@@ -1,0 +1,57 @@
+{
+    "parse": "babel-eslint",
+    "extends": "eslint:recommended",
+    "env": {
+        "es6": true,
+        "node": true,
+        "browser": true
+    },
+    "rules": {
+        "indent": [
+            2,
+            "tab"
+        ],
+        "quotes": [
+            2,
+            "single"
+        ],
+        "linebreak-style": [
+            2,
+            "unix"
+        ],
+        "semi": [
+            2,
+            "always"
+        ],
+        "comma-dangle": [
+            2,
+            "always"
+        ]
+    },
+    "ecmaFeatures": {
+        "arrowFunctions": true,
+        "binaryLiterals": false,
+        "blockBindings": true,
+        "classes": true,
+        "defaultParams": true,
+        "destructuring": true,
+        "forOf": true,
+        "generators": false,
+        "modules": true,
+        "objectLiteralComputedProperties": true,
+        "objectLiteralDuplicateProperties": false,
+        "objectLiteralShorthandMethods": true,
+        "objectLiteralShorthandProperties": true,
+        "octalLiterals": false,
+        "regexUFlag": false,
+        "regexYFlag": false,
+        "restParams": false,
+        "spread": false,
+        "superInFunctions": true,
+        "templateStrings": true,
+        "unicodeCodePointEscapes": false,
+        "globalReturn": false,
+        "jsx": false,
+        "experimentalObjectRestSpread": true,
+    }
+}
