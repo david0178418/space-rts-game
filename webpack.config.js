@@ -34,6 +34,9 @@ module.exports = {
 	plugins: [
 	],
 	devtool: 'source-map',
+	externals: {
+		'phaser': 'Phaser',
+	},
 	resolve: {
 		extensions: [
 			'',

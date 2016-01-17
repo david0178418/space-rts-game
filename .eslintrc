@@ -23,9 +23,18 @@
             2,
             "always"
         ],
+        "spaced-comment": [
+            2,
+            "always"
+        ],
         "comma-dangle": [
             2,
             "always"
+        ],
+        "no-unused-vars": [
+            2, {
+                "args": "none",
+            }
         ]
     },
     "ecmaFeatures": {

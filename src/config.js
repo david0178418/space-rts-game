@@ -5,13 +5,12 @@ export default {
 		panRight: 'D',
 		panDown: 'S',
 	},
-	universe_size: 15,
 	screen: {
-		width: 1280,
-		height: 720,
+		width: 800,
+		height: 600,
 	},
 	stage: {
-		width: 100,
-		height: 100,
+		width: 1600,
+		height: 1200,
 	},
 };
