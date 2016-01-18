@@ -536,6 +536,7 @@
 		value: true
 	});
 	exports.default = {
+		universeSize: 15,
 		controls: {
 			panUp: 'W',
 			panLeft: 'A',
@@ -578,7 +579,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.registerResource('controls', {
+	_instanceManager2.default.registerResource('pan-controls', {
 		init: function init() {
 			var KeyCodes = _phaser2.default.Keyboard;
 			var game = _instanceManager2.default.get('game');
@@ -687,7 +688,9 @@
 	// Util function to copy getter definitions as well as properties.
 	var extend = function extend(obj) {
 		Array.prototype.slice.call(arguments, 1).forEach(function (source) {
-			var descriptor, prop;
+			var descriptor = undefined;
+			var prop = undefined;
+	
 			if (source) {
 				for (prop in source) {
 					descriptor = Object.getOwnPropertyDescriptor(source, prop);
@@ -714,6 +717,7 @@
 			key: 'createEntity',
 			value: function createEntity() {
 				var entity = new _entity2.default(this);
+	
 				this[entities].push(entity);
 				return entity;
 			}
@@ -722,6 +726,8 @@
 			//		exist, a new one will be created using the provided properties as defaults
 			// @param {object} [props={}] - component instant overrides.
 			// @return {object}
+			// TODO Consider case of over-writing a component that has an
+			// "onRemove" callback (such as "sprite")
 	
 		}, {
 			key: 'createComponent',
@@ -762,12 +768,12 @@
 			key: 'getEntities',
 			value: function getEntities(components) {
 				if (!components) {
-					return _lodash2.default.select(this[entities].slice(0), function (entity) {
+					return _lodash2.default.filter(this[entities].slice(0), function (entity) {
 						return entity.alive;
 					});
 				}
 	
-				return _lodash2.default.select(this[entities], function (entity) {
+				return _lodash2.default.filter(this[entities], function (entity) {
 					return entity.alive && entity.hasComponents(components);
 				});
 			}
@@ -808,18 +814,20 @@
 		}, {
 			key: 'runSystems',
 			value: function runSystems() {
+				var _this = this;
+	
 				_lodash2.default.each(this[_runSystems], function (system) {
 					if (system.components) {
-						var entities = this.getEntities(system.components);
+						var _entities = _this.getEntities(system.components);
 	
-						if (entities.length) {
-							system.run && system.run(entities);
-							system.runOne && _lodash2.default.map(entities, system.runOne, system);
+						if (_entities.length) {
+							system.run && system.run(_entities);
+							system.runOne && _lodash2.default.map(_entities, system.runOne, system);
 						}
 					} else {
 						system.run();
 					}
-				}, this);
+				});
 			}
 		}]);
 	
@@ -15360,6 +15368,8 @@
 
 	__webpack_require__(55);
 
+	__webpack_require__(56);
+
 /***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
@@ -15386,6 +15396,9 @@
 	
 	_instanceManager2.default.get('ecs-manager').registerSystem('universe-creation', {
 		init: function init() {
+			var planets = [];
+	
+			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
 			// planets acting as markers to edges and center
 			(0, _planet2.default)({ x: 0, y: _config2.default.stage.height / 2 });
@@ -15398,19 +15411,26 @@
 			(0, _planet2.default)({ x: _config2.default.stage.width, y: 0 });
 			(0, _planet2.default)({ x: _config2.default.stage.width, y: _config2.default.stage.height });
 	
-			for (var i = 0; i < _config2.default.universe_size; i++) {
-				(0, _planet2.default)(_lodash2.default.random(100, _config2.default.stage.width - 100), _lodash2.default.random(100, _config2.default.stage.height - 100));
+			for (var i = 0; i < _config2.default.universeSize; i++) {
+				var newPlanet = (0, _planet2.default)({
+					x: _lodash2.default.random(100, _config2.default.stage.width - 100),
+					y: _lodash2.default.random(100, _config2.default.stage.height - 100)
+				});
+	
+				planets.push(newPlanet);
 			}
+	
+			this.assignTeams(planets);
 		},
 		assignTeams: function assignTeams(planets) {
-			return;
-			// var playerPlanet = planets[0];
-			// var enemyPlanet = planets[1];
-			//
-			// this.worldEntities.x = -playerPlanet.x + Config.screen.width / 2;
-			// this.worldEntities.y = -playerPlanet.y + Config.screen.height / 2;
-			//
-			// playerPlanet.components.team.name = 'player';
+			var playerPlanet = planets[0];
+			var playerPlanetSpriteComponent = playerPlanet.getComponent('sprite');
+			// let enemyPlanet = planets[1];
+	
+			this.worldEntities.x = -playerPlanetSpriteComponent.x + _config2.default.screen.width / 2;
+			this.worldEntities.y = -playerPlanetSpriteComponent.y + _config2.default.screen.height / 2;
+	
+			playerPlanet.addComponent('team', { name: 'player' });
 			//
 			// playerPlanet.
 			// 	addComponent('probe-blueprint', {
@@ -15498,6 +15518,8 @@
 
 	__webpack_require__(26);
 
+	__webpack_require__(57);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
@@ -15537,7 +15559,7 @@
 	
 			return sprite;
 		},
-		remove: function remove(sprite) {
+		onRemove: function onRemove(sprite) {
 			sprite.destroy();
 		}
 	});
@@ -15639,7 +15661,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var game = _instanceManager2.default.get('game');
-	// const entityManager = instanceManager.get('entity-manager');
+	var ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 	exports.default = {
 		checkForDoubleClick: false,
@@ -15653,7 +15675,7 @@
 		worldEntities: null,
 	
 		init: function init() {
-			this.controls = _instanceManager2.default.get('controls');
+			this.controls = _instanceManager2.default.get('pan-controls');
 			this.mousePointer = game.input.mousePointer;
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
@@ -15699,9 +15721,10 @@
 				}
 		},
 		drag: function drag(ev) {
-			var dragX;
-			var dragY;
-			var graphic;
+			var dragX = undefined;
+			var dragY = undefined;
+			var graphic = undefined;
+			// let selectedEntites;
 	
 			if (game.input.mousePointer.isUp || ev.button !== _phaser2.default.Mouse.LEFT_BUTTON) {
 				this.graphic.visible = false;
@@ -15725,23 +15748,25 @@
 				return;
 			}
 	
+			var selectedEntites = window.selectedEntites = [];
+	
 			this.drawDragArea(dragX, dragY);
 	
-			// each(entityManager.getEntitiesWithComponent('selectable'), function(entity) {
-			// 	var intersects;
-			// 	var isSelected = entity.components.selected;
-			//
-			// 	if(entity.components.team.name === 'player') {
-			// 		intersects = graphic.getBounds().intersects(entity.getBounds());
-			//
-			// 		if(!isSelected && intersects) {
-			// 			entity.addComponent('selected');
-			// 			selectedEntites.push(entity);
-			// 		} else if(isSelected && !intersects) {
-			// 			entity.removeComponent('selected');
-			// 		}
-			// 	}
-			// });
+			(0, _each2.default)(ecsManager.getEntities('selectable'), function (entity) {
+				var intersects = undefined;
+				var isSelected = entity.components.selected;
+	
+				if (entity.components.team.name === 'player') {
+					intersects = graphic.getBounds().intersects(entity.getBounds());
+	
+					if (!isSelected && intersects) {
+						entity.addComponent('selected');
+						selectedEntites.push(entity);
+					} else if (isSelected && !intersects) {
+						entity.removeComponent('selected');
+					}
+				}
+			});
 	
 			graphic.visible = true;
 		},
@@ -15751,6 +15776,7 @@
 		},
 		drawDragArea: function drawDragArea(dragX, dragY) {
 			var graphic = this.graphic;
+	
 			graphic.clear();
 			graphic.lineStyle(3, 0xFFFF0B);
 			graphic.beginFill(0xFFFF0B);
@@ -15760,8 +15786,8 @@
 		leftDoubleClick: function leftDoubleClick(position) {
 			var entities = []; // this.ecs.getEntities('selectable');
 			var selectedEntity = this.getTopEntityAt(entities, position);
-			var selectedEntityTeam;
-			var selectedEntityTeamComponent;
+			var selectedEntityTeam = undefined;
+			var selectedEntityTeamComponent = undefined;
 	
 			if (!selectedEntity) {
 				return;
@@ -15782,7 +15808,7 @@
 			});
 		},
 		leftSingleClick: function leftSingleClick(position) {
-			var entities = []; //this.ecs.getEntities('selectable');
+			var entities = []; // this.ecs.getEntities('selectable');
 			var selectedEntity = this.getTopEntityAt(entities, position);
 	
 			(0, _each2.default)(entities, function (entity) {
@@ -15796,7 +15822,7 @@
 	
 			var marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypointMarker');
 			var markerAnimationTime = 250;
-			var markerTween;
+			var markerTween = undefined;
 	
 			marker.anchor.setTo(0.5, 0.5);
 	
@@ -15815,7 +15841,7 @@
 			markerTween.start();
 		},
 		rightClick: function rightClick(position) {
-			var entities = []; //this.ecs.getEntities('selected');
+			var entities = []; // this.ecs.getEntities('selected');
 	
 			if (false /* this.uiViewModel.awaitTarget() */) {
 					// this.uiViewModel.awaitTarget(false);
@@ -15830,7 +15856,7 @@
 			}
 		},
 		getTopEntityAt: function getTopEntityAt(entities, position) {
-			var topEntity;
+			var topEntity = undefined;
 	
 			(0, _each2.default)(entities, function (entity) {
 				if (entity.components.team.name === 'player' && (!topEntity || topEntity.z < entity.z) && entity.containsPoint(position.x, position.y)) {
@@ -16675,7 +16701,7 @@
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
-			this.controls = _instanceManager2.default.get('controls');
+			this.controls = _instanceManager2.default.get('pan-controls');
 			this.world = this.game.world;
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
@@ -16738,8 +16764,8 @@
 			this.background1layer2.position.y = this.background1layer2.height * 0.01 * this.worldEntities.y / this.game.height;
 		},
 		updateZoom: function updateZoom() {
-			var zoom = this.zoomTarget / 100,
-			    localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+			var zoom = this.zoomTarget / 100;
+			var localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
 	
 			this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
 			this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
@@ -16760,6 +16786,95 @@
 	
 			this.limitView();
 			this.updateBackground();
+		}
+	});
+
+/***/ },
+/* 56 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _phaser = __webpack_require__(13);
+	
+	var _phaser2 = _interopRequireDefault(_phaser);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('selection', {
+		SELECTION_PADDING: 30,
+	
+		components: ['selectable'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+			// this.uiViewModel = instanceManager.get('uiViewModel');
+			this.selectionChanged = false;
+		},
+	
+		run: function run(entities) {
+			_lodash2.default.each(entities, this.checkSelection, this);
+	
+			if (this.selectionChanged) {
+				// this.uiViewModel.update();
+				this.selectionChanged = false;
+			}
+		},
+	
+		checkSelection: function checkSelection(entity) {
+			var selectableComponent = entity.getComponent('selectable');
+			var graphic = undefined;
+	
+			if (entity.hasComponent('selected')) {
+				if (!selectableComponent.graphic) {
+					graphic = new _phaser2.default.Sprite(this.game, 0, 0, 'selection');
+					graphic.anchor.setTo(0.5, 0.5);
+					// Set the height and width to the greater of the two plus padding
+					graphic.width = graphic.height = (entity.width > entity.height ? entity.width : entity.height) + this.SELECTION_PADDING;
+					this.worldEntities.addChild(graphic);
+					selectableComponent.graphic = graphic;
+					this.selectionChanged = true;
+	
+					entity.events.onDestroy.addOnce(graphic.kill, graphic);
+					// entity.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
+				} else if (!selectableComponent.graphic.visible) {
+						selectableComponent.graphic.visible = true;
+						this.selectionChanged = true;
+					}
+	
+				selectableComponent.graphic.position.x = entity.position.x;
+				selectableComponent.graphic.position.y = entity.position.y;
+			} else if (selectableComponent.graphic && selectableComponent.graphic.visible) {
+				this.selectionChanged = true;
+				selectableComponent.graphic.visible = false;
+			}
+		}
+	});
+
+/***/ },
+/* 57 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerComponent('team', {
+		state: {
+			name: 'neutral'
 		}
 	});
 

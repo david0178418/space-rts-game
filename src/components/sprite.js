@@ -24,7 +24,7 @@ instanceManager
 
 			return sprite;
 		},
-		remove(sprite) {
+		onRemove(sprite) {
 			sprite.destroy();
 		},
 	});

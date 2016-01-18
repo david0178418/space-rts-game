@@ -9,7 +9,9 @@ const runSystems = Symbol('run-systems');
 // Util function to copy getter definitions as well as properties.
 const extend = function(obj) {
 	Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-		var descriptor, prop;
+		let descriptor;
+		let prop;
+
 		if(source) {
 			for (prop in source) {
 				descriptor = Object.getOwnPropertyDescriptor(source, prop);
@@ -32,7 +34,8 @@ class ECSManager {
 	}
 
 	createEntity() {
-		var entity = new Entity(this);
+		let entity = new Entity(this);
+
 		this[entities].push(entity);
 		return entity;
 	}
@@ -41,6 +44,8 @@ class ECSManager {
 	//		exist, a new one will be created using the provided properties as defaults
 	// @param {object} [props={}] - component instant overrides.
 	// @return {object}
+	// TODO Consider case of over-writing a component that has an
+	// "onRemove" callback (such as "sprite")
 	createComponent(name, state = {}) {
 		let component = this[components][name];
 
@@ -72,12 +77,12 @@ class ECSManager {
 
 	getEntities(components) {
 		if(!components) {
-			return _.select(this[entities].slice(0), function(entity) {
+			return _.filter(this[entities].slice(0), function(entity) {
 				return entity.alive;
 			});
 		}
 
-		return _.select(this[entities], function(entity) {
+		return _.filter(this[entities], function(entity) {
 			return entity.alive && entity.hasComponents(components);
 		});
 	}
@@ -110,9 +115,9 @@ class ECSManager {
 	}
 
 	runSystems() {
-		_.each(this[runSystems], function(system) {
+		_.each(this[runSystems], (system) => {
 			if(system.components) {
-				var entities = this.getEntities(system.components);
+				let entities = this.getEntities(system.components);
 
 				if(entities.length) {
 					system.run && system.run(entities);
@@ -122,6 +127,6 @@ class ECSManager {
 				system.run();
 			}
 
-		}, this);
+		});
 	}
 }

@@ -1,4 +1,5 @@
 export default {
+	universeSize: 15,
 	controls: {
 		panUp: 'W',
 		panLeft: 'A',

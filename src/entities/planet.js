@@ -2,6 +2,7 @@ import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
 import 'components/sprite';
+import 'components/team';
 
 export default
 function(position) {

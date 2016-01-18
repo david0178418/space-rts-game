@@ -13,7 +13,7 @@ instanceManager.get('ecs-manager').registerSystem('camera', {
 
 	init() {
 		this.game = instanceManager.get('game');
-		this.controls = instanceManager.get('controls');
+		this.controls = instanceManager.get('pan-controls');
 		this.world = this.game.world;
 		this.worldEntities = instanceManager.get('world-entities');
 
@@ -79,8 +79,8 @@ instanceManager.get('ecs-manager').registerSystem('camera', {
 	},
 
 	updateZoom() {
-		var zoom = this.zoomTarget / 100,
-			localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+		let zoom = this.zoomTarget / 100;
+		let localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
 
 		this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
 		this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);

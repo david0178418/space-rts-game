@@ -5,6 +5,9 @@ import planetFactory from 'entities/planet';
 
 instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 	init() {
+		let planets = [];
+
+		this.worldEntities = instanceManager.get('world-entities');
 
 		// planets acting as markers to edges and center
 		planetFactory({ x: 0, y: Config.stage.height / 2 });
@@ -17,22 +20,27 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		planetFactory({ x: Config.stage.width, y: 0 });
 		planetFactory({ x: Config.stage.width, y: Config.stage.height });
 
-		for(let i = 0; i < Config.universe_size; i++) {
-			planetFactory(
-				_.random(100, Config.stage.width - 100),
-				_.random(100, Config.stage.height - 100)
-			);
+		for(let i = 0; i < Config.universeSize; i++) {
+			let newPlanet = planetFactory({
+				x: _.random(100, Config.stage.width - 100),
+				y: _.random(100, Config.stage.height - 100),
+			});
+
+			planets.push(newPlanet);
 		}
+
+		this.assignTeams(planets);
 	},
 
-	assignTeams(planets) {return;
-		// var playerPlanet = planets[0];
-		// var enemyPlanet = planets[1];
-		//
-		// this.worldEntities.x = -playerPlanet.x + Config.screen.width / 2;
-		// this.worldEntities.y = -playerPlanet.y + Config.screen.height / 2;
-		//
-		// playerPlanet.components.team.name = 'player';
+	assignTeams(planets) {
+		let playerPlanet = planets[0];
+		let playerPlanetSpriteComponent = playerPlanet.getComponent('sprite');
+		// let enemyPlanet = planets[1];
+
+		this.worldEntities.x = -playerPlanetSpriteComponent.x + Config.screen.width / 2;
+		this.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
+
+		playerPlanet.addComponent('team', {name: 'player'});
 		//
 		// playerPlanet.
 		// 	addComponent('probe-blueprint', {

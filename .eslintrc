@@ -35,7 +35,8 @@
             2, {
                 "args": "none",
             }
-        ]
+        ],
+        "no-var": 2
     },
     "ecmaFeatures": {
         "arrowFunctions": true,
