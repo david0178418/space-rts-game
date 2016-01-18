@@ -10,7 +10,7 @@ export default {
 		height: 600,
 	},
 	stage: {
-		width: 1600,
-		height: 1200,
+		width: 8000,
+		height: 6000,
 	},
 };

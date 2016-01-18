@@ -1,8 +1,8 @@
 import defer from 'lodash/defer';
 import InstanceManager from 'instance-manager';
 
-import 'resource-registry';
-import 'component-registry';
+import 'resources/_registry';
+import 'systems/_registry';
 
 import 'states/play';
 

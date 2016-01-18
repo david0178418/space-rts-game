@@ -1,8 +1,8 @@
-import InstanceManager from 'instance-manager';
+import instanceManager from 'instance-manager';
 
-InstanceManager.registerResource('group', {
+instanceManager.registerResource('group', {
 	cache: false,
 	init: function() {
-		return InstanceManager.get('game').add.group();
+		return instanceManager.get('game').add.group();
 	},
 });

@@ -1,14 +1,14 @@
-import InstanceManager from 'instance-manager';
+import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
 
-const game = InstanceManager.get('game');
+const game = instanceManager.get('game');
 const defaultParams = {
 	x: 0,
 	y: 0,
 	graphic: '',
 };
 
-InstanceManager
+instanceManager
 	.get('ecs-manager')
 	.registerComponent('sprite', {
 		factory(params) {
@@ -19,6 +19,8 @@ InstanceManager
 			sprite = new Phaser.Sprite(game, params.x, params.y, params.graphic);
 			sprite.anchor.setTo(0.5, 0.5);
 			sprite.autoCull = true;
+
+			instanceManager.get('world-entities').add(sprite);
 
 			return sprite;
 		},

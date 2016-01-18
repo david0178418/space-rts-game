@@ -42,6 +42,8 @@ game.state.add('play', {
 			game.scale.setShowAll();
 			game.scale.refresh();
 		});
+
+		ecsManager.runSystemInits();
 	},
 	update() {
 		MouseControls.update();

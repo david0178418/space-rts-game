@@ -1,10 +1,8 @@
-import InstanceManager from 'instance-manager';
+import instanceManager from 'instance-manager';
 
-InstanceManager.registerResource('worldEntities', {
+instanceManager.registerResource('world-entities', {
 	init: function() {
-		//TODO: Remove global debug
-		var worldEntities = window.worldEntities = InstanceManager.get('group');
-
-		return worldEntities;
+		// TODO: Remove global debug
+		return window.worldEntities = instanceManager.get('group');
 	},
 });

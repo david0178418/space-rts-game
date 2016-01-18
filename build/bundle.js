@@ -58,7 +58,7 @@
 	
 	__webpack_require__(23);
 	
-	__webpack_require__(25);
+	__webpack_require__(27);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -547,8 +547,8 @@
 			height: 600
 		},
 		stage: {
-			width: 1600,
-			height: 1200
+			width: 8000,
+			height: 6000
 		}
 	};
 
@@ -625,12 +625,10 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.registerResource('worldEntities', {
+	_instanceManager2.default.registerResource('world-entities', {
 		init: function init() {
-			//TODO: Remove global debug
-			var worldEntities = window.worldEntities = _instanceManager2.default.get('group');
-	
-			return worldEntities;
+			// TODO: Remove global debug
+			return window.worldEntities = _instanceManager2.default.get('group');
 		}
 	});
 
@@ -15360,8 +15358,150 @@
 
 	__webpack_require__(24);
 
+	__webpack_require__(55);
+
 /***/ },
 /* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _config = __webpack_require__(12);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _planet = __webpack_require__(25);
+	
+	var _planet2 = _interopRequireDefault(_planet);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('universe-creation', {
+		init: function init() {
+	
+			// planets acting as markers to edges and center
+			(0, _planet2.default)({ x: 0, y: _config2.default.stage.height / 2 });
+			(0, _planet2.default)({ x: 0, y: 0 });
+			(0, _planet2.default)({ x: _config2.default.stage.width / 2, y: _config2.default.stage.height / 2 });
+			(0, _planet2.default)({ x: _config2.default.stage.width / 2, y: 0 });
+			(0, _planet2.default)({ x: _config2.default.stage.width, y: _config2.default.stage.height / 2 });
+			(0, _planet2.default)({ x: _config2.default.stage.width / 2, y: _config2.default.stage.height });
+			(0, _planet2.default)({ x: 0, y: _config2.default.stage.height });
+			(0, _planet2.default)({ x: _config2.default.stage.width, y: 0 });
+			(0, _planet2.default)({ x: _config2.default.stage.width, y: _config2.default.stage.height });
+	
+			for (var i = 0; i < _config2.default.universe_size; i++) {
+				(0, _planet2.default)(_lodash2.default.random(100, _config2.default.stage.width - 100), _lodash2.default.random(100, _config2.default.stage.height - 100));
+			}
+		},
+		assignTeams: function assignTeams(planets) {
+			return;
+			// var playerPlanet = planets[0];
+			// var enemyPlanet = planets[1];
+			//
+			// this.worldEntities.x = -playerPlanet.x + Config.screen.width / 2;
+			// this.worldEntities.y = -playerPlanet.y + Config.screen.height / 2;
+			//
+			// playerPlanet.components.team.name = 'player';
+			//
+			// playerPlanet.
+			// 	addComponent('probe-blueprint', {
+			// 		prefab: require('entities/probe'),
+			// 		buildTime: 3000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('fighter-blueprint', {
+			// 		prefab: require('entities/fighter'),
+			// 		buildTime: 4000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('battleship-blueprint', {
+			// 		prefab: require('entities/battleship'),
+			// 		buildTime: 6000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('colony-ship-blueprint', {
+			// 		prefab: require('entities/colony-ship'),
+			// 		buildTime: 8000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('ship-generator', {
+			// 		activeGenerator: 'probe-blueprint',
+			// 		rallyPoint: {
+			// 			x: playerPlanet.x + 100,
+			// 			y: playerPlanet.y + 75,
+			// 		},
+			// 	});
+			//
+			// enemyPlanet.components.team.name = 'enemy';
+			//
+			// enemyPlanet.
+			// 	addComponent('probe-blueprint', {
+			// 		prefab: require('entities/probe'),
+			// 		buildTime: 3000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('fighter-blueprint', {
+			// 		prefab: require('entities/fighter'),
+			// 		buildTime: 4000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('battleship-blueprint', {
+			// 		prefab: require('entities/battleship'),
+			// 		buildTime: 6000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('colony-ship-blueprint', {
+			// 		prefab: require('entities/colony-ship'),
+			// 		buildTime: 8000,
+			// 		currentUnitBuildTime: 0,
+			// 	}).
+			// 	addComponent('ship-generator', {
+			// 		activeGenerator: 'probe-blueprint',
+			// 		rallyPoint: {
+			// 			x: playerPlanet.x + 100,
+			// 			y: playerPlanet.y + 75,
+			// 		},
+			// 	});
+		}
+	});
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	exports.default = function (position) {
+		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'planet' }, position)).addComponent('selectable');
+	};
+	
+	var _lodash = __webpack_require__(19);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	var _instanceManager = __webpack_require__(9);
+
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+
+	__webpack_require__(26);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ },
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15393,6 +15533,8 @@
 			sprite.anchor.setTo(0.5, 0.5);
 			sprite.autoCull = true;
 	
+			_instanceManager2.default.get('world-entities').add(sprite);
+	
 			return sprite;
 		},
 		remove: function remove(sprite) {
@@ -15401,7 +15543,7 @@
 	});
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15414,7 +15556,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(26);
+	var _mouseControls = __webpack_require__(28);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -15462,6 +15604,8 @@
 				game.scale.setShowAll();
 				game.scale.refresh();
 			});
+	
+			ecsManager.runSystemInits();
 		},
 		update: function update() {
 			_mouseControls2.default.update();
@@ -15471,7 +15615,7 @@
 	});
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15480,7 +15624,7 @@
 		value: true
 	});
 	
-	var _each = __webpack_require__(27);
+	var _each = __webpack_require__(29);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -15511,7 +15655,7 @@
 		init: function init() {
 			this.controls = _instanceManager2.default.get('controls');
 			this.mousePointer = game.input.mousePointer;
-			this.worldEntities = _instanceManager2.default.get('worldEntities');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
 			this.graphic = this.game.add.graphics(-500, -500);
 			this.graphic.alpha = 0.25;
@@ -15699,20 +15843,20 @@
 	};
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(28);
+	module.exports = __webpack_require__(30);
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(29),
-	    baseEach = __webpack_require__(30),
-	    isArray = __webpack_require__(46),
-	    toFunction = __webpack_require__(51);
+	var arrayEach = __webpack_require__(31),
+	    baseEach = __webpack_require__(32),
+	    isArray = __webpack_require__(48),
+	    toFunction = __webpack_require__(53);
 	
 	/**
 	 * Iterates over elements of `collection` invoking `iteratee` for each element.
@@ -15752,7 +15896,7 @@
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports) {
 
 	/**
@@ -15780,11 +15924,11 @@
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseForOwn = __webpack_require__(31),
-	    createBaseEach = __webpack_require__(50);
+	var baseForOwn = __webpack_require__(33),
+	    createBaseEach = __webpack_require__(52);
 	
 	/**
 	 * The base implementation of `_.forEach` without support for iteratee shorthands.
@@ -15800,11 +15944,11 @@
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseFor = __webpack_require__(32),
-	    keys = __webpack_require__(34);
+	var baseFor = __webpack_require__(34),
+	    keys = __webpack_require__(36);
 	
 	/**
 	 * The base implementation of `_.forOwn` without support for iteratee shorthands.
@@ -15822,10 +15966,10 @@
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createBaseFor = __webpack_require__(33);
+	var createBaseFor = __webpack_require__(35);
 	
 	/**
 	 * The base implementation of `baseForIn` and `baseForOwn` which iterates
@@ -15845,7 +15989,7 @@
 
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports) {
 
 	/**
@@ -15876,15 +16020,15 @@
 
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseHas = __webpack_require__(35),
-	    baseKeys = __webpack_require__(36),
-	    indexKeys = __webpack_require__(37),
-	    isArrayLike = __webpack_require__(41),
-	    isIndex = __webpack_require__(48),
-	    isPrototype = __webpack_require__(49);
+	var baseHas = __webpack_require__(37),
+	    baseKeys = __webpack_require__(38),
+	    indexKeys = __webpack_require__(39),
+	    isArrayLike = __webpack_require__(43),
+	    isIndex = __webpack_require__(50),
+	    isPrototype = __webpack_require__(51);
 	
 	/**
 	 * Creates an array of the own enumerable property names of `object`.
@@ -15937,7 +16081,7 @@
 
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/** Used for built-in method references. */
@@ -15970,7 +16114,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -15993,14 +16137,14 @@
 
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseTimes = __webpack_require__(38),
-	    isArguments = __webpack_require__(39),
-	    isArray = __webpack_require__(46),
-	    isLength = __webpack_require__(44),
-	    isString = __webpack_require__(47);
+	var baseTimes = __webpack_require__(40),
+	    isArguments = __webpack_require__(41),
+	    isArray = __webpack_require__(48),
+	    isLength = __webpack_require__(46),
+	    isString = __webpack_require__(49);
 	
 	/**
 	 * Creates an array of index keys for `object` values of arrays,
@@ -16021,7 +16165,7 @@
 
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports) {
 
 	/**
@@ -16047,10 +16191,10 @@
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var isArrayLikeObject = __webpack_require__(40);
+	/* WEBPACK VAR INJECTION */(function(global) {var isArrayLikeObject = __webpack_require__(42);
 	
 	/** `Object#toString` result references. */
 	var argsTag = '[object Arguments]';
@@ -16097,11 +16241,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLike = __webpack_require__(41),
-	    isObjectLike = __webpack_require__(45);
+	var isArrayLike = __webpack_require__(43),
+	    isObjectLike = __webpack_require__(47);
 	
 	/**
 	 * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -16135,12 +16279,12 @@
 
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getLength = __webpack_require__(42),
+	var getLength = __webpack_require__(44),
 	    isFunction = __webpack_require__(7),
-	    isLength = __webpack_require__(44);
+	    isLength = __webpack_require__(46);
 	
 	/**
 	 * Checks if `value` is array-like. A value is considered array-like if it's
@@ -16176,10 +16320,10 @@
 
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseProperty = __webpack_require__(43);
+	var baseProperty = __webpack_require__(45);
 	
 	/**
 	 * Gets the "length" property value of `object`.
@@ -16197,7 +16341,7 @@
 
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports) {
 
 	/**
@@ -16217,7 +16361,7 @@
 
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports) {
 
 	/** Used as references for various `Number` constants. */
@@ -16255,7 +16399,7 @@
 
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports) {
 
 	/**
@@ -16289,7 +16433,7 @@
 
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports) {
 
 	/**
@@ -16321,11 +16465,11 @@
 
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var isArray = __webpack_require__(46),
-	    isObjectLike = __webpack_require__(45);
+	/* WEBPACK VAR INJECTION */(function(global) {var isArray = __webpack_require__(48),
+	    isObjectLike = __webpack_require__(47);
 	
 	/** `Object#toString` result references. */
 	var stringTag = '[object String]';
@@ -16365,7 +16509,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 48 */
+/* 50 */
 /***/ function(module, exports) {
 
 	/** Used as references for various `Number` constants. */
@@ -16392,7 +16536,7 @@
 
 
 /***/ },
-/* 49 */
+/* 51 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/** Used for built-in method references. */
@@ -16417,10 +16561,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 50 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLike = __webpack_require__(41);
+	var isArrayLike = __webpack_require__(43);
 	
 	/**
 	 * Creates a `baseEach` or `baseEachRight` function.
@@ -16455,10 +16599,10 @@
 
 
 /***/ },
-/* 51 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(52);
+	var identity = __webpack_require__(54);
 	
 	/**
 	 * Converts `value` to a function if it's not one.
@@ -16475,7 +16619,7 @@
 
 
 /***/ },
-/* 52 */
+/* 54 */
 /***/ function(module, exports) {
 
 	/**
@@ -16499,6 +16643,125 @@
 	
 	module.exports = identity;
 
+
+/***/ },
+/* 55 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _config = __webpack_require__(12);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('camera', {
+		dirtyBackground: true,
+		panSpeed: 8,
+		zoomIncrement: 5, // %
+		zoomMax: 100,
+		zoomMin: 15,
+		zoomTween: null,
+		zoomTarget: 100, // %
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.controls = _instanceManager2.default.get('controls');
+			this.world = this.game.world;
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+	
+			// this.background1layer1 = this.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
+			this.background1layer2 = this.game.add.tileSprite(_config2.default.screen.width * -0.5, _config2.default.screen.width * -0.5, _config2.default.screen.width * 1.5, _config2.default.screen.width * 1.5, 'background1-layer2');
+	
+			window.addEventListener('mousewheel', _lodash2.default.bind(function (e) {
+				this.updateZoomTarget(e.wheelDelta);
+			}, this));
+		},
+		run: function run() {
+			// Vertial pan
+			if (this.controls.panUp.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.y += this.panSpeed;
+			} else if (this.controls.panDown.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.y -= this.panSpeed;
+			}
+	
+			// Horizontal pa
+			if (this.controls.panRight.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.x -= this.panSpeed;
+			} else if (this.controls.panLeft.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.x += this.panSpeed;
+			}
+	
+			if (!this.dirtyBackground) {
+				return;
+			}
+	
+			this.updateBackground();
+			this.updateZoom();
+			this.limitView();
+	
+			this.dirtyBackground = false;
+		},
+		limitView: function limitView() {
+			// Limit view
+			// Run check each tick to account for
+			// other position mutators such as zooming
+			if (this.worldEntities.y > 0) {
+				this.worldEntities.y = 0;
+			} else if (this.worldEntities.y < -(this.world.height * this.worldEntities.scale.y - this.game.camera.height)) {
+				this.worldEntities.y = -(this.world.height * this.worldEntities.scale.y - this.game.camera.height);
+			}
+	
+			if (this.worldEntities.x < -(this.world.width * this.worldEntities.scale.x - this.game.camera.width)) {
+				this.worldEntities.x = -(this.world.width * this.worldEntities.scale.x - this.game.camera.width);
+			} else if (this.worldEntities.x > 0) {
+				this.worldEntities.x = 0;
+			}
+		},
+		updateBackground: function updateBackground() {
+			// this.background1layer1.position.x = this.background1layer1.width * 0.005  * this.worldEntities.x / this.game.width;
+			// this.background1layer1.position.y = this.background1layer1.height * 0.005 * this.worldEntities.y / this.game.height;
+			this.background1layer2.position.x = this.background1layer2.width * 0.01 * this.worldEntities.x / this.game.width;
+			this.background1layer2.position.y = this.background1layer2.height * 0.01 * this.worldEntities.y / this.game.height;
+		},
+		updateZoom: function updateZoom() {
+			var zoom = this.zoomTarget / 100,
+			    localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+	
+			this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
+			this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
+			this.worldEntities.scale.setTo(zoom);
+		},
+		updateZoomTarget: function updateZoomTarget(delta) {
+			if (this.game.paused) {
+				return;
+			}
+	
+			this.zoomTarget += this.zoomIncrement * (delta > 0 ? 1 : -1);
+	
+			if (this.zoomTarget >= this.zoomMin && this.zoomTarget <= this.zoomMax) {
+				this.updateZoom();
+			} else {
+				this.zoomTarget = delta > 0 ? this.zoomMax : this.zoomMin;
+			}
+	
+			this.limitView();
+			this.updateBackground();
+		}
+	});
 
 /***/ }
 /******/ ]);

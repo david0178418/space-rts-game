@@ -19,7 +19,7 @@ export default {
 	init() {
 		this.controls = instanceManager.get('controls');
 		this.mousePointer = game.input.mousePointer;
-		this.worldEntities = instanceManager.get('worldEntities');
+		this.worldEntities = instanceManager.get('world-entities');
 
 		this.graphic = this.game.add.graphics(-500, -500);
 		this.graphic.alpha = 0.25;
