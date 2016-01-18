@@ -14,7 +14,6 @@ module.exports = {
 				test: /\.jsx?$/,
 				loader: 'babel-loader',
 				exclude: [
-					path.resolve(__dirname, 'libs'),
 					path.resolve(__dirname, 'node_modules'),
 				],
 				query: {
@@ -38,6 +37,9 @@ module.exports = {
 		'phaser': 'Phaser',
 	},
 	resolve: {
+		alias: {
+			'ecs-manager': 'ecs/ecs-manager',
+		},
 		extensions: [
 			'',
 			'.js',

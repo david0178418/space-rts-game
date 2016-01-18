@@ -29,7 +29,7 @@
         ],
         "comma-dangle": [
             2,
-            "always"
+            "always-multiline"
         ],
         "no-unused-vars": [
             2, {

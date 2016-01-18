@@ -1,27 +1,19 @@
 {
-  "name": "electron-quick-start",
+  "name": "some-space-tower-defense-rts",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "Test Game",
   "main": "main.js",
   "scripts": {
     "start": "electron main.js"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/atom/electron-quick-start.git"
   },
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "David Granado",
   "bugs": {
-    "url": "https://github.com/atom/electron-quick-start/issues"
   },
-  "homepage": "https://github.com/atom/electron-quick-start#readme",
+  "homepage": "",
   "devDependencies": {
     "babel-core": "^6.4.0",
     "babel-loader": "^6.2.1",

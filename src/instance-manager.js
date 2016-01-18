@@ -31,4 +31,5 @@ class InstanceManager {
 	}
 }
 
-export default new InstanceManager();
+// TODO remove global debug
+export default window.instanceManager = new InstanceManager();
