@@ -1,4 +1,5 @@
-var path = require('path');
+'use strict';
+let path = require('path');
 
 module.exports = {
 	entry: {
@@ -19,6 +20,7 @@ module.exports = {
 				query: {
 					presets: [
 						'es2015',
+						'react',
 					],
 				},
 			}, {
@@ -43,6 +45,7 @@ module.exports = {
 		extensions: [
 			'',
 			'.js',
+			'.jsx',
 		],
 		modulesDirectories: [
 			'src',

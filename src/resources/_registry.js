@@ -1,5 +1,6 @@
-import 'resources/game';
-import 'resources/pan-controls';
-import 'resources/group';
-import 'resources/world-entites';
-import 'resources/ecs-manager';
+import './game';
+import './pan-controls';
+import './group';
+import './world-entites';
+import './ecs-manager';
+import './hud';

@@ -1,6 +1,6 @@
 import defer from 'lodash/defer';
-import Phaser from 'phaser';
 import instanceManager from 'instance-manager';
+import Phaser from 'phaser';
 
 import 'resources/_registry';
 import 'systems/_registry';

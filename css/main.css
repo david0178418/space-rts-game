@@ -1,0 +1,44 @@
+body {
+	margin: 0px;
+	background-color: black;
+	-webkit-user-select: none;
+}
+
+body.awaiting-target {
+	cursor: crosshair;
+}
+
+canvas {
+	margin: auto;
+	position: absolute;
+	top: 0; left: 0; bottom: 0; right: 0;
+}
+
+#hud {
+	position: fixed;
+	top: 50px;
+	left: 50px;
+	z-index: 10;
+}
+
+.icon-button {
+	background-color: transparent;
+	border: 2px solid #1ed81e;
+	color: #1ed81e;
+}
+
+.icon-button:not(:disabled) {
+	cursor: pointer;
+}
+.icon-button:disabled {
+	border-color: #17AB17;
+	color: #17AB17;
+}
+
+.production-options {
+	display: none;
+}
+
+.production-options.active {
+	display: block;
+}
