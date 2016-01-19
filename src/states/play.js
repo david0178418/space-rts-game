@@ -38,11 +38,6 @@ game.state.add('play', {
 
 		this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-		window.addEventListener('resize', function(e) {
-			game.scale.setShowAll();
-			game.scale.refresh();
-		});
-
 		ecsManager.runSystemInits();
 	},
 	update() {

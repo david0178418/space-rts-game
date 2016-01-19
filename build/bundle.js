@@ -50,15 +50,19 @@
 	
 	var _defer2 = _interopRequireDefault(_defer);
 	
-	var _instanceManager = __webpack_require__(9);
+	var _phaser = __webpack_require__(9);
+	
+	var _phaser2 = _interopRequireDefault(_phaser);
+	
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	__webpack_require__(10);
+	__webpack_require__(11);
 	
 	__webpack_require__(23);
 	
-	__webpack_require__(27);
+	__webpack_require__(30);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -67,6 +71,12 @@
 	game.state.start('play');
 	
 	(0, _defer2.default)(function () {
+		window.addEventListener('keyup', function (e) {
+			if (e.keyCode === _phaser2.default.Keyboard.F) {
+				document.body.webkitRequestFullScreen();
+			}
+		});
+	
 		game.canvas.addEventListener('contextmenu', function (e) {
 			e.preventDefault();
 		});
@@ -428,6 +438,12 @@
 /* 9 */
 /***/ function(module, exports) {
 
+	module.exports = Phaser;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
 	'use strict';
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -485,12 +501,12 @@
 	exports.default = window.instanceManager = new InstanceManager();
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	__webpack_require__(11);
+	__webpack_require__(12);
 
 	__webpack_require__(14);
 
@@ -501,20 +517,20 @@
 	__webpack_require__(17);
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _config = __webpack_require__(12);
+	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
 	
-	var _phaser = __webpack_require__(13);
+	var _phaser = __webpack_require__(9);
 	
 	var _phaser2 = _interopRequireDefault(_phaser);
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -527,15 +543,13 @@
 	});
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	exports.default = {
+	// commonjs format for use by electron
+	module.exports = {
 		universeSize: 15,
 		controls: {
 			panUp: 'W',
@@ -544,8 +558,8 @@
 			panDown: 'S'
 		},
 		screen: {
-			width: 800,
-			height: 600
+			width: 1200,
+			height: 800
 		},
 		stage: {
 			width: 8000,
@@ -554,26 +568,20 @@
 	};
 
 /***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	module.exports = Phaser;
-
-/***/ },
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _config = __webpack_require__(12);
+	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
 	
-	var _phaser = __webpack_require__(13);
+	var _phaser = __webpack_require__(9);
 	
 	var _phaser2 = _interopRequireDefault(_phaser);
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -601,7 +609,7 @@
 
 	'use strict';
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -620,7 +628,7 @@
 
 	'use strict';
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -643,7 +651,7 @@
 	
 	var _ecsManager2 = _interopRequireDefault(_ecsManager);
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -15366,9 +15374,9 @@
 
 	__webpack_require__(24);
 
-	__webpack_require__(55);
+	__webpack_require__(28);
 
-	__webpack_require__(56);
+	__webpack_require__(29);
 
 /***/ },
 /* 24 */
@@ -15380,11 +15388,11 @@
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _config = __webpack_require__(12);
+	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -15512,13 +15520,13 @@
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
 	__webpack_require__(26);
 
-	__webpack_require__(57);
+	__webpack_require__(27);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -15528,11 +15536,11 @@
 
 	'use strict';
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _phaser = __webpack_require__(13);
+	var _phaser = __webpack_require__(9);
 	
 	var _phaser2 = _interopRequireDefault(_phaser);
 	
@@ -15570,19 +15578,227 @@
 
 	'use strict';
 	
-	var _config = __webpack_require__(12);
-	
-	var _config2 = _interopRequireDefault(_config);
-	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(28);
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerComponent('team', {
+		state: {
+			name: 'neutral'
+		}
+	});
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _config = __webpack_require__(13);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _instanceManager = __webpack_require__(10);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('camera', {
+		dirtyBackground: true,
+		panSpeed: 8,
+		zoomIncrement: 5, // %
+		zoomMax: 100,
+		zoomMin: 15,
+		zoomTween: null,
+		zoomTarget: 100, // %
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.controls = _instanceManager2.default.get('pan-controls');
+			this.world = this.game.world;
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+	
+			// this.background1layer1 = this.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
+			this.background1layer2 = this.game.add.tileSprite(_config2.default.screen.width * -0.5, _config2.default.screen.width * -0.5, _config2.default.screen.width * 1.5, _config2.default.screen.width * 1.5, 'background1-layer2');
+	
+			window.addEventListener('mousewheel', _lodash2.default.bind(function (e) {
+				this.updateZoomTarget(e.wheelDelta);
+			}, this));
+		},
+		run: function run() {
+			// Vertial pan
+			if (this.controls.panUp.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.y += this.panSpeed;
+			} else if (this.controls.panDown.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.y -= this.panSpeed;
+			}
+	
+			// Horizontal pa
+			if (this.controls.panRight.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.x -= this.panSpeed;
+			} else if (this.controls.panLeft.isDown) {
+				this.dirtyBackground = true;
+				this.worldEntities.x += this.panSpeed;
+			}
+	
+			if (!this.dirtyBackground) {
+				return;
+			}
+	
+			this.updateBackground();
+			this.updateZoom();
+			this.limitView();
+	
+			this.dirtyBackground = false;
+		},
+		limitView: function limitView() {
+			// Limit view
+			// Run check each tick to account for
+			// other position mutators such as zooming
+			if (this.worldEntities.y > 0) {
+				this.worldEntities.y = 0;
+			} else if (this.worldEntities.y < -(this.world.height * this.worldEntities.scale.y - this.game.camera.height)) {
+				this.worldEntities.y = -(this.world.height * this.worldEntities.scale.y - this.game.camera.height);
+			}
+	
+			if (this.worldEntities.x < -(this.world.width * this.worldEntities.scale.x - this.game.camera.width)) {
+				this.worldEntities.x = -(this.world.width * this.worldEntities.scale.x - this.game.camera.width);
+			} else if (this.worldEntities.x > 0) {
+				this.worldEntities.x = 0;
+			}
+		},
+		updateBackground: function updateBackground() {
+			// this.background1layer1.position.x = this.background1layer1.width * 0.005  * this.worldEntities.x / this.game.width;
+			// this.background1layer1.position.y = this.background1layer1.height * 0.005 * this.worldEntities.y / this.game.height;
+			this.background1layer2.position.x = this.background1layer2.width * 0.01 * this.worldEntities.x / this.game.width;
+			this.background1layer2.position.y = this.background1layer2.height * 0.01 * this.worldEntities.y / this.game.height;
+		},
+		updateZoom: function updateZoom() {
+			var zoom = this.zoomTarget / 100;
+			var localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+	
+			this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
+			this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
+			this.worldEntities.scale.setTo(zoom);
+		},
+		updateZoomTarget: function updateZoomTarget(delta) {
+			if (this.game.paused) {
+				return;
+			}
+	
+			this.zoomTarget += this.zoomIncrement * (delta > 0 ? 1 : -1);
+	
+			if (this.zoomTarget >= this.zoomMin && this.zoomTarget <= this.zoomMax) {
+				this.updateZoom();
+			} else {
+				this.zoomTarget = delta > 0 ? this.zoomMax : this.zoomMin;
+			}
+	
+			this.limitView();
+			this.updateBackground();
+		}
+	});
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(10);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _phaser = __webpack_require__(9);
+	
+	var _phaser2 = _interopRequireDefault(_phaser);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('selection', {
+		SELECTION_PADDING: 30,
+	
+		components: ['selectable'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+			// this.uiViewModel = instanceManager.get('uiViewModel');
+			this.selectionChanged = false;
+		},
+	
+		run: function run(entities) {
+			_lodash2.default.each(entities, this.checkSelection, this);
+	
+			if (this.selectionChanged) {
+				// this.uiViewModel.update();
+				this.selectionChanged = false;
+			}
+		},
+	
+		checkSelection: function checkSelection(entity) {
+			var selectableComponent = entity.getComponent('selectable');
+			var graphic = undefined;
+	
+			if (entity.hasComponent('selected')) {
+				if (!selectableComponent.graphic) {
+					graphic = new _phaser2.default.Sprite(this.game, 0, 0, 'selection');
+					graphic.anchor.setTo(0.5, 0.5);
+					// Set the height and width to the greater of the two plus padding
+					graphic.width = graphic.height = (entity.width > entity.height ? entity.width : entity.height) + this.SELECTION_PADDING;
+					this.worldEntities.addChild(graphic);
+					selectableComponent.graphic = graphic;
+					this.selectionChanged = true;
+	
+					entity.events.onDestroy.addOnce(graphic.kill, graphic);
+					// entity.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
+				} else if (!selectableComponent.graphic.visible) {
+						selectableComponent.graphic.visible = true;
+						this.selectionChanged = true;
+					}
+	
+				selectableComponent.graphic.position.x = entity.position.x;
+				selectableComponent.graphic.position.y = entity.position.y;
+			} else if (selectableComponent.graphic && selectableComponent.graphic.visible) {
+				this.selectionChanged = true;
+				selectableComponent.graphic.visible = false;
+			}
+		}
+	});
+
+/***/ },
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _config = __webpack_require__(13);
+	
+	var _config2 = _interopRequireDefault(_config);
+	
+	var _instanceManager = __webpack_require__(10);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _mouseControls = __webpack_require__(31);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
-	var _phaser = __webpack_require__(13);
+	var _phaser = __webpack_require__(9);
 	
 	var _phaser2 = _interopRequireDefault(_phaser);
 	
@@ -15622,11 +15838,6 @@
 	
 			this.game.physics.startSystem(_phaser2.default.Physics.ARCADE);
 	
-			window.addEventListener('resize', function (e) {
-				game.scale.setShowAll();
-				game.scale.refresh();
-			});
-	
 			ecsManager.runSystemInits();
 		},
 		update: function update() {
@@ -15637,7 +15848,7 @@
 	});
 
 /***/ },
-/* 28 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -15646,15 +15857,15 @@
 		value: true
 	});
 	
-	var _each = __webpack_require__(29);
+	var _each = __webpack_require__(32);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
-	var _phaser = __webpack_require__(13);
+	var _phaser = __webpack_require__(9);
 	
 	var _phaser2 = _interopRequireDefault(_phaser);
 	
-	var _instanceManager = __webpack_require__(9);
+	var _instanceManager = __webpack_require__(10);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
@@ -15869,20 +16080,20 @@
 	};
 
 /***/ },
-/* 29 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(30);
+	module.exports = __webpack_require__(33);
 
 
 /***/ },
-/* 30 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(31),
-	    baseEach = __webpack_require__(32),
-	    isArray = __webpack_require__(48),
-	    toFunction = __webpack_require__(53);
+	var arrayEach = __webpack_require__(34),
+	    baseEach = __webpack_require__(35),
+	    isArray = __webpack_require__(51),
+	    toFunction = __webpack_require__(56);
 	
 	/**
 	 * Iterates over elements of `collection` invoking `iteratee` for each element.
@@ -15922,7 +16133,7 @@
 
 
 /***/ },
-/* 31 */
+/* 34 */
 /***/ function(module, exports) {
 
 	/**
@@ -15950,11 +16161,11 @@
 
 
 /***/ },
-/* 32 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseForOwn = __webpack_require__(33),
-	    createBaseEach = __webpack_require__(52);
+	var baseForOwn = __webpack_require__(36),
+	    createBaseEach = __webpack_require__(55);
 	
 	/**
 	 * The base implementation of `_.forEach` without support for iteratee shorthands.
@@ -15970,11 +16181,11 @@
 
 
 /***/ },
-/* 33 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseFor = __webpack_require__(34),
-	    keys = __webpack_require__(36);
+	var baseFor = __webpack_require__(37),
+	    keys = __webpack_require__(39);
 	
 	/**
 	 * The base implementation of `_.forOwn` without support for iteratee shorthands.
@@ -15992,10 +16203,10 @@
 
 
 /***/ },
-/* 34 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createBaseFor = __webpack_require__(35);
+	var createBaseFor = __webpack_require__(38);
 	
 	/**
 	 * The base implementation of `baseForIn` and `baseForOwn` which iterates
@@ -16015,7 +16226,7 @@
 
 
 /***/ },
-/* 35 */
+/* 38 */
 /***/ function(module, exports) {
 
 	/**
@@ -16046,15 +16257,15 @@
 
 
 /***/ },
-/* 36 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseHas = __webpack_require__(37),
-	    baseKeys = __webpack_require__(38),
-	    indexKeys = __webpack_require__(39),
-	    isArrayLike = __webpack_require__(43),
-	    isIndex = __webpack_require__(50),
-	    isPrototype = __webpack_require__(51);
+	var baseHas = __webpack_require__(40),
+	    baseKeys = __webpack_require__(41),
+	    indexKeys = __webpack_require__(42),
+	    isArrayLike = __webpack_require__(46),
+	    isIndex = __webpack_require__(53),
+	    isPrototype = __webpack_require__(54);
 	
 	/**
 	 * Creates an array of the own enumerable property names of `object`.
@@ -16107,7 +16318,7 @@
 
 
 /***/ },
-/* 37 */
+/* 40 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/** Used for built-in method references. */
@@ -16140,7 +16351,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 38 */
+/* 41 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -16163,14 +16374,14 @@
 
 
 /***/ },
-/* 39 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseTimes = __webpack_require__(40),
-	    isArguments = __webpack_require__(41),
-	    isArray = __webpack_require__(48),
-	    isLength = __webpack_require__(46),
-	    isString = __webpack_require__(49);
+	var baseTimes = __webpack_require__(43),
+	    isArguments = __webpack_require__(44),
+	    isArray = __webpack_require__(51),
+	    isLength = __webpack_require__(49),
+	    isString = __webpack_require__(52);
 	
 	/**
 	 * Creates an array of index keys for `object` values of arrays,
@@ -16191,7 +16402,7 @@
 
 
 /***/ },
-/* 40 */
+/* 43 */
 /***/ function(module, exports) {
 
 	/**
@@ -16217,10 +16428,10 @@
 
 
 /***/ },
-/* 41 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var isArrayLikeObject = __webpack_require__(42);
+	/* WEBPACK VAR INJECTION */(function(global) {var isArrayLikeObject = __webpack_require__(45);
 	
 	/** `Object#toString` result references. */
 	var argsTag = '[object Arguments]';
@@ -16267,11 +16478,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 42 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLike = __webpack_require__(43),
-	    isObjectLike = __webpack_require__(47);
+	var isArrayLike = __webpack_require__(46),
+	    isObjectLike = __webpack_require__(50);
 	
 	/**
 	 * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -16305,12 +16516,12 @@
 
 
 /***/ },
-/* 43 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getLength = __webpack_require__(44),
+	var getLength = __webpack_require__(47),
 	    isFunction = __webpack_require__(7),
-	    isLength = __webpack_require__(46);
+	    isLength = __webpack_require__(49);
 	
 	/**
 	 * Checks if `value` is array-like. A value is considered array-like if it's
@@ -16346,10 +16557,10 @@
 
 
 /***/ },
-/* 44 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseProperty = __webpack_require__(45);
+	var baseProperty = __webpack_require__(48);
 	
 	/**
 	 * Gets the "length" property value of `object`.
@@ -16367,7 +16578,7 @@
 
 
 /***/ },
-/* 45 */
+/* 48 */
 /***/ function(module, exports) {
 
 	/**
@@ -16387,7 +16598,7 @@
 
 
 /***/ },
-/* 46 */
+/* 49 */
 /***/ function(module, exports) {
 
 	/** Used as references for various `Number` constants. */
@@ -16425,7 +16636,7 @@
 
 
 /***/ },
-/* 47 */
+/* 50 */
 /***/ function(module, exports) {
 
 	/**
@@ -16459,7 +16670,7 @@
 
 
 /***/ },
-/* 48 */
+/* 51 */
 /***/ function(module, exports) {
 
 	/**
@@ -16491,11 +16702,11 @@
 
 
 /***/ },
-/* 49 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var isArray = __webpack_require__(48),
-	    isObjectLike = __webpack_require__(47);
+	/* WEBPACK VAR INJECTION */(function(global) {var isArray = __webpack_require__(51),
+	    isObjectLike = __webpack_require__(50);
 	
 	/** `Object#toString` result references. */
 	var stringTag = '[object String]';
@@ -16535,7 +16746,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 50 */
+/* 53 */
 /***/ function(module, exports) {
 
 	/** Used as references for various `Number` constants. */
@@ -16562,7 +16773,7 @@
 
 
 /***/ },
-/* 51 */
+/* 54 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/** Used for built-in method references. */
@@ -16587,10 +16798,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 52 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLike = __webpack_require__(43);
+	var isArrayLike = __webpack_require__(46);
 	
 	/**
 	 * Creates a `baseEach` or `baseEachRight` function.
@@ -16625,10 +16836,10 @@
 
 
 /***/ },
-/* 53 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(54);
+	var identity = __webpack_require__(57);
 	
 	/**
 	 * Converts `value` to a function if it's not one.
@@ -16645,7 +16856,7 @@
 
 
 /***/ },
-/* 54 */
+/* 57 */
 /***/ function(module, exports) {
 
 	/**
@@ -16669,214 +16880,6 @@
 	
 	module.exports = identity;
 
-
-/***/ },
-/* 55 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _lodash = __webpack_require__(19);
-	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
-	var _config = __webpack_require__(12);
-	
-	var _config2 = _interopRequireDefault(_config);
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerSystem('camera', {
-		dirtyBackground: true,
-		panSpeed: 8,
-		zoomIncrement: 5, // %
-		zoomMax: 100,
-		zoomMin: 15,
-		zoomTween: null,
-		zoomTarget: 100, // %
-	
-		init: function init() {
-			this.game = _instanceManager2.default.get('game');
-			this.controls = _instanceManager2.default.get('pan-controls');
-			this.world = this.game.world;
-			this.worldEntities = _instanceManager2.default.get('world-entities');
-	
-			// this.background1layer1 = this.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
-			this.background1layer2 = this.game.add.tileSprite(_config2.default.screen.width * -0.5, _config2.default.screen.width * -0.5, _config2.default.screen.width * 1.5, _config2.default.screen.width * 1.5, 'background1-layer2');
-	
-			window.addEventListener('mousewheel', _lodash2.default.bind(function (e) {
-				this.updateZoomTarget(e.wheelDelta);
-			}, this));
-		},
-		run: function run() {
-			// Vertial pan
-			if (this.controls.panUp.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.y += this.panSpeed;
-			} else if (this.controls.panDown.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.y -= this.panSpeed;
-			}
-	
-			// Horizontal pa
-			if (this.controls.panRight.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.x -= this.panSpeed;
-			} else if (this.controls.panLeft.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.x += this.panSpeed;
-			}
-	
-			if (!this.dirtyBackground) {
-				return;
-			}
-	
-			this.updateBackground();
-			this.updateZoom();
-			this.limitView();
-	
-			this.dirtyBackground = false;
-		},
-		limitView: function limitView() {
-			// Limit view
-			// Run check each tick to account for
-			// other position mutators such as zooming
-			if (this.worldEntities.y > 0) {
-				this.worldEntities.y = 0;
-			} else if (this.worldEntities.y < -(this.world.height * this.worldEntities.scale.y - this.game.camera.height)) {
-				this.worldEntities.y = -(this.world.height * this.worldEntities.scale.y - this.game.camera.height);
-			}
-	
-			if (this.worldEntities.x < -(this.world.width * this.worldEntities.scale.x - this.game.camera.width)) {
-				this.worldEntities.x = -(this.world.width * this.worldEntities.scale.x - this.game.camera.width);
-			} else if (this.worldEntities.x > 0) {
-				this.worldEntities.x = 0;
-			}
-		},
-		updateBackground: function updateBackground() {
-			// this.background1layer1.position.x = this.background1layer1.width * 0.005  * this.worldEntities.x / this.game.width;
-			// this.background1layer1.position.y = this.background1layer1.height * 0.005 * this.worldEntities.y / this.game.height;
-			this.background1layer2.position.x = this.background1layer2.width * 0.01 * this.worldEntities.x / this.game.width;
-			this.background1layer2.position.y = this.background1layer2.height * 0.01 * this.worldEntities.y / this.game.height;
-		},
-		updateZoom: function updateZoom() {
-			var zoom = this.zoomTarget / 100;
-			var localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
-	
-			this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
-			this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
-			this.worldEntities.scale.setTo(zoom);
-		},
-		updateZoomTarget: function updateZoomTarget(delta) {
-			if (this.game.paused) {
-				return;
-			}
-	
-			this.zoomTarget += this.zoomIncrement * (delta > 0 ? 1 : -1);
-	
-			if (this.zoomTarget >= this.zoomMin && this.zoomTarget <= this.zoomMax) {
-				this.updateZoom();
-			} else {
-				this.zoomTarget = delta > 0 ? this.zoomMax : this.zoomMin;
-			}
-	
-			this.limitView();
-			this.updateBackground();
-		}
-	});
-
-/***/ },
-/* 56 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _lodash = __webpack_require__(19);
-	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	var _phaser = __webpack_require__(13);
-	
-	var _phaser2 = _interopRequireDefault(_phaser);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerSystem('selection', {
-		SELECTION_PADDING: 30,
-	
-		components: ['selectable'],
-	
-		init: function init() {
-			this.game = _instanceManager2.default.get('game');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
-			// this.uiViewModel = instanceManager.get('uiViewModel');
-			this.selectionChanged = false;
-		},
-	
-		run: function run(entities) {
-			_lodash2.default.each(entities, this.checkSelection, this);
-	
-			if (this.selectionChanged) {
-				// this.uiViewModel.update();
-				this.selectionChanged = false;
-			}
-		},
-	
-		checkSelection: function checkSelection(entity) {
-			var selectableComponent = entity.getComponent('selectable');
-			var graphic = undefined;
-	
-			if (entity.hasComponent('selected')) {
-				if (!selectableComponent.graphic) {
-					graphic = new _phaser2.default.Sprite(this.game, 0, 0, 'selection');
-					graphic.anchor.setTo(0.5, 0.5);
-					// Set the height and width to the greater of the two plus padding
-					graphic.width = graphic.height = (entity.width > entity.height ? entity.width : entity.height) + this.SELECTION_PADDING;
-					this.worldEntities.addChild(graphic);
-					selectableComponent.graphic = graphic;
-					this.selectionChanged = true;
-	
-					entity.events.onDestroy.addOnce(graphic.kill, graphic);
-					// entity.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
-				} else if (!selectableComponent.graphic.visible) {
-						selectableComponent.graphic.visible = true;
-						this.selectionChanged = true;
-					}
-	
-				selectableComponent.graphic.position.x = entity.position.x;
-				selectableComponent.graphic.position.y = entity.position.y;
-			} else if (selectableComponent.graphic && selectableComponent.graphic.visible) {
-				this.selectionChanged = true;
-				selectableComponent.graphic.visible = false;
-			}
-		}
-	});
-
-/***/ },
-/* 57 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('team', {
-		state: {
-			name: 'neutral'
-		}
-	});
 
 /***/ }
 /******/ ]);

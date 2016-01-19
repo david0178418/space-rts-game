@@ -1,4 +1,5 @@
-export default {
+// commonjs format for use by electron
+module.exports = {
 	universeSize: 15,
 	controls: {
 		panUp: 'W',
@@ -7,8 +8,8 @@ export default {
 		panDown: 'S',
 	},
 	screen: {
-		width: 800,
-		height: 600,
+		width: 1200,
+		height: 800,
 	},
 	stage: {
 		width: 8000,

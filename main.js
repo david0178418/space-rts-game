@@ -1,5 +1,6 @@
 'use strict';
 const electron = require('electron');
+const Config = require('./src/config');
 // Module to control application life.
 const app = electron.app;
 // Module to create native browser window.
@@ -12,13 +13,15 @@ let mainWindow;
 function createWindow () {
 	// Create the browser window.
 	mainWindow = new BrowserWindow({
-		width: 800,
-		height: 600,
+		width: Config.screen.width,
+		height: Config.screen.height,
 		resizable: false,
 		center: true,
-		autoHideMenuBar: true,
+		menuBarVisible: false,
 		// fullscreen: false
 	});
+
+	mainWindow.setMenuBarVisibility(false);
 
 	mainWindow.openDevTools();
 
