@@ -5,11 +5,9 @@ import ReactDOM from 'react-dom';
 
 instanceManager.registerResource('hud', {
 	init: function() {
-		window.x = ReactDOM.render(
+		return ReactDOM.render(
 			React.createElement(Hud, {}),
 			document.getElementById('hud')
 		);
-
-		return window.x;
 	},
 });

@@ -62,7 +62,7 @@
 	
 	__webpack_require__(273);
 	
-	__webpack_require__(280);
+	__webpack_require__(284);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -440,11 +440,7 @@
 
 	'use strict';
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -459,33 +455,28 @@
 			this[RESOURCES_KEY] = {};
 		}
 	
-		_createClass(InstanceManager, [{
-			key: 'get',
-			value: function get(resourceName) {
-				var resourceInstance = this[INSTANCES_KEY][resourceName];
-				var resources = this[RESOURCES_KEY];
+		InstanceManager.prototype.get = function get(resourceName) {
+			var resourceInstance = this[INSTANCES_KEY][resourceName];
+			var resources = this[RESOURCES_KEY];
 	
-				if (!resourceInstance) {
-					resourceInstance = resources[resourceName].init();
+			if (!resourceInstance) {
+				resourceInstance = resources[resourceName].init();
 	
-					if (resources[resourceName].cache || resources[resourceName].cache === undefined) {
-						this[INSTANCES_KEY][resourceName] = resourceInstance;
-					}
+				if (resources[resourceName].cache || resources[resourceName].cache === undefined) {
+					this[INSTANCES_KEY][resourceName] = resourceInstance;
 				}
+			}
 	
-				return resourceInstance;
-			}
-		}, {
-			key: 'reset',
-			value: function reset(dependency) {
-				this[INSTANCES_KEY][dependency] = this[RESOURCES_KEY][dependency]();
-			}
-		}, {
-			key: 'registerResource',
-			value: function registerResource(name, resource) {
-				this[RESOURCES_KEY][name] = resource;
-			}
-		}]);
+			return resourceInstance;
+		};
+	
+		InstanceManager.prototype.reset = function reset(dependency) {
+			this[INSTANCES_KEY][dependency] = this[RESOURCES_KEY][dependency]();
+		};
+	
+		InstanceManager.prototype.registerResource = function registerResource(name, resource) {
+			this[RESOURCES_KEY][name] = resource;
+		};
 	
 		return InstanceManager;
 	}();
@@ -672,11 +663,7 @@
 
 	'use strict';
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(19);
 	
@@ -723,123 +710,108 @@
 			this[_runSystems] = {};
 		}
 	
-		_createClass(ECSManager, [{
-			key: 'createEntity',
-			value: function createEntity() {
-				var entity = new _entity2.default(this);
+		ECSManager.prototype.createEntity = function createEntity() {
+			var entity = new _entity2.default(this);
 	
-				this[entities].push(entity);
-				return entity;
+			this[entities].push(entity);
+			return entity;
+		};
+	
+		// @param {string} name - component name.  If component with matching name doesn't
+		//		exist, a new one will be created using the provided properties as defaults
+		// @param {object} [props={}] - component instant overrides.
+		// @return {object}
+		// TODO Consider case of over-writing a component that has an
+		// "onRemove" callback (such as "sprite")
+	
+		ECSManager.prototype.createComponent = function createComponent(name) {
+			var state = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	
+			var component = this[components][name];
+	
+			if (!component) {
+				this.registerComponent(name, { state: state });
+				return state;
+			} else if (component.factory) {
+				return component.factory(state);
+			} else {
+				return extend({}, component.state, state);
 			}
+		};
 	
-			// @param {string} name - component name.  If component with matching name doesn't
-			//		exist, a new one will be created using the provided properties as defaults
-			// @param {object} [props={}] - component instant overrides.
-			// @return {object}
-			// TODO Consider case of over-writing a component that has an
-			// "onRemove" callback (such as "sprite")
+		ECSManager.prototype.destroyEntity = function destroyEntity(entity) {
+			this[entities].splice(this[entities].indexOf(entity), 1);
+			entity.destroy();
+			return this;
+		};
 	
-		}, {
-			key: 'createComponent',
-			value: function createComponent(name) {
-				var state = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+		ECSManager.prototype.getComponentCleanup = function getComponentCleanup(name) {
+			return this[components][name].onRemove || _lodash2.default.noop;
+		};
 	
-				var component = this[components][name];
+		ECSManager.prototype.getEntityById = function getEntityById(id) {
+			return _lodash2.default.find(this[entities], function (entity) {
+				return entity.id === id;
+			});
+		};
 	
-				if (!component) {
-					this.registerComponent(name, { state: state });
-					return state;
-				} else if (component.factory) {
-					return component.factory(state);
-				} else {
-					return extend({}, component.state, state);
-				}
-			}
-		}, {
-			key: 'destroyEntity',
-			value: function destroyEntity(entity) {
-				this[entities].splice(this[entities].indexOf(entity), 1);
-				entity.destroy();
-				return this;
-			}
-		}, {
-			key: 'getComponentCleanup',
-			value: function getComponentCleanup(name) {
-				return this[components][name].onRemove || _lodash2.default.noop;
-			}
-		}, {
-			key: 'getEntityById',
-			value: function getEntityById(id) {
-				return _lodash2.default.find(this[entities], function (entity) {
-					return entity.id === id;
-				});
-			}
-		}, {
-			key: 'getEntities',
-			value: function getEntities(components) {
-				if (!components) {
-					return _lodash2.default.filter(this[entities].slice(0), function (entity) {
-						return entity.alive;
-					});
-				}
-	
-				return _lodash2.default.filter(this[entities], function (entity) {
-					return entity.alive && entity.hasComponents(components);
+		ECSManager.prototype.getEntities = function getEntities(components) {
+			if (!components) {
+				return _lodash2.default.filter(this[entities].slice(0), function (entity) {
+					return entity.alive;
 				});
 			}
 	
-			// @param {string} name
-			// @param {object} [defaultData={}] - provide an optional baseline for a component
+			return _lodash2.default.filter(this[entities], function (entity) {
+				return entity.alive && entity.hasComponents(components);
+			});
+		};
 	
-		}, {
-			key: 'registerComponent',
-			value: function registerComponent(name, defaultData) {
-				this[components][name] = defaultData;
+		// @param {string} name
+		// @param {object} [defaultData={}] - provide an optional baseline for a component
+	
+		ECSManager.prototype.registerComponent = function registerComponent(name, defaultData) {
+			this[components][name] = defaultData;
+		};
+	
+		// @param {string} name
+		// @param {object} system
+		// @param {array} system.components - listing of components required for system operation
+		// @param {function} system.run - system tick logic.  Receives array of all matching entities.
+		// @param {function} system.init - system initialization.
+	
+		ECSManager.prototype.registerSystem = function registerSystem(name, system) {
+			if (system.init) {
+				this[initSystems][name] = system;
 			}
 	
-			// @param {string} name
-			// @param {object} system
-			// @param {array} system.components - listing of components required for system operation
-			// @param {function} system.run - system tick logic.  Receives array of all matching entities.
-			// @param {function} system.init - system initialization.
-	
-		}, {
-			key: 'registerSystem',
-			value: function registerSystem(name, system) {
-				if (system.init) {
-					this[initSystems][name] = system;
-				}
-	
-				if (system.run || system.runOne) {
-					this[_runSystems][name] = system;
-				}
+			if (system.run || system.runOne) {
+				this[_runSystems][name] = system;
 			}
-		}, {
-			key: 'runSystemInits',
-			value: function runSystemInits() {
-				_lodash2.default.each(this[initSystems], function (system) {
-					system.init();
-				});
-			}
-		}, {
-			key: 'runSystems',
-			value: function runSystems() {
-				var _this = this;
+		};
 	
-				_lodash2.default.each(this[_runSystems], function (system) {
-					if (system.components) {
-						var _entities = _this.getEntities(system.components);
+		ECSManager.prototype.runSystemInits = function runSystemInits() {
+			_lodash2.default.each(this[initSystems], function (system) {
+				system.init();
+			});
+		};
 	
-						if (_entities.length) {
-							system.run && system.run(_entities);
-							system.runOne && _lodash2.default.map(_entities, system.runOne, system);
-						}
-					} else {
-						system.run();
+		ECSManager.prototype.runSystems = function runSystems() {
+			var _this = this;
+	
+			_lodash2.default.each(this[_runSystems], function (system) {
+				if (system.components) {
+					var _entities = _this.getEntities(system.components);
+	
+					if (_entities.length) {
+						system.run && system.run(_entities);
+						system.runOne && _lodash2.default.map(_entities, system.runOne, system);
 					}
-				});
-			}
-		}]);
+				} else {
+					system.run();
+				}
+			});
+		};
 	
 		return ECSManager;
 	}();
@@ -15305,58 +15277,51 @@
 			this[id] = _lodash2.default.uniqueId('entity-');
 		}
 	
-		_createClass(Entity, [{
-			key: 'addComponent',
-			value: function addComponent(component, props) {
-				if (this[components][component] && !props) {
-					return this;
-				}
-	
-				this[components][component] = this[entityManager].createComponent(component, props);
-	
+		Entity.prototype.addComponent = function addComponent(component, props) {
+			if (this[components][component] && !props) {
 				return this;
 			}
-		}, {
-			key: 'currentComponents',
-			value: function currentComponents() {
-				// TODO Cache this
-				return _lodash2.default.keys(this[components]);
-			}
-		}, {
-			key: 'getComponent',
-			value: function getComponent(component) {
-				return this[components][component];
-			}
-		}, {
-			key: 'hasComponent',
-			value: function hasComponent(component) {
-				return _lodash2.default.contains(this.currentComponents(), component);
-			}
-		}, {
-			key: 'hasComponents',
-			value: function hasComponents(components) {
-				if (!_lodash2.default.isArray(components)) {
-					return this.hasComponent(components);
-				}
 	
-				return _lodash2.default.all(components, this.hasComponent, this);
-			}
-		}, {
-			key: 'removeComponent',
-			value: function removeComponent(name) {
-				var component = this[components][name];
+			this[components][component] = this[entityManager].createComponent(component, props);
 	
-				this[entityManager].getComponentCleanup(name)(component);
-				delete this[components][name];
-			}
-		}, {
-			key: 'toggleComponent',
-			value: function toggleComponent(component, addComponent, props) {
-				addComponent = _lodash2.default.isUndefined(addComponent) ? !this[components][component] : addComponent;
+			return this;
+		};
 	
-				addComponent ? this.addComponent(component, props) : this.removeComponent(component);
+		Entity.prototype.currentComponents = function currentComponents() {
+			// TODO Cache this
+			return _lodash2.default.keys(this[components]);
+		};
+	
+		Entity.prototype.getComponent = function getComponent(component) {
+			return this[components][component];
+		};
+	
+		Entity.prototype.hasComponent = function hasComponent(component) {
+			return _lodash2.default.contains(this.currentComponents(), component);
+		};
+	
+		Entity.prototype.hasComponents = function hasComponents(components) {
+			if (!_lodash2.default.isArray(components)) {
+				return this.hasComponent(components);
 			}
-		}, {
+	
+			return _lodash2.default.all(components, this.hasComponent, this);
+		};
+	
+		Entity.prototype.removeComponent = function removeComponent(name) {
+			var component = this[components][name];
+	
+			this[entityManager].getComponentCleanup(name)(component);
+			delete this[components][name];
+		};
+	
+		Entity.prototype.toggleComponent = function toggleComponent(component, addComponent, props) {
+			addComponent = _lodash2.default.isUndefined(addComponent) ? !this[components][component] : addComponent;
+	
+			addComponent ? this.addComponent(component, props) : this.removeComponent(component);
+		};
+	
+		_createClass(Entity, [{
 			key: 'id',
 			get: function get() {
 				return this[id];
@@ -15394,9 +15359,7 @@
 	
 	_instanceManager2.default.registerResource('hud', {
 		init: function init() {
-			window.x = _reactDom2.default.render(_react2.default.createElement(_hud2.default, {}), document.getElementById('hud'));
-	
-			return window.x;
+			return _reactDom2.default.render(_react2.default.createElement(_hud2.default, {}), document.getElementById('hud'));
 		}
 	});
 
@@ -15406,11 +15369,7 @@
 
 	'use strict';
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 	
 	var _map = __webpack_require__(25);
 	
@@ -15438,7 +15397,8 @@
 	var buttonStyles = {
 		backgroundColor: 'transparent',
 		border: '2px solid #1ed81e',
-		color: '#1ed81e'
+		color: '#1ed81e',
+		cursor: 'pointer'
 	};
 	
 	var Hud = function (_Component) {
@@ -15447,38 +15407,35 @@
 		function Hud(props) {
 			_classCallCheck(this, Hud);
 	
-			return _possibleConstructorReturn(this, Object.getPrototypeOf(Hud).call(this, props));
+			return _possibleConstructorReturn(this, _Component.call(this, props));
 		}
 	
-		_createClass(Hud, [{
-			key: 'render',
-			value: function render() {
-				var _this2 = this;
+		Hud.prototype.render = function render() {
+			var _this2 = this;
 	
-				var classes = (this.props.showMenu ? 'active' : '') + ' production-options';
+			var classes = (this.props.showMenu ? 'active' : '') + ' production-options';
 	
-				return _react2.default.createElement(
+			return _react2.default.createElement(
+				'div',
+				{ className: classes, style: baseStyles },
+				this.props.showMenu || true && _react2.default.createElement(
 					'div',
-					{ className: classes, style: baseStyles },
-					this.props.showMenu || true && _react2.default.createElement(
-						'div',
-						{ className: 'options' },
-						(0, _map2.default)(this.props.options || [{ label: 'aaa', handler: function handler() {} }], function (option) {
-							return _react2.default.createElement(
-								'button',
-								{
-									key: option.label,
-									className: 'icon-button',
-									style: buttonStyles,
-									onClick: _this2.props.handler
-								},
-								option.label
-							);
-						})
-					)
-				);
-			}
-		}]);
+					{ className: 'options' },
+					(0, _map2.default)(this.props.options || [{ label: 'aaa', handler: function handler() {} }], function (option) {
+						return _react2.default.createElement(
+							'button',
+							{
+								key: option.label,
+								className: 'icon-button',
+								style: buttonStyles,
+								onClick: _this2.props.handler
+							},
+							option.label
+						);
+					})
+				)
+			);
+		};
 	
 		return Hud;
 	}(_react.Component);
@@ -38253,9 +38210,7 @@
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 	
 	exports.default = function (position) {
 		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'planet' }, position)).addComponent('selectable');
@@ -38460,9 +38415,9 @@
 
 	'use strict';
 	
-	var _lodash = __webpack_require__(19);
+	var _each = __webpack_require__(280);
 	
-	var _lodash2 = _interopRequireDefault(_lodash);
+	var _each2 = _interopRequireDefault(_each);
 	
 	var _instanceManager = __webpack_require__(9);
 	
@@ -38487,7 +38442,7 @@
 		},
 	
 		run: function run(entities) {
-			_lodash2.default.each(entities, this.checkSelection, this);
+			(0, _each2.default)(entities, this.checkSelection, this);
 	
 			if (this.selectionChanged) {
 				// this.uiViewModel.update();
@@ -38529,6 +38484,107 @@
 /* 280 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = __webpack_require__(281);
+
+
+/***/ },
+/* 281 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var arrayEach = __webpack_require__(282),
+	    baseEach = __webpack_require__(110),
+	    isArray = __webpack_require__(81),
+	    toFunction = __webpack_require__(283);
+	
+	/**
+	 * Iterates over elements of `collection` invoking `iteratee` for each element.
+	 * The iteratee is invoked with three arguments: (value, index|key, collection).
+	 * Iteratee functions may exit iteration early by explicitly returning `false`.
+	 *
+	 * **Note:** As with other "Collections" methods, objects with a "length" property
+	 * are iterated like arrays. To avoid this behavior use `_.forIn` or `_.forOwn`
+	 * for object iteration.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @alias each
+	 * @category Collection
+	 * @param {Array|Object} collection The collection to iterate over.
+	 * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+	 * @returns {Array|Object} Returns `collection`.
+	 * @example
+	 *
+	 * _([1, 2]).forEach(function(value) {
+	 *   console.log(value);
+	 * });
+	 * // => logs `1` then `2`
+	 *
+	 * _.forEach({ 'a': 1, 'b': 2 }, function(value, key) {
+	 *   console.log(key);
+	 * });
+	 * // => logs 'a' then 'b' (iteration order is not guaranteed)
+	 */
+	function forEach(collection, iteratee) {
+	  return (typeof iteratee == 'function' && isArray(collection))
+	    ? arrayEach(collection, iteratee)
+	    : baseEach(collection, toFunction(iteratee));
+	}
+	
+	module.exports = forEach;
+
+
+/***/ },
+/* 282 */
+/***/ function(module, exports) {
+
+	/**
+	 * A specialized version of `_.forEach` for arrays without support for
+	 * iteratee shorthands.
+	 *
+	 * @private
+	 * @param {Array} array The array to iterate over.
+	 * @param {Function} iteratee The function invoked per iteration.
+	 * @returns {Array} Returns `array`.
+	 */
+	function arrayEach(array, iteratee) {
+	  var index = -1,
+	      length = array.length;
+	
+	  while (++index < length) {
+	    if (iteratee(array[index], index, array) === false) {
+	      break;
+	    }
+	  }
+	  return array;
+	}
+	
+	module.exports = arrayEach;
+
+
+/***/ },
+/* 283 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var identity = __webpack_require__(106);
+	
+	/**
+	 * Converts `value` to a function if it's not one.
+	 *
+	 * @private
+	 * @param {*} value The value to process.
+	 * @returns {Function} Returns the function.
+	 */
+	function toFunction(value) {
+	  return typeof value == 'function' ? value : identity;
+	}
+	
+	module.exports = toFunction;
+
+
+/***/ },
+/* 284 */
+/***/ function(module, exports, __webpack_require__) {
+
 	'use strict';
 	
 	var _config = __webpack_require__(13);
@@ -38539,7 +38595,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(281);
+	var _mouseControls = __webpack_require__(285);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -38595,16 +38651,14 @@
 	});
 
 /***/ },
-/* 281 */
+/* 285 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
+	exports.__esModule = true;
 	
-	var _each = __webpack_require__(282);
+	var _each = __webpack_require__(280);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -38825,107 +38879,6 @@
 			return topEntity;
 		}
 	};
-
-/***/ },
-/* 282 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(283);
-
-
-/***/ },
-/* 283 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var arrayEach = __webpack_require__(284),
-	    baseEach = __webpack_require__(110),
-	    isArray = __webpack_require__(81),
-	    toFunction = __webpack_require__(285);
-	
-	/**
-	 * Iterates over elements of `collection` invoking `iteratee` for each element.
-	 * The iteratee is invoked with three arguments: (value, index|key, collection).
-	 * Iteratee functions may exit iteration early by explicitly returning `false`.
-	 *
-	 * **Note:** As with other "Collections" methods, objects with a "length" property
-	 * are iterated like arrays. To avoid this behavior use `_.forIn` or `_.forOwn`
-	 * for object iteration.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @alias each
-	 * @category Collection
-	 * @param {Array|Object} collection The collection to iterate over.
-	 * @param {Function} [iteratee=_.identity] The function invoked per iteration.
-	 * @returns {Array|Object} Returns `collection`.
-	 * @example
-	 *
-	 * _([1, 2]).forEach(function(value) {
-	 *   console.log(value);
-	 * });
-	 * // => logs `1` then `2`
-	 *
-	 * _.forEach({ 'a': 1, 'b': 2 }, function(value, key) {
-	 *   console.log(key);
-	 * });
-	 * // => logs 'a' then 'b' (iteration order is not guaranteed)
-	 */
-	function forEach(collection, iteratee) {
-	  return (typeof iteratee == 'function' && isArray(collection))
-	    ? arrayEach(collection, iteratee)
-	    : baseEach(collection, toFunction(iteratee));
-	}
-	
-	module.exports = forEach;
-
-
-/***/ },
-/* 284 */
-/***/ function(module, exports) {
-
-	/**
-	 * A specialized version of `_.forEach` for arrays without support for
-	 * iteratee shorthands.
-	 *
-	 * @private
-	 * @param {Array} array The array to iterate over.
-	 * @param {Function} iteratee The function invoked per iteration.
-	 * @returns {Array} Returns `array`.
-	 */
-	function arrayEach(array, iteratee) {
-	  var index = -1,
-	      length = array.length;
-	
-	  while (++index < length) {
-	    if (iteratee(array[index], index, array) === false) {
-	      break;
-	    }
-	  }
-	  return array;
-	}
-	
-	module.exports = arrayEach;
-
-
-/***/ },
-/* 285 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var identity = __webpack_require__(106);
-	
-	/**
-	 * Converts `value` to a function if it's not one.
-	 *
-	 * @private
-	 * @param {*} value The value to process.
-	 * @returns {Function} Returns the function.
-	 */
-	function toFunction(value) {
-	  return typeof value == 'function' ? value : identity;
-	}
-	
-	module.exports = toFunction;
-
 
 /***/ }
 /******/ ]);

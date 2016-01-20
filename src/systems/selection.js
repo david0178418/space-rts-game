@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import each from 'lodash/each';
 import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
 
@@ -17,7 +17,7 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 	},
 
 	run: function(entities) {
-		_.each(entities, this.checkSelection, this);
+		each(entities, this.checkSelection, this);
 
 		if(this.selectionChanged) {
 			// this.uiViewModel.update();

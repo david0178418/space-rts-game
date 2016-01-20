@@ -13,6 +13,7 @@ const buttonStyles = {
 	backgroundColor: 'transparent',
 	border: '2px solid #1ed81e',
 	color: '#1ed81e',
+	cursor: 'pointer'
 };
 
 export default

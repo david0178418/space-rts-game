@@ -19,7 +19,7 @@ module.exports = {
 				],
 				query: {
 					presets: [
-						'es2015',
+						'es2015-loose',
 						'react',
 					],
 				},
