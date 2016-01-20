@@ -97,12 +97,14 @@ export default {
 
 		this.drawDragArea(dragX, dragY);
 
-		each(ecsManager.getEntities('selectable'), function(entity) {
-			let intersects;
-			let isSelected = entity.components.selected;
+		each(ecsManager.getEntities(['selectable']), function(entity) {
+			let isSelected = entity.getComponent('selected');
+			let teamComponent = entity.getComponent('team');
 
-			if(entity.components.team.name === 'player') {
-				intersects = graphic.getBounds().intersects(entity.getBounds());
+			if(teamComponent && teamComponent.name === 'player') {
+				let intersects = graphic.getBounds().intersects(
+					entity.getComponent('sprite').getBounds()
+				);
 
 				if(!isSelected && intersects) {
 					entity.addComponent('selected');
@@ -141,11 +143,11 @@ export default {
 			return;
 		}
 
-		selectedEntityTeamComponent = selectedEntity.components.team;
+		selectedEntityTeamComponent = selectedEntity.getComponents('team');
 		selectedEntityTeam = selectedEntityTeamComponent && selectedEntityTeamComponent.name;
 
 		each(entities, function(entity) {
-			let entityTeamComponent = entity.components.team;
+			let entityTeamComponent = entity.getComponents('team');
 			let team = entityTeamComponent && entityTeamComponent.name;
 
 			if(
@@ -216,7 +218,7 @@ export default {
 
 		each(entities, function(entity) {
 			if(
-				entity.components.team.name === 'player' &&
+				entity.getComponents('team').name === 'player' &&
 				(!topEntity || topEntity.z < entity.z) &&
 				entity.containsPoint(position.x, position.y)
 			) {

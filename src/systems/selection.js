@@ -1,3 +1,4 @@
+import bind from 'lodash/bind';
 import each from 'lodash/each';
 import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
@@ -14,6 +15,8 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		this.worldEntities = instanceManager.get('world-entities');
 		// this.uiViewModel = instanceManager.get('uiViewModel');
 		this.selectionChanged = false;
+
+		this.checkSelection = bind(this.checkSelection, this);
 	},
 
 	run: function(entities) {
@@ -27,6 +30,7 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 
 	checkSelection: function(entity) {
 		let selectableComponent = entity.getComponent('selectable');
+		let sprite = entity.getComponent('sprite');
 		let graphic;
 
 		if(entity.hasComponent('selected')) {
@@ -35,21 +39,21 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 				graphic.anchor.setTo(0.5, 0.5);
 				// Set the height and width to the greater of the two plus padding
 				graphic.width = graphic.height =
-					(entity.width > entity.height ? entity.width : entity.height)
+					(sprite.width > sprite.height ? sprite.width : sprite.height)
 					+ this.SELECTION_PADDING;
 				this.worldEntities.addChild(graphic);
 				selectableComponent.graphic = graphic;
 				this.selectionChanged = true;
 
-				entity.events.onDestroy.addOnce(graphic.kill, graphic);
-				// entity.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
+				sprite.events.onDestroy.addOnce(graphic.kill, graphic);
+				// sprite.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
 			} else if(!selectableComponent.graphic.visible) {
 				selectableComponent.graphic.visible = true;
 				this.selectionChanged = true;
 			}
 
-			selectableComponent.graphic.position.x = entity.position.x;
-			selectableComponent.graphic.position.y = entity.position.y;
+			selectableComponent.graphic.position.x = sprite.position.x;
+			selectableComponent.graphic.position.y = sprite.position.y;
 		} else if(selectableComponent.graphic && selectableComponent.graphic.visible) {
 			this.selectionChanged = true;
 			selectableComponent.graphic.visible = false;

@@ -77,13 +77,11 @@ class ECSManager {
 
 	getEntities(components) {
 		if(!components) {
-			return _.filter(this[entities].slice(0), function(entity) {
-				return entity.alive;
-			});
+			return this[entities].slice(0);
 		}
 
 		return _.filter(this[entities], function(entity) {
-			return entity.alive && entity.hasComponents(components);
+			return entity.hasComponents(components);
 		});
 	}
 

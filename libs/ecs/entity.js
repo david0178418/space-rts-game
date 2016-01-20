@@ -10,6 +10,8 @@ class Entity {
 		this[components] = {};
 
 		this[id] = _.uniqueId('entity-');
+
+		this.hasComponent = _.bind(this.hasComponent, this);
 	}
 
 	addComponent(component, props) {
@@ -32,15 +34,11 @@ class Entity {
 	}
 
 	hasComponent(component) {
-		return _.contains(this.currentComponents(), component);
+		return _.includes(this.currentComponents(), component);
 	}
 
 	hasComponents(components) {
-		if(!_.isArray(components)) {
-			return this.hasComponent(components);
-		}
-
-		return _.all(components, this.hasComponent, this);
+		return _.every(components, this.hasComponent);
 	}
 
 	removeComponent(name) {
