@@ -4,7 +4,6 @@ import MouseControls from 'interface/mouse-controls';
 import Phaser from 'phaser';
 
 const game = instanceManager.get('game');
-window.game = game;
 const ecsManager = instanceManager.get('ecs-manager');
 
 game.state.add('play', {

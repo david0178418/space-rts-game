@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Entity from './entity';
 
 const components = Symbol('components');
-const entities = Symbol('entities');
+const entities = 'entities'; // Symbol('entities');
 const initSystems = Symbol('init-systems');
 const runSystems = Symbol('run-systems');
 
@@ -115,11 +115,11 @@ class ECSManager {
 	runSystems() {
 		_.each(this[runSystems], (system) => {
 			if(system.components) {
-				let entities = this.getEntities(system.components);
+				let matchedEntities = this.getEntities(system.components);
 
-				if(entities.length) {
-					system.run && system.run(entities);
-					system.runOne && _.map(entities, system.runOne, system);
+				if(matchedEntities.length) {
+					system.run && system.run(matchedEntities);
+					system.runOne && _.map(matchedEntities, system.runOne);
 				}
 			} else {
 				system.run();

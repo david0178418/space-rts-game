@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-const components = Symbol('components');
+const components = 'components'; // Symbol('components');
 const entityManager = Symbol('entity-manager');
 const id = Symbol('id');
 

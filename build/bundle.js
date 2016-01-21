@@ -62,7 +62,7 @@
 	
 	__webpack_require__(273);
 	
-	__webpack_require__(314);
+	__webpack_require__(315);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -531,7 +531,7 @@
 	
 	_instanceManager2.default.registerResource('game', {
 		init: function init() {
-			return new _phaser2.default.Game(_config2.default.screen.width, _config2.default.screen.height, _phaser2.default.AUTO, 'phaser', undefined, false);
+			return window.game = new _phaser2.default.Game(_config2.default.screen.width, _config2.default.screen.height, _phaser2.default.AUTO, 'phaser', undefined, false);
 		}
 	});
 
@@ -678,7 +678,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	var components = Symbol('components');
-	var entities = Symbol('entities');
+	var entities = 'entities'; // Symbol('entities');
 	var initSystems = Symbol('init-systems');
 	var _runSystems = Symbol('run-systems');
 	
@@ -799,11 +799,11 @@
 	
 			_lodash2.default.each(this[_runSystems], function (system) {
 				if (system.components) {
-					var _entities = _this.getEntities(system.components);
+					var matchedEntities = _this.getEntities(system.components);
 	
-					if (_entities.length) {
-						system.run && system.run(_entities);
-						system.runOne && _lodash2.default.map(_entities, system.runOne, system);
+					if (matchedEntities.length) {
+						system.run && system.run(matchedEntities);
+						system.runOne && _lodash2.default.map(matchedEntities, system.runOne);
 					}
 				} else {
 					system.run();
@@ -15261,7 +15261,7 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var components = Symbol('components');
+	var components = 'components'; // Symbol('components');
 	var entityManager = Symbol('entity-manager');
 	var id = Symbol('id');
 	
@@ -38076,6 +38076,8 @@
 
 	__webpack_require__(279);
 
+	__webpack_require__(314);
+
 /***/ },
 /* 274 */
 /***/ function(module, exports, __webpack_require__) {
@@ -38089,6 +38091,10 @@
 	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
+	
+	var _fighter = __webpack_require__(317);
+	
+	var _fighter2 = _interopRequireDefault(_fighter);
 	
 	var _instanceManager = __webpack_require__(9);
 	
@@ -38137,6 +38143,18 @@
 			this.worldEntities.y = -playerPlanetSpriteComponent.y + _config2.default.screen.height / 2;
 	
 			playerPlanet.addComponent('team', { name: 'player' });
+	
+			playerPlanet.addComponent('fighter-blueprint', {
+				prefab: _fighter2.default,
+				buildTime: 4000,
+				currentUnitBuildTime: 0
+			}).addComponent('ship-generator', {
+				activeGenerator: 'fighter-blueprint',
+				rallyPoint: {
+					x: playerPlanet.getComponent('sprite').x + 100,
+					y: playerPlanet.getComponent('sprite').y + 75
+				}
+			});;
 			//
 			// playerPlanet.
 			// 	addComponent('probe-blueprint', {
@@ -38258,6 +38276,7 @@
 			sprite = new _phaser2.default.Sprite(game, params.x, params.y, params.graphic);
 			sprite.anchor.setTo(0.5, 0.5);
 			sprite.autoCull = true;
+			sprite.smoothed = false;
 	
 			_instanceManager2.default.get('world-entities').add(sprite);
 	
@@ -39871,6 +39890,56 @@
 
 	'use strict';
 	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('ship-production', {
+		components: ['ship-generator'],
+	
+		init: function init() {
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+			this.game = _instanceManager2.default.get('game');
+	
+			this.runOne = _lodash2.default.bind(this.runOne, this);
+		},
+		runOne: function runOne(entity) {
+			var newShip = undefined;
+			var shipGenerator = entity.getComponent('ship-generator');
+			var activeGenerator = entity.getComponent(shipGenerator.activeGenerator);
+			var entitySprite = entity.getComponent('sprite');
+	
+			activeGenerator.currentUnitBuildTime += this.game.time.elapsed;
+	
+			if (activeGenerator.currentUnitBuildTime >= activeGenerator.buildTime) {
+				activeGenerator.currentUnitBuildTime = 0;
+				newShip = activeGenerator.prefab({
+					x: entitySprite.x,
+					y: entitySprite.y
+				});
+				newShip.getComponent('team').name = entity.getComponent('team').name;
+	
+				// TODO Figure out why rally point reference is being copied
+				// even though deep cloning
+				newShip.addComponent('waypoints', {
+					queued: [_lodash2.default.cloneDeep(shipGenerator.rallyPoint)]
+				});
+			}
+		}
+	});
+
+/***/ },
+/* 315 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
 	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
@@ -39879,7 +39948,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(315);
+	var _mouseControls = __webpack_require__(316);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -39890,7 +39959,6 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var game = _instanceManager2.default.get('game');
-	window.game = game;
 	var ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 	game.state.add('play', {
@@ -39935,7 +40003,7 @@
 	});
 
 /***/ },
-/* 315 */
+/* 316 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -40163,6 +40231,37 @@
 			return topEntity;
 		}
 	};
+
+/***/ },
+/* 317 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	exports.default = function (position) {
+		window.x = window.x || [];
+		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'fighter' }, position)).addComponent('dockable', {
+			size: 10
+		}).addComponent('team').addComponent('selectable').addComponent('movable', {
+			speed: 100
+		});
+	};
+	
+	var _lodash = __webpack_require__(19);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	var _instanceManager = __webpack_require__(9);
+
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+
+	__webpack_require__(276);
+
+	__webpack_require__(277);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }
 /******/ ]);

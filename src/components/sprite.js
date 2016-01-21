@@ -19,6 +19,7 @@ instanceManager
 			sprite = new Phaser.Sprite(game, params.x, params.y, params.graphic);
 			sprite.anchor.setTo(0.5, 0.5);
 			sprite.autoCull = true;
+			sprite.smoothed = false;
 
 			instanceManager.get('world-entities').add(sprite);
 

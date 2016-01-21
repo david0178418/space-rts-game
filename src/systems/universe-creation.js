@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import Config from 'config';
+import fighter from 'entities/fighter';
 import instanceManager from 'instance-manager';
 import planetFactory from 'entities/planet';
 
@@ -41,6 +42,20 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		this.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
 
 		playerPlanet.addComponent('team', {name: 'player'});
+
+		playerPlanet
+			.addComponent('fighter-blueprint', {
+				prefab: fighter,
+				buildTime: 4000,
+				currentUnitBuildTime: 0,
+			})
+			.addComponent('ship-generator', {
+				activeGenerator: 'fighter-blueprint',
+				rallyPoint: {
+					x: playerPlanet.getComponent('sprite').x + 100,
+					y: playerPlanet.getComponent('sprite').y + 75,
+				},
+			});;
 		//
 		// playerPlanet.
 		// 	addComponent('probe-blueprint', {
