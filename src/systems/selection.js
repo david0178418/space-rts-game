@@ -10,7 +10,7 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		'selectable',
 	],
 
-	init: function() {
+	init() {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 		// this.uiViewModel = instanceManager.get('uiViewModel');
@@ -19,7 +19,7 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		this.checkSelection = bind(this.checkSelection, this);
 	},
 
-	run: function(entities) {
+	run(entities) {
 		each(entities, this.checkSelection, this);
 
 		if(this.selectionChanged) {
@@ -28,7 +28,7 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		}
 	},
 
-	checkSelection: function(entity) {
+	checkSelection(entity) {
 		let selectableComponent = entity.getComponent('selectable');
 		let sprite = entity.getComponent('sprite');
 		let graphic;

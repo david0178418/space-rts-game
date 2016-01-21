@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 instanceManager.registerResource('hud', {
-	init: function() {
+	init() {
 		return ReactDOM.render(
 			React.createElement(Hud, {}),
 			document.getElementById('hud')
