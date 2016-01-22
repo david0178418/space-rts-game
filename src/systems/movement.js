@@ -39,6 +39,7 @@ instanceManager.get('ecs-manager').registerSystem('movement', {
 
 			sprite.position.x += Math.cos(angle) * movable.currentSpeed;
 			sprite.position.y += Math.sin(angle) * movable.currentSpeed;
+			sprite.rotation = angle; // TODO Animate angle change
 		}
 	},
 });
