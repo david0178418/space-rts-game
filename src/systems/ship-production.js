@@ -18,6 +18,7 @@ instanceManager.get('ecs-manager').registerSystem('ship-production', {
 		let shipGenerator = entity.getComponent('ship-generator');
 		let activeGenerator = entity.getComponent(shipGenerator.activeGenerator);
 		let entitySprite = entity.getComponent('sprite');
+		let waypoint = entity.getComponent('waypoint');
 
 		activeGenerator.currentUnitBuildTime += this.game.time.elapsed;
 
@@ -31,8 +32,11 @@ instanceManager.get('ecs-manager').registerSystem('ship-production', {
 
 			// TODO Figure out why rally point reference is being copied
 			// even though deep cloning
-			newShip.addComponent('waypoints', {
-				queued: [_.cloneDeep(shipGenerator.rallyPoint)],
+			newShip.addComponent('waypoint-queue', {
+				queue: [{
+					x: waypoint.x,
+					y: waypoint.y,
+				}],
 			});
 		}
 	},

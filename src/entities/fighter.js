@@ -6,7 +6,6 @@ import 'components/team';
 
 export default
 function(position) {
-	window.x = window.x || [];
 	return instanceManager.get('ecs-manager')
 		.createEntity()
 		.addComponent('sprite', _.extend({graphic: 'fighter'}, position))
@@ -16,6 +15,8 @@ function(position) {
 		.addComponent('team')
 		.addComponent('selectable')
 		.addComponent('movable', {
-			speed: 100,
+			acceleration: 1,
+			currentSpeed: 0,
+			topSpeed: 5,
 		});
 }

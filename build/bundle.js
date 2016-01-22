@@ -62,7 +62,7 @@
 	
 	__webpack_require__(273);
 	
-	__webpack_require__(315);
+	__webpack_require__(318);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -38072,11 +38072,15 @@
 
 	__webpack_require__(274);
 
-	__webpack_require__(278);
-
 	__webpack_require__(279);
 
-	__webpack_require__(314);
+	__webpack_require__(280);
+
+	__webpack_require__(281);
+
+	__webpack_require__(282);
+
+	__webpack_require__(317);
 
 /***/ },
 /* 274 */
@@ -38092,7 +38096,7 @@
 	
 	var _config2 = _interopRequireDefault(_config);
 	
-	var _fighter = __webpack_require__(317);
+	var _fighter = __webpack_require__(275);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
@@ -38100,7 +38104,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _planet = __webpack_require__(275);
+	var _planet = __webpack_require__(278);
 	
 	var _planet2 = _interopRequireDefault(_planet);
 	
@@ -38149,12 +38153,11 @@
 				buildTime: 4000,
 				currentUnitBuildTime: 0
 			}).addComponent('ship-generator', {
-				activeGenerator: 'fighter-blueprint',
-				rallyPoint: {
-					x: playerPlanet.getComponent('sprite').x + 100,
-					y: playerPlanet.getComponent('sprite').y + 75
-				}
-			});;
+				activeGenerator: 'fighter-blueprint'
+			}).addComponent('waypoint', {
+				x: playerPlanet.getComponent('sprite').x + 100,
+				y: playerPlanet.getComponent('sprite').y + 75
+			});
 			//
 			// playerPlanet.
 			// 	addComponent('probe-blueprint', {
@@ -38227,7 +38230,13 @@
 	exports.__esModule = true;
 	
 	exports.default = function (position) {
-		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'planet' }, position)).addComponent('selectable');
+		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'fighter' }, position)).addComponent('dockable', {
+			size: 10
+		}).addComponent('team').addComponent('selectable').addComponent('movable', {
+			acceleration: 1,
+			currentSpeed: 0,
+			topSpeed: 5
+		});
 	};
 	
 	var _lodash = __webpack_require__(19);
@@ -38307,6 +38316,32 @@
 
 /***/ },
 /* 278 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	exports.default = function (position) {
+		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'planet' }, position)).addComponent('selectable');
+	};
+	
+	var _lodash = __webpack_require__(19);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	var _instanceManager = __webpack_require__(9);
+
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+
+	__webpack_require__(276);
+
+	__webpack_require__(277);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ },
+/* 279 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38425,16 +38460,111 @@
 	});
 
 /***/ },
-/* 279 */
+/* 280 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _bind = __webpack_require__(280);
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('dequeue-waypoint', {
+		components: ['waypoint-queue'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+		},
+	
+		runOne: function runOne(entity) {
+			if (entity.hasComponent('waypoint')) {
+				// TODO Implement a "without componets" param to systems
+				return;
+			}
+	
+			var waypointQueue = entity.getComponent('waypoint-queue');
+	
+			entity.addComponent('waypoint', waypointQueue.queue.shift());
+	
+			if (!waypointQueue.queue.length) {
+				entity.removeComponent('waypoint-queue');
+			}
+		}
+	});
+
+/***/ },
+/* 281 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('movement', {
+		components: ['movable', 'waypoint'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+	
+			this.runOne = _lodash2.default.bind(this.runOne, this);
+		},
+	
+		runOne: function runOne(entity) {
+			var distance = undefined;
+			var movable = entity.getComponent('movable');
+			var sprite = entity.getComponent('sprite');
+			var waypoint = entity.getComponent('waypoint');
+	
+			if (movable.currentSpeed < movable.topSpeed) {
+				movable.currentSpeed += movable.acceleration * this.game.time.physicsElapsed;
+	
+				if (movable.currentSpeed > movable.topSpeed) {
+					movable.currentSpeed = movable.topSpeed;
+				}
+			}
+	
+			distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+	
+			if (distance < movable.currentSpeed) {
+				sprite.position.x = waypoint.x;
+				sprite.position.y = waypoint.y;
+				entity.removeComponent('waypoint');
+			} else {
+				var angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
+	
+				sprite.position.x += Math.cos(angle) * movable.currentSpeed;
+				sprite.position.y += Math.sin(angle) * movable.currentSpeed;
+			}
+		}
+	});
+	
+	// TODO Refactor systems and others that need larger references for performance
+	// See the following jsperf: https://jsperf.com/closure-vs-property/12
+	// Determine how to best store references to libraries and global instances
+
+/***/ },
+/* 282 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _bind = __webpack_require__(283);
 	
 	var _bind2 = _interopRequireDefault(_bind);
 	
-	var _each = __webpack_require__(310);
+	var _each = __webpack_require__(313);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -38501,11 +38631,11 @@
 	});
 
 /***/ },
-/* 280 */
+/* 283 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createWrapper = __webpack_require__(281),
-	    replaceHolders = __webpack_require__(307),
+	var createWrapper = __webpack_require__(284),
+	    replaceHolders = __webpack_require__(310),
 	    rest = __webpack_require__(3);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -38560,17 +38690,17 @@
 
 
 /***/ },
-/* 281 */
+/* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(282),
-	    createBaseWrapper = __webpack_require__(285),
-	    createCurryWrapper = __webpack_require__(288),
-	    createHybridWrapper = __webpack_require__(289),
-	    createPartialWrapper = __webpack_require__(308),
-	    getData = __webpack_require__(297),
-	    mergeData = __webpack_require__(309),
-	    setData = __webpack_require__(304),
+	var baseSetData = __webpack_require__(285),
+	    createBaseWrapper = __webpack_require__(288),
+	    createCurryWrapper = __webpack_require__(291),
+	    createHybridWrapper = __webpack_require__(292),
+	    createPartialWrapper = __webpack_require__(311),
+	    getData = __webpack_require__(300),
+	    mergeData = __webpack_require__(312),
+	    setData = __webpack_require__(307),
 	    toInteger = __webpack_require__(5);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -38667,11 +38797,11 @@
 
 
 /***/ },
-/* 282 */
+/* 285 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(106),
-	    metaMap = __webpack_require__(283);
+	    metaMap = __webpack_require__(286);
 	
 	/**
 	 * The base implementation of `setData` without support for hot loop detection.
@@ -38690,10 +38820,10 @@
 
 
 /***/ },
-/* 283 */
+/* 286 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WeakMap = __webpack_require__(284);
+	var WeakMap = __webpack_require__(287);
 	
 	/** Used to store function metadata. */
 	var metaMap = WeakMap && new WeakMap;
@@ -38702,7 +38832,7 @@
 
 
 /***/ },
-/* 284 */
+/* 287 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var getNative = __webpack_require__(45);
@@ -38715,10 +38845,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 285 */
+/* 288 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var createCtorWrapper = __webpack_require__(286);
+	/* WEBPACK VAR INJECTION */(function(global) {var createCtorWrapper = __webpack_require__(289);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -38749,10 +38879,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 286 */
+/* 289 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(287),
+	var baseCreate = __webpack_require__(290),
 	    isObject = __webpack_require__(8);
 	
 	/**
@@ -38792,7 +38922,7 @@
 
 
 /***/ },
-/* 287 */
+/* 290 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(8);
@@ -38821,14 +38951,14 @@
 
 
 /***/ },
-/* 288 */
+/* 291 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(286),
-	    createHybridWrapper = __webpack_require__(289),
-	    createRecurryWrapper = __webpack_require__(292),
-	    replaceHolders = __webpack_require__(307);
+	    createCtorWrapper = __webpack_require__(289),
+	    createHybridWrapper = __webpack_require__(292),
+	    createRecurryWrapper = __webpack_require__(295),
+	    replaceHolders = __webpack_require__(310);
 	
 	/**
 	 * Creates a function that wraps `func` to enable currying.
@@ -38869,15 +38999,15 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 289 */
+/* 292 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var composeArgs = __webpack_require__(290),
-	    composeArgsRight = __webpack_require__(291),
-	    createCtorWrapper = __webpack_require__(286),
-	    createRecurryWrapper = __webpack_require__(292),
-	    reorder = __webpack_require__(306),
-	    replaceHolders = __webpack_require__(307);
+	/* WEBPACK VAR INJECTION */(function(global) {var composeArgs = __webpack_require__(293),
+	    composeArgsRight = __webpack_require__(294),
+	    createCtorWrapper = __webpack_require__(289),
+	    createRecurryWrapper = __webpack_require__(295),
+	    reorder = __webpack_require__(309),
+	    replaceHolders = __webpack_require__(310);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38960,7 +39090,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 290 */
+/* 293 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39000,7 +39130,7 @@
 
 
 /***/ },
-/* 291 */
+/* 294 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39042,12 +39172,12 @@
 
 
 /***/ },
-/* 292 */
+/* 295 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(293),
-	    isLaziable = __webpack_require__(294),
-	    setData = __webpack_require__(304);
+	var copyArray = __webpack_require__(296),
+	    isLaziable = __webpack_require__(297),
+	    setData = __webpack_require__(307);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -39101,7 +39231,7 @@
 
 
 /***/ },
-/* 293 */
+/* 296 */
 /***/ function(module, exports) {
 
 	/**
@@ -39127,13 +39257,13 @@
 
 
 /***/ },
-/* 294 */
+/* 297 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(295),
-	    getData = __webpack_require__(297),
-	    getFuncName = __webpack_require__(299),
-	    lodash = __webpack_require__(301);
+	var LazyWrapper = __webpack_require__(298),
+	    getData = __webpack_require__(300),
+	    getFuncName = __webpack_require__(302),
+	    lodash = __webpack_require__(304);
 	
 	/**
 	 * Checks if `func` has a lazy counterpart.
@@ -39160,11 +39290,11 @@
 
 
 /***/ },
-/* 295 */
+/* 298 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(287),
-	    baseLodash = __webpack_require__(296);
+	var baseCreate = __webpack_require__(290),
+	    baseLodash = __webpack_require__(299);
 	
 	/** Used as references for the maximum length and index of an array. */
 	var MAX_ARRAY_LENGTH = 4294967295;
@@ -39192,7 +39322,7 @@
 
 
 /***/ },
-/* 296 */
+/* 299 */
 /***/ function(module, exports) {
 
 	/**
@@ -39208,11 +39338,11 @@
 
 
 /***/ },
-/* 297 */
+/* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var metaMap = __webpack_require__(283),
-	    noop = __webpack_require__(298);
+	var metaMap = __webpack_require__(286),
+	    noop = __webpack_require__(301);
 	
 	/**
 	 * Gets metadata for `func`.
@@ -39229,7 +39359,7 @@
 
 
 /***/ },
-/* 298 */
+/* 301 */
 /***/ function(module, exports) {
 
 	/**
@@ -39254,10 +39384,10 @@
 
 
 /***/ },
-/* 299 */
+/* 302 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var realNames = __webpack_require__(300);
+	var realNames = __webpack_require__(303);
 	
 	/**
 	 * Gets the name of `func`.
@@ -39285,7 +39415,7 @@
 
 
 /***/ },
-/* 300 */
+/* 303 */
 /***/ function(module, exports) {
 
 	/** Used to lookup unminified function names. */
@@ -39295,15 +39425,15 @@
 
 
 /***/ },
-/* 301 */
+/* 304 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var LazyWrapper = __webpack_require__(295),
-	    LodashWrapper = __webpack_require__(302),
-	    baseLodash = __webpack_require__(296),
+	/* WEBPACK VAR INJECTION */(function(global) {var LazyWrapper = __webpack_require__(298),
+	    LodashWrapper = __webpack_require__(305),
+	    baseLodash = __webpack_require__(299),
 	    isArray = __webpack_require__(81),
 	    isObjectLike = __webpack_require__(48),
-	    wrapperClone = __webpack_require__(303);
+	    wrapperClone = __webpack_require__(306);
 	
 	/** Used for built-in method references. */
 	var objectProto = global.Object.prototype;
@@ -39441,11 +39571,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 302 */
+/* 305 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(287),
-	    baseLodash = __webpack_require__(296);
+	var baseCreate = __webpack_require__(290),
+	    baseLodash = __webpack_require__(299);
 	
 	/**
 	 * The base constructor for creating `lodash` wrapper objects.
@@ -39469,12 +39599,12 @@
 
 
 /***/ },
-/* 303 */
+/* 306 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(295),
-	    LodashWrapper = __webpack_require__(302),
-	    copyArray = __webpack_require__(293);
+	var LazyWrapper = __webpack_require__(298),
+	    LodashWrapper = __webpack_require__(305),
+	    copyArray = __webpack_require__(296);
 	
 	/**
 	 * Creates a clone of `wrapper`.
@@ -39498,11 +39628,11 @@
 
 
 /***/ },
-/* 304 */
+/* 307 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(282),
-	    now = __webpack_require__(305);
+	var baseSetData = __webpack_require__(285),
+	    now = __webpack_require__(308);
 	
 	/** Used to detect hot functions by number of calls within a span of milliseconds. */
 	var HOT_COUNT = 150,
@@ -39545,7 +39675,7 @@
 
 
 /***/ },
-/* 305 */
+/* 308 */
 /***/ function(module, exports) {
 
 	/**
@@ -39570,10 +39700,10 @@
 
 
 /***/ },
-/* 306 */
+/* 309 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(293),
+	var copyArray = __webpack_require__(296),
 	    isIndex = __webpack_require__(83);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39605,7 +39735,7 @@
 
 
 /***/ },
-/* 307 */
+/* 310 */
 /***/ function(module, exports) {
 
 	/** Used as the internal argument placeholder. */
@@ -39639,11 +39769,11 @@
 
 
 /***/ },
-/* 308 */
+/* 311 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(286);
+	    createCtorWrapper = __webpack_require__(289);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -39688,13 +39818,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 309 */
+/* 312 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(290),
-	    composeArgsRight = __webpack_require__(291),
-	    copyArray = __webpack_require__(293),
-	    replaceHolders = __webpack_require__(307);
+	var composeArgs = __webpack_require__(293),
+	    composeArgsRight = __webpack_require__(294),
+	    copyArray = __webpack_require__(296),
+	    replaceHolders = __webpack_require__(310);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -39784,20 +39914,20 @@
 
 
 /***/ },
-/* 310 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(311);
+	module.exports = __webpack_require__(314);
 
 
 /***/ },
-/* 311 */
+/* 314 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(312),
+	var arrayEach = __webpack_require__(315),
 	    baseEach = __webpack_require__(110),
 	    isArray = __webpack_require__(81),
-	    toFunction = __webpack_require__(313);
+	    toFunction = __webpack_require__(316);
 	
 	/**
 	 * Iterates over elements of `collection` invoking `iteratee` for each element.
@@ -39837,7 +39967,7 @@
 
 
 /***/ },
-/* 312 */
+/* 315 */
 /***/ function(module, exports) {
 
 	/**
@@ -39865,7 +39995,7 @@
 
 
 /***/ },
-/* 313 */
+/* 316 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(106);
@@ -39885,7 +40015,7 @@
 
 
 /***/ },
-/* 314 */
+/* 317 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39914,6 +40044,7 @@
 			var shipGenerator = entity.getComponent('ship-generator');
 			var activeGenerator = entity.getComponent(shipGenerator.activeGenerator);
 			var entitySprite = entity.getComponent('sprite');
+			var waypoint = entity.getComponent('waypoint');
 	
 			activeGenerator.currentUnitBuildTime += this.game.time.elapsed;
 	
@@ -39927,15 +40058,18 @@
 	
 				// TODO Figure out why rally point reference is being copied
 				// even though deep cloning
-				newShip.addComponent('waypoints', {
-					queued: [_lodash2.default.cloneDeep(shipGenerator.rallyPoint)]
+				newShip.addComponent('waypoint-queue', {
+					queue: [{
+						x: waypoint.x,
+						y: waypoint.y
+					}]
 				});
 			}
 		}
 	});
 
 /***/ },
-/* 315 */
+/* 318 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39948,7 +40082,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(316);
+	var _mouseControls = __webpack_require__(319);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -40003,14 +40137,14 @@
 	});
 
 /***/ },
-/* 316 */
+/* 319 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _each = __webpack_require__(310);
+	var _each = __webpack_require__(313);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -40231,37 +40365,6 @@
 			return topEntity;
 		}
 	};
-
-/***/ },
-/* 317 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	exports.__esModule = true;
-	
-	exports.default = function (position) {
-		window.x = window.x || [];
-		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'fighter' }, position)).addComponent('dockable', {
-			size: 10
-		}).addComponent('team').addComponent('selectable').addComponent('movable', {
-			speed: 100
-		});
-	};
-	
-	var _lodash = __webpack_require__(19);
-
-	var _lodash2 = _interopRequireDefault(_lodash);
-
-	var _instanceManager = __webpack_require__(9);
-
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-
-	__webpack_require__(276);
-
-	__webpack_require__(277);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }
 /******/ ]);

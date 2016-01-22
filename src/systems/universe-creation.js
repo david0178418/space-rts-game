@@ -51,11 +51,11 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 			})
 			.addComponent('ship-generator', {
 				activeGenerator: 'fighter-blueprint',
-				rallyPoint: {
-					x: playerPlanet.getComponent('sprite').x + 100,
-					y: playerPlanet.getComponent('sprite').y + 75,
-				},
-			});;
+			})
+			.addComponent('waypoint', {
+				x: playerPlanet.getComponent('sprite').x + 100,
+				y: playerPlanet.getComponent('sprite').y + 75,
+			});
 		//
 		// playerPlanet.
 		// 	addComponent('probe-blueprint', {
