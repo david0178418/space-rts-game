@@ -11,7 +11,7 @@ instanceManager.get('ecs-manager').registerSystem('dequeue-waypoint', {
 	},
 
 	runOne: function(entity) {
-		if(entity.hasComponent('waypoint')) {
+		if(entity.hasComponent('waypoint') || !entity.getComponent('waypoint-queue').queue.length) {
 			// TODO Implement a "without componets" param to systems
 			return;
 		}
@@ -19,9 +19,5 @@ instanceManager.get('ecs-manager').registerSystem('dequeue-waypoint', {
 		let waypointQueue = entity.getComponent('waypoint-queue');
 
 		entity.addComponent('waypoint', waypointQueue.queue.shift());
-
-		if(!waypointQueue.queue.length) {
-			entity.removeComponent('waypoint-queue');
-		}
 	},
 });

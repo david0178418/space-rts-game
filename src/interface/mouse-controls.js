@@ -178,7 +178,7 @@ export default {
 			return;
 		}
 
-		let marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypointMarker');
+		let marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypoint-marker');
 		let markerAnimationTime = 250;
 		let markerTween;
 

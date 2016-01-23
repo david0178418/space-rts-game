@@ -32,11 +32,9 @@ instanceManager.get('ecs-manager').registerSystem('ship-production', {
 
 			// TODO Figure out why rally point reference is being copied
 			// even though deep cloning
-			newShip.addComponent('waypoint-queue', {
-				queue: [{
-					x: waypoint.x,
-					y: waypoint.y,
-				}],
+			newShip.getComponent('waypoint-queue').queue.push({
+				x: waypoint.x,
+				y: waypoint.y,
 			});
 		}
 	},

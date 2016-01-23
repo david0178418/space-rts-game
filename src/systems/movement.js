@@ -25,10 +25,11 @@ instanceManager.get('ecs-manager').registerSystem('movement', {
 		// d = (Vf^2 - Vf^2) / (2*a)
 		breakingDistance = (movable.currentSpeed * movable.currentSpeed) / (2 * movable.acceleration);
 		distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+
 		if(distance <= breakingDistance) {
 			movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
 
-			if(movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
+			if(distance < 1 ||movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
 				movable.currentSpeed = 0;
 				sprite.position.x = waypoint.x;
 				sprite.position.y = waypoint.y;

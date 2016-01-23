@@ -8,8 +8,8 @@ module.exports = {
 		panDown: 'S',
 	},
 	screen: {
-		width: 1200,
-		height: 800,
+		width: 1024,
+		height: 768,
 	},
 	stage: {
 		width: 8000,

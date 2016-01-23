@@ -1,6 +1,11 @@
 import instanceManager from 'instance-manager';
 
-instanceManager.registerComponent('waypoints', {
-	queued: false,
-	inProgress: false,
-});
+instanceManager
+	.get('ecs-manager')
+	.registerComponent('waypoint-queue', {
+		factory: function(params) {
+			return {
+				queue: [],
+			};
+		},
+	});

@@ -3,6 +3,7 @@ import instanceManager from 'instance-manager';
 
 import 'components/sprite';
 import 'components/team';
+import 'components/waypoint-queue';
 
 export default
 function(position) {
@@ -14,6 +15,7 @@ function(position) {
 		})
 		.addComponent('team')
 		.addComponent('selectable')
+		.addComponent('waypoint-queue')
 		.addComponent('movable', {
 			acceleration: 150,
 			currentSpeed: 0,

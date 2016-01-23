@@ -551,8 +551,8 @@
 			panDown: 'S'
 		},
 		screen: {
-			width: 1200,
-			height: 800
+			width: 1024,
+			height: 768
 		},
 		stage: {
 			width: 8000,
@@ -38238,7 +38238,7 @@
 	exports.default = function (position) {
 		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'fighter' }, position)).addComponent('dockable', {
 			size: 10
-		}).addComponent('team').addComponent('selectable').addComponent('movable', {
+		}).addComponent('team').addComponent('selectable').addComponent('waypoint-queue').addComponent('movable', {
 			acceleration: 150,
 			currentSpeed: 0,
 			topSpeed: 100
@@ -38256,6 +38256,8 @@
 	__webpack_require__(276);
 
 	__webpack_require__(277);
+
+	__webpack_require__(321);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -38486,7 +38488,7 @@
 		},
 	
 		runOne: function runOne(entity) {
-			if (entity.hasComponent('waypoint')) {
+			if (entity.hasComponent('waypoint') || !entity.getComponent('waypoint-queue').queue.length) {
 				// TODO Implement a "without componets" param to systems
 				return;
 			}
@@ -38494,10 +38496,6 @@
 			var waypointQueue = entity.getComponent('waypoint-queue');
 	
 			entity.addComponent('waypoint', waypointQueue.queue.shift());
-	
-			if (!waypointQueue.queue.length) {
-				entity.removeComponent('waypoint-queue');
-			}
 		}
 	});
 
@@ -38538,10 +38536,11 @@
 			// d = (Vf^2 - Vf^2) / (2*a)
 			breakingDistance = movable.currentSpeed * movable.currentSpeed / (2 * movable.acceleration);
 			distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+	
 			if (distance <= breakingDistance) {
 				movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
 	
-				if (movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
+				if (distance < 1 || movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
 					movable.currentSpeed = 0;
 					sprite.position.x = waypoint.x;
 					sprite.position.y = waypoint.y;
@@ -40072,11 +40071,9 @@
 	
 				// TODO Figure out why rally point reference is being copied
 				// even though deep cloning
-				newShip.addComponent('waypoint-queue', {
-					queue: [{
-						x: waypoint.x,
-						y: waypoint.y
-					}]
+				newShip.getComponent('waypoint-queue').queue.push({
+					x: waypoint.x,
+					y: waypoint.y
 				});
 			}
 		}
@@ -40175,7 +40172,7 @@
 			game.load.image('probe', 'assets/images/probe.png');
 	
 			game.load.image('selection', 'assets/images/selection.png', 50, 50);
-			game.load.image('waypointMarker', 'assets/images/waypoint.png', 20, 20);
+			game.load.image('waypoint-marker', 'assets/images/waypoint.png', 20, 20);
 	
 			game.load.image('background1-layer1', 'assets/images/backdrop-black-little-spark-black.png', 512, 512);
 			game.load.image('background1-layer2', 'assets/images/backdrop-black-little-spark-transparent.png', 512, 512);
@@ -40391,7 +40388,7 @@
 				return;
 			}
 	
-			var marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypointMarker');
+			var marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypoint-marker');
 			var markerAnimationTime = 250;
 			var markerTween = undefined;
 	
@@ -40442,6 +40439,26 @@
 			return topEntity;
 		}
 	};
+
+/***/ },
+/* 321 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerComponent('waypoint-queue', {
+		factory: function factory(params) {
+			return {
+				queue: []
+			};
+		}
+	});
 
 /***/ }
 /******/ ]);

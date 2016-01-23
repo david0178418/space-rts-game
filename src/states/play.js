@@ -15,7 +15,7 @@ game.state.add('play', {
 		game.load.image('probe', 'assets/images/probe.png');
 
 		game.load.image('selection', 'assets/images/selection.png', 50, 50);
-		game.load.image('waypointMarker', 'assets/images/waypoint.png', 20, 20);
+		game.load.image('waypoint-marker', 'assets/images/waypoint.png', 20, 20);
 
 		game.load.image('background1-layer1', 'assets/images/backdrop-black-little-spark-black.png', 512, 512);
 		game.load.image('background1-layer2', 'assets/images/backdrop-black-little-spark-transparent.png', 512, 512);
