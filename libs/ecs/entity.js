@@ -44,6 +44,10 @@ class Entity {
 	removeComponent(name) {
 		let component = this[components][name];
 
+		if(!component) {
+			return;
+		}
+
 		this[entityManager].getComponentCleanup(name)(component);
 		delete this[components][name];
 	}

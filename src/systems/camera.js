@@ -13,7 +13,7 @@ instanceManager.get('ecs-manager').registerSystem('camera', {
 
 	init() {
 		this.game = instanceManager.get('game');
-		this.controls = instanceManager.get('pan-controls');
+		this.keyboardControls = instanceManager.get('keyboard-controls');
 		this.world = this.game.world;
 		this.worldEntities = instanceManager.get('world-entities');
 
@@ -27,19 +27,19 @@ instanceManager.get('ecs-manager').registerSystem('camera', {
 
 	run() {
 		// Vertial pan
-		if(this.controls.panUp.isDown) {
+		if(this.keyboardControls.panUp.isDown) {
 			this.dirtyBackground = true;
 			this.worldEntities.y += this.panSpeed;
-		} else if(this.controls.panDown.isDown) {
+		} else if(this.keyboardControls.panDown.isDown) {
 			this.dirtyBackground = true;
 			this.worldEntities.y -= this.panSpeed;
 		}
 
 		// Horizontal pa
-		if(this.controls.panRight.isDown) {
+		if(this.keyboardControls.panRight.isDown) {
 			this.dirtyBackground = true;
 			this.worldEntities.x -= this.panSpeed;
-		} else if(this.controls.panLeft.isDown) {
+		} else if(this.keyboardControls.panLeft.isDown) {
 			this.dirtyBackground = true;
 			this.worldEntities.x += this.panSpeed;
 		}

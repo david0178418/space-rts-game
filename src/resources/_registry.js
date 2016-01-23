@@ -1,5 +1,5 @@
 import './game';
-import './pan-controls';
+import './keyboard-controls';
 import './group';
 import './world-entites';
 import './ecs-manager';

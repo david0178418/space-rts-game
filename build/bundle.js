@@ -62,7 +62,7 @@
 	
 	__webpack_require__(273);
 	
-	__webpack_require__(318);
+	__webpack_require__(319);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -580,7 +580,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.registerResource('pan-controls', {
+	_instanceManager2.default.registerResource('keyboard-controls', {
 		init: function init() {
 			var KeyCodes = _phaser2.default.Keyboard;
 			var game = _instanceManager2.default.get('game');
@@ -15306,6 +15306,10 @@
 	
 		Entity.prototype.removeComponent = function removeComponent(name) {
 			var component = this[components][name];
+	
+			if (!component) {
+				return;
+			}
 	
 			this[entityManager].getComponentCleanup(name)(component);
 			delete this[components][name];
@@ -38082,6 +38086,8 @@
 
 	__webpack_require__(317);
 
+	__webpack_require__(318);
+
 /***/ },
 /* 274 */
 /***/ function(module, exports, __webpack_require__) {
@@ -38371,7 +38377,7 @@
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
-			this.controls = _instanceManager2.default.get('pan-controls');
+			this.keyboardControls = _instanceManager2.default.get('keyboard-controls');
 			this.world = this.game.world;
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
@@ -38384,19 +38390,19 @@
 		},
 		run: function run() {
 			// Vertial pan
-			if (this.controls.panUp.isDown) {
+			if (this.keyboardControls.panUp.isDown) {
 				this.dirtyBackground = true;
 				this.worldEntities.y += this.panSpeed;
-			} else if (this.controls.panDown.isDown) {
+			} else if (this.keyboardControls.panDown.isDown) {
 				this.dirtyBackground = true;
 				this.worldEntities.y -= this.panSpeed;
 			}
 	
 			// Horizontal pa
-			if (this.controls.panRight.isDown) {
+			if (this.keyboardControls.panRight.isDown) {
 				this.dirtyBackground = true;
 				this.worldEntities.x -= this.panSpeed;
-			} else if (this.controls.panLeft.isDown) {
+			} else if (this.keyboardControls.panLeft.isDown) {
 				this.dirtyBackground = true;
 				this.worldEntities.x += this.panSpeed;
 			}
@@ -40075,6 +40081,63 @@
 
 	'use strict';
 	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('orders-interpretation', {
+		components: ['order'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+		},
+	
+		run: function run(entities) {
+			// TODO Optimize
+			var localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+			var noMovable = !_lodash2.default.some(entities, function (entity) {
+				return entity.hasComponent('movable');
+			});
+	
+			_lodash2.default.each(entities, function (entity) {
+				// TODO Clean all this up
+				if (noMovable && entity.hasComponent('ship-generator')) {
+					entity.addComponent('waypoint', {
+						x: localPoint.x,
+						y: localPoint.y
+					});
+				} else if (entity.getComponent('movable') && entity.getComponent('team').name === 'player') {
+					if (entities.length === 1) {
+						entity.addComponent('waypoint', {
+							x: localPoint.x,
+							y: localPoint.y
+						});
+					} else {
+						entity.addComponent('group-movement', {
+							override: _instanceManager2.default.get('keyboard-controls').shiftModifier.isDown,
+							centralPoint: localPoint
+						});
+					}
+				}
+	
+				entity.removeComponent('order');
+			});
+		}
+	});
+
+/***/ },
+/* 319 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
 	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
@@ -40083,7 +40146,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(319);
+	var _mouseControls = __webpack_require__(320);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -40138,7 +40201,7 @@
 	});
 
 /***/ },
-/* 319 */
+/* 320 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -40174,9 +40237,11 @@
 		worldEntities: null,
 	
 		init: function init() {
-			this.controls = _instanceManager2.default.get('pan-controls');
+			this.keyboard = _instanceManager2.default.get('keyboard-controls');
 			this.mousePointer = game.input.mousePointer;
 			this.worldEntities = _instanceManager2.default.get('world-entities');
+			this.game = _instanceManager2.default.get('game');
+			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 			this.graphic = this.game.add.graphics(-500, -500);
 			this.graphic.alpha = 0.25;
@@ -40292,11 +40357,11 @@
 				return;
 			}
 	
-			selectedEntityTeamComponent = selectedEntity.getComponents('team');
+			selectedEntityTeamComponent = selectedEntity.getComponent('team');
 			selectedEntityTeam = selectedEntityTeamComponent && selectedEntityTeamComponent.name;
 	
 			(0, _each2.default)(entities, function (entity) {
-				var entityTeamComponent = entity.getComponents('team');
+				var entityTeamComponent = entity.getComponent('team');
 				var team = entityTeamComponent && entityTeamComponent.name;
 	
 				if (entity.entityType === selectedEntity.entityType && selectedEntityTeam === team && entity.inCamera) {
@@ -40307,7 +40372,7 @@
 			});
 		},
 		leftSingleClick: function leftSingleClick(position) {
-			var entities = []; // this.ecs.getEntities('selectable');
+			var entities = this.ecsManager.getEntities(['selectable', 'team']);
 			var selectedEntity = this.getTopEntityAt(entities, position);
 	
 			(0, _each2.default)(entities, function (entity) {
@@ -40340,7 +40405,7 @@
 			markerTween.start();
 		},
 		rightClick: function rightClick(position) {
-			var entities = []; // this.ecs.getEntities('selected');
+			var entities = this.ecsManager.getEntities(['selected']);
 	
 			if (false /* this.uiViewModel.awaitTarget() */) {
 					// this.uiViewModel.awaitTarget(false);
@@ -40350,7 +40415,10 @@
 					});
 				} else {
 				(0, _each2.default)(entities, function (entity) {
-					entity.addComponent('issue-order', position);
+					entity.addComponent('order', {
+						x: position.x,
+						y: position.y
+					});
 				});
 			}
 		},
@@ -40358,7 +40426,8 @@
 			var topEntity = undefined;
 	
 			(0, _each2.default)(entities, function (entity) {
-				if (entity.getComponents('team').name === 'player' && (!topEntity || topEntity.z < entity.z) && entity.containsPoint(position.x, position.y)) {
+				// TODO Make a "getComponents"?
+				if (entity.getComponent('team').name === 'player' && (!topEntity || topEntity.z < entity.z) && entity.getComponent('sprite').getBounds().contains(position.x, position.y)) {
 					topEntity = entity;
 				}
 			});

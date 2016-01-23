@@ -2,7 +2,7 @@ import Config from 'config';
 import Phaser from 'phaser';
 import InstanceManager from 'instance-manager';
 
-InstanceManager.registerResource('pan-controls', {
+InstanceManager.registerResource('keyboard-controls', {
 	init() {
 		const KeyCodes = Phaser.Keyboard;
 		let game = InstanceManager.get('game');

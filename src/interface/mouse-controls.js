@@ -17,9 +17,11 @@ export default {
 	worldEntities: null,
 
 	init() {
-		this.controls = instanceManager.get('pan-controls');
+		this.keyboard = instanceManager.get('keyboard-controls');
 		this.mousePointer = game.input.mousePointer;
 		this.worldEntities = instanceManager.get('world-entities');
+		this.game = instanceManager.get('game');
+		this.ecsManager = instanceManager.get('ecs-manager');
 
 		this.graphic = this.game.add.graphics(-500, -500);
 		this.graphic.alpha = 0.25;
@@ -143,11 +145,11 @@ export default {
 			return;
 		}
 
-		selectedEntityTeamComponent = selectedEntity.getComponents('team');
+		selectedEntityTeamComponent = selectedEntity.getComponent('team');
 		selectedEntityTeam = selectedEntityTeamComponent && selectedEntityTeamComponent.name;
 
 		each(entities, function(entity) {
-			let entityTeamComponent = entity.getComponents('team');
+			let entityTeamComponent = entity.getComponent('team');
 			let team = entityTeamComponent && entityTeamComponent.name;
 
 			if(
@@ -163,7 +165,7 @@ export default {
 	},
 
 	leftSingleClick(position) {
-		let entities = []; // this.ecs.getEntities('selectable');
+		let entities = this.ecsManager.getEntities(['selectable', 'team']);
 		let selectedEntity = this.getTopEntityAt(entities, position);
 
 		each(entities, function(entity) {
@@ -198,7 +200,7 @@ export default {
 	},
 
 	rightClick(position) {
-		let entities = []; // this.ecs.getEntities('selected');
+		let entities = this.ecsManager.getEntities(['selected']);
 
 		if(false /* this.uiViewModel.awaitTarget() */) {
 			// this.uiViewModel.awaitTarget(false);
@@ -208,7 +210,10 @@ export default {
 			});
 		} else {
 			each(entities, function(entity) {
-				entity.addComponent('issue-order', position);
+				entity.addComponent('order', {
+					x: position.x,
+					y: position.y,
+				});
 			});
 		}
 	},
@@ -217,10 +222,11 @@ export default {
 		let topEntity;
 
 		each(entities, function(entity) {
+			// TODO Make a "getComponents"?
 			if(
-				entity.getComponents('team').name === 'player' &&
+				entity.getComponent('team').name === 'player' &&
 				(!topEntity || topEntity.z < entity.z) &&
-				entity.containsPoint(position.x, position.y)
+				entity.getComponent('sprite').getBounds().contains(position.x, position.y)
 			) {
 				topEntity = entity;
 			}
