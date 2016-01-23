@@ -15,12 +15,27 @@ instanceManager.get('ecs-manager').registerSystem('movement', {
 	},
 
 	runOne: function(entity) {
+		let angle;
+		let breakingDistance;
 		let distance;
 		let movable = entity.getComponent('movable');
 		let sprite = entity.getComponent('sprite');
 		let waypoint = entity.getComponent('waypoint');
 
-		if(movable.currentSpeed < movable.topSpeed) {
+		// d = (Vf^2 - Vf^2) / (2*a)
+		breakingDistance = (movable.currentSpeed * movable.currentSpeed) / (2 * movable.acceleration);
+		distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+		if(distance <= breakingDistance) {
+			movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
+
+			if(movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
+				movable.currentSpeed = 0;
+				sprite.position.x = waypoint.x;
+				sprite.position.y = waypoint.y;
+				entity.removeComponent('waypoint');
+				return;
+			}
+		} else if(movable.currentSpeed < movable.topSpeed) {
 			movable.currentSpeed += movable.acceleration * this.game.time.physicsElapsed;
 
 			if(movable.currentSpeed > movable.topSpeed) {
@@ -28,20 +43,11 @@ instanceManager.get('ecs-manager').registerSystem('movement', {
 			}
 		}
 
-		distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+		angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
 
-		if(distance < movable.currentSpeed) {
-			movable.currentSpeed = 0;
-			sprite.position.x = waypoint.x;
-			sprite.position.y = waypoint.y;
-			entity.removeComponent('waypoint');
-		} else {
-			let angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
-
-			sprite.position.x += Math.cos(angle) * movable.currentSpeed;
-			sprite.position.y += Math.sin(angle) * movable.currentSpeed;
-			sprite.rotation = angle; // TODO Animate angle change
-		}
+		sprite.rotation = angle; // TODO Animate angle change
+		sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
+		sprite.position.y += Math.sin(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
 	},
 });
 

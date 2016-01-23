@@ -15,8 +15,8 @@ function(position) {
 		.addComponent('team')
 		.addComponent('selectable')
 		.addComponent('movable', {
-			acceleration: 1,
+			acceleration: 150,
 			currentSpeed: 0,
-			topSpeed: 5,
+			topSpeed: 100,
 		});
 }

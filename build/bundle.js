@@ -38239,9 +38239,9 @@
 		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'fighter' }, position)).addComponent('dockable', {
 			size: 10
 		}).addComponent('team').addComponent('selectable').addComponent('movable', {
-			acceleration: 1,
+			acceleration: 150,
 			currentSpeed: 0,
-			topSpeed: 5
+			topSpeed: 100
 		});
 	};
 	
@@ -38528,12 +38528,27 @@
 		},
 	
 		runOne: function runOne(entity) {
+			var angle = undefined;
+			var breakingDistance = undefined;
 			var distance = undefined;
 			var movable = entity.getComponent('movable');
 			var sprite = entity.getComponent('sprite');
 			var waypoint = entity.getComponent('waypoint');
 	
-			if (movable.currentSpeed < movable.topSpeed) {
+			// d = (Vf^2 - Vf^2) / (2*a)
+			breakingDistance = movable.currentSpeed * movable.currentSpeed / (2 * movable.acceleration);
+			distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+			if (distance <= breakingDistance) {
+				movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
+	
+				if (movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
+					movable.currentSpeed = 0;
+					sprite.position.x = waypoint.x;
+					sprite.position.y = waypoint.y;
+					entity.removeComponent('waypoint');
+					return;
+				}
+			} else if (movable.currentSpeed < movable.topSpeed) {
 				movable.currentSpeed += movable.acceleration * this.game.time.physicsElapsed;
 	
 				if (movable.currentSpeed > movable.topSpeed) {
@@ -38541,20 +38556,11 @@
 				}
 			}
 	
-			distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+			angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
 	
-			if (distance < movable.currentSpeed) {
-				movable.currentSpeed = 0;
-				sprite.position.x = waypoint.x;
-				sprite.position.y = waypoint.y;
-				entity.removeComponent('waypoint');
-			} else {
-				var angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
-	
-				sprite.position.x += Math.cos(angle) * movable.currentSpeed;
-				sprite.position.y += Math.sin(angle) * movable.currentSpeed;
-				sprite.rotation = angle; // TODO Animate angle change
-			}
+			sprite.rotation = angle; // TODO Animate angle change
+			sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
+			sprite.position.y += Math.sin(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
 		}
 	});
 	
