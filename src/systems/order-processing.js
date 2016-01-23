@@ -14,32 +14,47 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 	run: function(entities) {
 		// TODO Optimize
 		let localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
-		let noMovable = !_.some(entities, function(entity) {
-			return entity.hasComponent('movable');
-		});
+		let movableEntities = [];
+		let playerEntities = [];
+		let shipGeneratingEntities = [];
 
-		_.each(entities, function(entity) {
-			// TODO Clean all this up
-			if(noMovable && entity.hasComponent('ship-generator')) {
-				entity.addComponent('waypoint', {
+		// TODO Perhaps change this to make the largest selected entity type
+		// the dominate action?
+		for(let i = 0; i < entities.length; i++) {
+			let entity = entities[i];
+
+			entity.removeComponent('order');
+
+			if(entity.getComponent('team').name === 'player') {
+				playerEntities.push(entity);
+
+				if(entity.hasComponent('movable')) {
+					movableEntities.push(entity);
+				}
+			}
+		}
+
+		if(movableEntities.length) {
+			if(movableEntities.length === 1) {
+				movableEntities[0].addComponent('waypoint', {
 					x: localPoint.x,
 					y: localPoint.y,
 				});
-			} else if(entity.getComponent('movable') && entity.getComponent('team').name === 'player') {
-				if(entities.length === 1) {
-					entity.addComponent('waypoint', {
-						x: localPoint.x,
-						y: localPoint.y,
-					});
-				} else {
-					entity.addComponent('group-movement', {
+			} else {
+				for(let i = 0; i < movableEntities.length; i++) {
+					movableEntities[i].addComponent('group-movement', {
 						override: instanceManager.get('keyboard-controls').shiftModifier.isDown,
 						centralPoint: localPoint,
 					});
 				}
 			}
-
-			entity.removeComponent('order');
-		});
+		} else {
+			for(let i = 0; i < shipGeneratingEntities.length; i++) {
+				shipGeneratingEntities[0].addComponent('waypoint', {
+					x: localPoint.x,
+					y: localPoint.y,
+				});
+			}
+		}
 	},
 });

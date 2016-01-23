@@ -38080,6 +38080,8 @@
 
 	__webpack_require__(280);
 
+	__webpack_require__(322);
+
 	__webpack_require__(281);
 
 	__webpack_require__(282);
@@ -40106,33 +40108,48 @@
 		run: function run(entities) {
 			// TODO Optimize
 			var localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
-			var noMovable = !_lodash2.default.some(entities, function (entity) {
-				return entity.hasComponent('movable');
-			});
+			var movableEntities = [];
+			var playerEntities = [];
+			var shipGeneratingEntities = [];
 	
-			_lodash2.default.each(entities, function (entity) {
-				// TODO Clean all this up
-				if (noMovable && entity.hasComponent('ship-generator')) {
-					entity.addComponent('waypoint', {
+			// TODO Perhaps change this to make the largest selected entity type
+			// the dominate action?
+			for (var i = 0; i < entities.length; i++) {
+				var entity = entities[i];
+	
+				entity.removeComponent('order');
+	
+				if (entity.getComponent('team').name === 'player') {
+					playerEntities.push(entity);
+	
+					if (entity.hasComponent('movable')) {
+						movableEntities.push(entity);
+					}
+				}
+			}
+	
+			if (movableEntities.length) {
+				if (movableEntities.length === 1) {
+					movableEntities[0].addComponent('waypoint', {
 						x: localPoint.x,
 						y: localPoint.y
 					});
-				} else if (entity.getComponent('movable') && entity.getComponent('team').name === 'player') {
-					if (entities.length === 1) {
-						entity.addComponent('waypoint', {
-							x: localPoint.x,
-							y: localPoint.y
-						});
-					} else {
-						entity.addComponent('group-movement', {
+				} else {
+					for (var i = 0; i < movableEntities.length; i++) {
+						movableEntities[i].addComponent('group-movement', {
 							override: _instanceManager2.default.get('keyboard-controls').shiftModifier.isDown,
 							centralPoint: localPoint
 						});
 					}
 				}
-	
-				entity.removeComponent('order');
-			});
+			} else {
+				for (var i = 0; i < shipGeneratingEntities.length; i++) {
+					shipGeneratingEntities[0].addComponent('waypoint', {
+						x: localPoint.x,
+						y: localPoint.y
+					});
+				}
+			}
 		}
 	});
 
@@ -40457,6 +40474,107 @@
 			return {
 				queue: []
 			};
+		}
+	});
+
+/***/ },
+/* 322 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('group-coordination', {
+		components: ['group-movement'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+			this.moveOrderSound = this.game.add.audio('move-order');
+		},
+	
+		run: function run(entities) {
+			var colCount = undefined;
+			var formationCenterOffsetX = undefined;
+			var formationCenterOffsetY = undefined;
+			var formationPositionX = undefined;
+			var formationPositionY = undefined;
+			// Theortically, only one is needed since all groups are processed
+			// together.  If multiple group commands are issued simultaniously,
+			// this may need to be changed.
+			var groupMovementComponent = entities[0].getComponent('group-movement');
+			var maxX = this.game.world.height * 10;
+			var maxY = this.game.world.width * 10;
+			var minX = -1;
+			var minY = -1;
+			var movableSelectedCount = 0;
+			var rowCount = undefined;
+			var slotWidth = 80;
+			var waypointsComponent = undefined;
+			var xTotal = 0;
+			var yTotal = 0;
+	
+			_lodash2.default.each(entities, function (entity) {
+				var sprite = entity.getComponent('sprite');
+	
+				movableSelectedCount++;
+				xTotal += sprite.x;
+				yTotal += sprite.y;
+	
+				if (sprite.x > maxX) {
+					maxX = sprite.x;
+				} else if (sprite.x < minX) {
+					minX = sprite.x;
+				}
+	
+				if (sprite.y > maxY) {
+					maxY = sprite.y;
+				} else if (sprite.y < minY) {
+					minY = sprite.y;
+				}
+			});
+	
+			rowCount = Math.sqrt(movableSelectedCount) | 0;
+			colCount = entities.length / rowCount + 0.5 | 0;
+			formationCenterOffsetX = slotWidth * (rowCount - 1) / 2;
+			formationCenterOffsetY = slotWidth * (colCount - 1) / 2;
+	
+			_lodash2.default.each(entities, function (entity, i) {
+				var waypointQueue = undefined;
+	
+				formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
+				formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * (i / rowCount | 0) - formationCenterOffsetY;
+	
+				if (groupMovementComponent.override && waypointsComponent && waypointsComponent.inProgress) {
+					entity.getComponent('waypoint-queue', [{
+						x: formationPositionX,
+						y: formationPositionY
+					}]);
+					/* eslint no-cond-assign: 0*/
+					// To avoid getting the component for no reason or getting twice
+				} else if (waypointQueue = entity.getComponent('waypoint-queue')) {
+						waypointQueue.queue.push({
+							x: formationPositionX,
+							y: formationPositionY,
+							hyperspace: groupMovementComponent.hyperspace
+						});
+					}
+	
+				entity.removeComponent('group-movement');
+			});
+	
+			if (!this.moveOrderSound.isPlaying) {
+				this.moveOrderSound.play();
+			}
 		}
 	});
 
