@@ -59,24 +59,26 @@ instanceManager.get('ecs-manager').registerSystem('group-coordination', {
 		formationCenterOffsetY = (slotWidth * (colCount - 1)) / 2;
 
 		_.each(entities, function(entity, i) {
-			let waypointQueue;
+			let waypointQueue = entity.getComponent('waypoint-queue');
 
 			formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
 			formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * ((i / rowCount) | 0) - formationCenterOffsetY;
 
-			if(groupMovementComponent.override && waypointsComponent && waypointsComponent.inProgress) {
-				entity.getComponent('waypoint-queue', [{
-					x: formationPositionX,
-					y: formationPositionY,
-				}]);
-				/* eslint no-cond-assign: 0*/
-				// To avoid getting the component for no reason or getting twice
-			} else if(waypointQueue = entity.getComponent('waypoint-queue')) {
+			if(groupMovementComponent.queue && waypointQueue) {
 				waypointQueue.queue.push({
 					x: formationPositionX,
 					y: formationPositionY,
 					hyperspace: groupMovementComponent.hyperspace,
 				});
+			} else {
+				entity.addComponent('waypoint', {
+					x: formationPositionX,
+					y: formationPositionY,
+				});
+
+				if(waypointQueue) {
+					waypointQueue.queue = [];
+				}
 			}
 
 			entity.removeComponent('group-movement');

@@ -16,7 +16,7 @@ instanceManager.get('ecs-manager').registerSystem('ship-production', {
 	runOne(entity) {
 		let newShip;
 		let shipGenerator = entity.getComponent('ship-generator');
-		let activeGenerator = entity.getComponent(shipGenerator.activeGenerator);
+		let activeGenerator = shipGenerator.availableGenerators[shipGenerator.activeGenerator];
 		let entitySprite = entity.getComponent('sprite');
 		let waypoint = entity.getComponent('waypoint');
 

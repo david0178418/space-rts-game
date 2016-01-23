@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import Config from 'config';
-import fighter from 'entities/fighter';
 import instanceManager from 'instance-manager';
-import planetFactory from 'entities/planet';
+
+import colonyShipPrefab from 'prefabs/colony-ship';
+import fighterPrefab from 'prefabs/fighter';
+import planetFactory from 'prefabs/planet';
 
 instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 	init() {
@@ -44,13 +46,21 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		playerPlanet.addComponent('team', {name: 'player'});
 
 		playerPlanet
-			.addComponent('fighter-blueprint', {
-				prefab: fighter,
-				buildTime: 4000,
-				currentUnitBuildTime: 0,
-			})
+			.addComponent()
 			.addComponent('ship-generator', {
-				activeGenerator: 'fighter-blueprint',
+				activeGenerator: 'colony-ship-blueprint',
+				availableGenerators: {
+					'fighter-blueprint': {
+						prefab: fighterPrefab,
+						buildTime: 4000,
+						currentUnitBuildTime: 0,
+					},
+					'colony-ship-blueprint': {
+						prefab: colonyShipPrefab,
+						buildTime: 8000,
+						currentUnitBuildTime: 0,
+					},
+				},
 			})
 			.addComponent('waypoint', {
 				x: playerPlanet.getComponent('sprite').x + 100,
@@ -59,22 +69,22 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		//
 		// playerPlanet.
 		// 	addComponent('probe-blueprint', {
-		// 		prefab: require('entities/probe'),
+		// 		prefab: require('prefabs/probe'),
 		// 		buildTime: 3000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
 		// 	addComponent('fighter-blueprint', {
-		// 		prefab: require('entities/fighter'),
+		// 		prefab: require('prefabs/fighter'),
 		// 		buildTime: 4000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
 		// 	addComponent('battleship-blueprint', {
-		// 		prefab: require('entities/battleship'),
+		// 		prefab: require('prefabs/battleship'),
 		// 		buildTime: 6000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
 		// 	addComponent('colony-ship-blueprint', {
-		// 		prefab: require('entities/colony-ship'),
+		// 		prefab: require('prefabs/colony-ship'),
 		// 		buildTime: 8000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
@@ -90,22 +100,22 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		//
 		// enemyPlanet.
 		// 	addComponent('probe-blueprint', {
-		// 		prefab: require('entities/probe'),
+		// 		prefab: require('prefabs/probe'),
 		// 		buildTime: 3000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
 		// 	addComponent('fighter-blueprint', {
-		// 		prefab: require('entities/fighter'),
+		// 		prefab: require('prefabs/fighter'),
 		// 		buildTime: 4000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
 		// 	addComponent('battleship-blueprint', {
-		// 		prefab: require('entities/battleship'),
+		// 		prefab: require('prefabs/battleship'),
 		// 		buildTime: 6000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
 		// 	addComponent('colony-ship-blueprint', {
-		// 		prefab: require('entities/colony-ship'),
+		// 		prefab: require('prefabs/colony-ship'),
 		// 		buildTime: 8000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).

@@ -6,6 +6,7 @@ module.exports = {
 		panLeft: 'A',
 		panRight: 'D',
 		panDown: 'S',
+		modifier: 'SHIFT',
 	},
 	screen: {
 		width: 1024,

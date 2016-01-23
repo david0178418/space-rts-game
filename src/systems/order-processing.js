@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
 instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
@@ -8,6 +7,7 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 
 	init() {
 		this.game = instanceManager.get('game');
+		this.moveOrderSound = this.game.add.audio('move-order');
 		this.worldEntities = instanceManager.get('world-entities');
 	},
 
@@ -30,27 +30,40 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 
 				if(entity.hasComponent('movable')) {
 					movableEntities.push(entity);
+				} else if(entity.hasComponent('ship-generator')) {
+					shipGeneratingEntities.push(entity);
 				}
 			}
 		}
 
 		if(movableEntities.length) {
 			if(movableEntities.length === 1) {
-				movableEntities[0].addComponent('waypoint', {
-					x: localPoint.x,
-					y: localPoint.y,
-				});
+				if(instanceManager.get('keyboard-controls').shiftModifier.isDown) {
+					movableEntities[0].getComponent('waypoint-queue').queue.push({
+						x: localPoint.x,
+						y: localPoint.y,
+					});
+				} else {
+					movableEntities[0].addComponent('waypoint', {
+						x: localPoint.x,
+						y: localPoint.y,
+					});
+				}
+
+				if(!this.moveOrderSound.isPlaying) {
+					this.moveOrderSound.play();
+				}
 			} else {
 				for(let i = 0; i < movableEntities.length; i++) {
 					movableEntities[i].addComponent('group-movement', {
-						override: instanceManager.get('keyboard-controls').shiftModifier.isDown,
+						queue: instanceManager.get('keyboard-controls').shiftModifier.isDown,
 						centralPoint: localPoint,
 					});
 				}
 			}
 		} else {
 			for(let i = 0; i < shipGeneratingEntities.length; i++) {
-				shipGeneratingEntities[0].addComponent('waypoint', {
+				shipGeneratingEntities[i].addComponent('waypoint', {
 					x: localPoint.x,
 					y: localPoint.y,
 				});
