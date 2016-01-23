@@ -31,6 +31,7 @@ instanceManager.get('ecs-manager').registerSystem('movement', {
 		distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
 
 		if(distance < movable.currentSpeed) {
+			movable.currentSpeed = 0;
 			sprite.position.x = waypoint.x;
 			sprite.position.y = waypoint.y;
 			entity.removeComponent('waypoint');
