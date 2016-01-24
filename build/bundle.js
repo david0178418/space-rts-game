@@ -62,7 +62,7 @@
 	
 	__webpack_require__(273);
 	
-	__webpack_require__(322);
+	__webpack_require__(324);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -38077,19 +38077,19 @@
 
 	__webpack_require__(274);
 
-	__webpack_require__(281);
-
-	__webpack_require__(282);
-
 	__webpack_require__(283);
 
 	__webpack_require__(284);
 
 	__webpack_require__(285);
 
-	__webpack_require__(320);
+	__webpack_require__(286);
 
-	__webpack_require__(321);
+	__webpack_require__(287);
+
+	__webpack_require__(288);
+
+	__webpack_require__(323);
 
 /***/ },
 /* 274 */
@@ -38113,11 +38113,11 @@
 	
 	var _colonyShip2 = _interopRequireDefault(_colonyShip);
 	
-	var _fighter = __webpack_require__(278);
+	var _fighter = __webpack_require__(280);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
-	var _planet = __webpack_require__(280);
+	var _planet = __webpack_require__(282);
 	
 	var _planet2 = _interopRequireDefault(_planet);
 	
@@ -38161,18 +38161,27 @@
 	
 			playerPlanet.addComponent('team', { name: 'player' });
 	
-			playerPlanet.addComponent().addComponent('ship-generator', {
-				activeGenerator: 'colony-ship-blueprint',
-				availableGenerators: {
-					'fighter-blueprint': {
-						prefab: _fighter2.default,
-						buildTime: 4000,
-						currentUnitBuildTime: 0
+			playerPlanet.addComponent('entity-spawn-queue', {
+				queue: [{
+					blueprint: 'fighter',
+					elapsedBuildTime: 0
+				}, {
+					blueprint: 'colony-ship',
+					elapsedBuildTime: 0
+				}]
+			}).addComponent('entity-spawner', {
+				availableBlueprints: {
+					fighter: {
+						baseBuildTime: 4000,
+						cost: 0,
+						label: 'Fighter',
+						prefab: _fighter2.default
 					},
-					'colony-ship-blueprint': {
-						prefab: _colonyShip2.default,
-						buildTime: 8000,
-						currentUnitBuildTime: 0
+					'colony-ship': {
+						baseBuildTime: 8000,
+						cost: 0,
+						label: 'Colony Ship',
+						prefab: _colonyShip2.default
 					}
 				}
 			}).addComponent('waypoint', {
@@ -38201,7 +38210,7 @@
 			// 		buildTime: 8000,
 			// 		currentUnitBuildTime: 0,
 			// 	}).
-			// 	addComponent('ship-generator', {
+			// 	addComponent('entity-spawner', {
 			// 		activeGenerator: 'probe-blueprint',
 			// 		rallyPoint: {
 			// 			x: playerPlanet.x + 100,
@@ -38232,7 +38241,7 @@
 			// 		buildTime: 8000,
 			// 		currentUnitBuildTime: 0,
 			// 	}).
-			// 	addComponent('ship-generator', {
+			// 	addComponent('entity-spawner', {
 			// 		activeGenerator: 'probe-blueprint',
 			// 		rallyPoint: {
 			// 			x: playerPlanet.x + 100,
@@ -38278,10 +38287,58 @@
 
 	__webpack_require__(277);
 
+	__webpack_require__(278);
+
+	__webpack_require__(279);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
 /* 276 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerComponent('entity-spawner', {
+		factory: function factory() {
+			var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+			return {
+				availableBlueprints: params.availableBlueprints || {}
+			};
+		}
+	});
+
+/***/ },
+/* 277 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerComponent('spawn-queue', {
+		factory: function factory() {
+			var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+			return {
+				queue: params.queue || []
+			};
+		}
+	});
+
+/***/ },
+/* 278 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38324,7 +38381,7 @@
 	});
 
 /***/ },
-/* 277 */
+/* 279 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38342,7 +38399,7 @@
 	});
 
 /***/ },
-/* 278 */
+/* 280 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38367,16 +38424,16 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(276);
-
-	__webpack_require__(277);
+	__webpack_require__(278);
 
 	__webpack_require__(279);
+
+	__webpack_require__(281);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 279 */
+/* 281 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38396,7 +38453,7 @@
 	});
 
 /***/ },
-/* 280 */
+/* 282 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38422,14 +38479,14 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(276);
+	__webpack_require__(278);
 
-	__webpack_require__(277);
+	__webpack_require__(279);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 281 */
+/* 283 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38548,10 +38605,14 @@
 	});
 
 /***/ },
-/* 282 */
+/* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
 	
 	var _instanceManager = __webpack_require__(9);
 	
@@ -38559,28 +38620,52 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('dequeue-waypoint', {
-		components: ['waypoint-queue'],
+	_instanceManager2.default.get('ecs-manager').registerSystem('dequeue-entity-spawn', {
+		components: ['entity-spawner', 'entity-spawn-queue'],
 	
 		init: function init() {
-			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
+			this.game = _instanceManager2.default.get('game');
+			this.runOne = _lodash2.default.bind(this.runOne, this);
 		},
 	
+		// TODO make spawn and waypoint queue/dequeue logic more consistent if
+		// possible
 		runOne: function runOne(entity) {
-			if (entity.hasComponent('waypoint') || !entity.getComponent('waypoint-queue').queue.length) {
-				// TODO Implement a "without componets" param to systems
+			var entitySpawnQueue = entity.getComponent('entity-spawn-queue').queue;
+	
+			if (!entitySpawnQueue.length) {
 				return;
 			}
 	
-			var waypointQueue = entity.getComponent('waypoint-queue');
+			var entitySpawner = entity.getComponent('entity-spawner');
+			var activeConstruction = entitySpawnQueue[0];
+			var spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 	
-			entity.addComponent('waypoint', waypointQueue.queue.shift());
+			activeConstruction.elapsedBuildTime += this.game.time.elapsed;
+	
+			if (activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
+				var newEntity = undefined;
+				var spawnerSprite = entity.getComponent('sprite');
+				var waypoint = entity.getComponent('waypoint');
+	
+				entitySpawnQueue.shift();
+	
+				newEntity = spawnerBlueprint.prefab({
+					x: spawnerSprite.x,
+					y: spawnerSprite.y
+				});
+				newEntity.getComponent('team').name = entity.getComponent('team').name;
+				newEntity.getComponent('waypoint-queue').queue.push({
+					x: waypoint.x,
+					y: waypoint.y
+				});
+			}
 		}
 	});
 
 /***/ },
-/* 283 */
+/* 285 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38683,7 +38768,7 @@
 	});
 
 /***/ },
-/* 284 */
+/* 286 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38751,16 +38836,98 @@
 	// Determine how to best store references to libraries and global instances
 
 /***/ },
-/* 285 */
+/* 287 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _bind = __webpack_require__(286);
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('orders-interpretation', {
+		components: ['order'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.moveOrderSound = this.game.add.audio('move-order');
+			this.worldEntities = _instanceManager2.default.get('world-entities');
+		},
+	
+		run: function run(entities) {
+			// TODO Optimize
+			var localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+			var movableEntities = [];
+			var playerEntities = [];
+			var shipGeneratingEntities = [];
+	
+			// TODO Perhaps change this to make the largest selected entity type
+			// the dominate action?
+			for (var i = 0; i < entities.length; i++) {
+				var entity = entities[i];
+	
+				entity.removeComponent('order');
+	
+				if (entity.getComponent('team').name === 'player') {
+					playerEntities.push(entity);
+	
+					if (entity.hasComponent('movable')) {
+						movableEntities.push(entity);
+					} else if (entity.hasComponent('entity-spawner')) {
+						shipGeneratingEntities.push(entity);
+					}
+				}
+			}
+	
+			if (movableEntities.length) {
+				if (movableEntities.length === 1) {
+					if (_instanceManager2.default.get('keyboard-controls').shiftModifier.isDown) {
+						movableEntities[0].getComponent('waypoint-queue').queue.push({
+							x: localPoint.x,
+							y: localPoint.y
+						});
+					} else {
+						movableEntities[0].addComponent('waypoint', {
+							x: localPoint.x,
+							y: localPoint.y
+						});
+					}
+	
+					if (!this.moveOrderSound.isPlaying) {
+						this.moveOrderSound.play();
+					}
+				} else {
+					for (var i = 0; i < movableEntities.length; i++) {
+						movableEntities[i].addComponent('group-movement', {
+							queue: _instanceManager2.default.get('keyboard-controls').shiftModifier.isDown,
+							centralPoint: localPoint
+						});
+					}
+				}
+			} else {
+				for (var i = 0; i < shipGeneratingEntities.length; i++) {
+					shipGeneratingEntities[i].addComponent('waypoint', {
+						x: localPoint.x,
+						y: localPoint.y
+					});
+				}
+			}
+		}
+	});
+
+/***/ },
+/* 288 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _bind = __webpack_require__(289);
 	
 	var _bind2 = _interopRequireDefault(_bind);
 	
-	var _each = __webpack_require__(316);
+	var _each = __webpack_require__(319);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -38827,11 +38994,11 @@
 	});
 
 /***/ },
-/* 286 */
+/* 289 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createWrapper = __webpack_require__(287),
-	    replaceHolders = __webpack_require__(313),
+	var createWrapper = __webpack_require__(290),
+	    replaceHolders = __webpack_require__(316),
 	    rest = __webpack_require__(3);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -38886,17 +39053,17 @@
 
 
 /***/ },
-/* 287 */
+/* 290 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(288),
-	    createBaseWrapper = __webpack_require__(291),
-	    createCurryWrapper = __webpack_require__(294),
-	    createHybridWrapper = __webpack_require__(295),
-	    createPartialWrapper = __webpack_require__(314),
-	    getData = __webpack_require__(303),
-	    mergeData = __webpack_require__(315),
-	    setData = __webpack_require__(310),
+	var baseSetData = __webpack_require__(291),
+	    createBaseWrapper = __webpack_require__(294),
+	    createCurryWrapper = __webpack_require__(297),
+	    createHybridWrapper = __webpack_require__(298),
+	    createPartialWrapper = __webpack_require__(317),
+	    getData = __webpack_require__(306),
+	    mergeData = __webpack_require__(318),
+	    setData = __webpack_require__(313),
 	    toInteger = __webpack_require__(5);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -38993,11 +39160,11 @@
 
 
 /***/ },
-/* 288 */
+/* 291 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(106),
-	    metaMap = __webpack_require__(289);
+	    metaMap = __webpack_require__(292);
 	
 	/**
 	 * The base implementation of `setData` without support for hot loop detection.
@@ -39016,10 +39183,10 @@
 
 
 /***/ },
-/* 289 */
+/* 292 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WeakMap = __webpack_require__(290);
+	var WeakMap = __webpack_require__(293);
 	
 	/** Used to store function metadata. */
 	var metaMap = WeakMap && new WeakMap;
@@ -39028,7 +39195,7 @@
 
 
 /***/ },
-/* 290 */
+/* 293 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var getNative = __webpack_require__(45);
@@ -39041,10 +39208,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 291 */
+/* 294 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var createCtorWrapper = __webpack_require__(292);
+	/* WEBPACK VAR INJECTION */(function(global) {var createCtorWrapper = __webpack_require__(295);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -39075,10 +39242,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 292 */
+/* 295 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(293),
+	var baseCreate = __webpack_require__(296),
 	    isObject = __webpack_require__(8);
 	
 	/**
@@ -39118,7 +39285,7 @@
 
 
 /***/ },
-/* 293 */
+/* 296 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(8);
@@ -39147,14 +39314,14 @@
 
 
 /***/ },
-/* 294 */
+/* 297 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(292),
-	    createHybridWrapper = __webpack_require__(295),
-	    createRecurryWrapper = __webpack_require__(298),
-	    replaceHolders = __webpack_require__(313);
+	    createCtorWrapper = __webpack_require__(295),
+	    createHybridWrapper = __webpack_require__(298),
+	    createRecurryWrapper = __webpack_require__(301),
+	    replaceHolders = __webpack_require__(316);
 	
 	/**
 	 * Creates a function that wraps `func` to enable currying.
@@ -39195,15 +39362,15 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 295 */
+/* 298 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var composeArgs = __webpack_require__(296),
-	    composeArgsRight = __webpack_require__(297),
-	    createCtorWrapper = __webpack_require__(292),
-	    createRecurryWrapper = __webpack_require__(298),
-	    reorder = __webpack_require__(312),
-	    replaceHolders = __webpack_require__(313);
+	/* WEBPACK VAR INJECTION */(function(global) {var composeArgs = __webpack_require__(299),
+	    composeArgsRight = __webpack_require__(300),
+	    createCtorWrapper = __webpack_require__(295),
+	    createRecurryWrapper = __webpack_require__(301),
+	    reorder = __webpack_require__(315),
+	    replaceHolders = __webpack_require__(316);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -39286,7 +39453,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 296 */
+/* 299 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39326,7 +39493,7 @@
 
 
 /***/ },
-/* 297 */
+/* 300 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39368,12 +39535,12 @@
 
 
 /***/ },
-/* 298 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(299),
-	    isLaziable = __webpack_require__(300),
-	    setData = __webpack_require__(310);
+	var copyArray = __webpack_require__(302),
+	    isLaziable = __webpack_require__(303),
+	    setData = __webpack_require__(313);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -39427,7 +39594,7 @@
 
 
 /***/ },
-/* 299 */
+/* 302 */
 /***/ function(module, exports) {
 
 	/**
@@ -39453,13 +39620,13 @@
 
 
 /***/ },
-/* 300 */
+/* 303 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(301),
-	    getData = __webpack_require__(303),
-	    getFuncName = __webpack_require__(305),
-	    lodash = __webpack_require__(307);
+	var LazyWrapper = __webpack_require__(304),
+	    getData = __webpack_require__(306),
+	    getFuncName = __webpack_require__(308),
+	    lodash = __webpack_require__(310);
 	
 	/**
 	 * Checks if `func` has a lazy counterpart.
@@ -39486,11 +39653,11 @@
 
 
 /***/ },
-/* 301 */
+/* 304 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(293),
-	    baseLodash = __webpack_require__(302);
+	var baseCreate = __webpack_require__(296),
+	    baseLodash = __webpack_require__(305);
 	
 	/** Used as references for the maximum length and index of an array. */
 	var MAX_ARRAY_LENGTH = 4294967295;
@@ -39518,7 +39685,7 @@
 
 
 /***/ },
-/* 302 */
+/* 305 */
 /***/ function(module, exports) {
 
 	/**
@@ -39534,11 +39701,11 @@
 
 
 /***/ },
-/* 303 */
+/* 306 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var metaMap = __webpack_require__(289),
-	    noop = __webpack_require__(304);
+	var metaMap = __webpack_require__(292),
+	    noop = __webpack_require__(307);
 	
 	/**
 	 * Gets metadata for `func`.
@@ -39555,7 +39722,7 @@
 
 
 /***/ },
-/* 304 */
+/* 307 */
 /***/ function(module, exports) {
 
 	/**
@@ -39580,10 +39747,10 @@
 
 
 /***/ },
-/* 305 */
+/* 308 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var realNames = __webpack_require__(306);
+	var realNames = __webpack_require__(309);
 	
 	/**
 	 * Gets the name of `func`.
@@ -39611,7 +39778,7 @@
 
 
 /***/ },
-/* 306 */
+/* 309 */
 /***/ function(module, exports) {
 
 	/** Used to lookup unminified function names. */
@@ -39621,15 +39788,15 @@
 
 
 /***/ },
-/* 307 */
+/* 310 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var LazyWrapper = __webpack_require__(301),
-	    LodashWrapper = __webpack_require__(308),
-	    baseLodash = __webpack_require__(302),
+	/* WEBPACK VAR INJECTION */(function(global) {var LazyWrapper = __webpack_require__(304),
+	    LodashWrapper = __webpack_require__(311),
+	    baseLodash = __webpack_require__(305),
 	    isArray = __webpack_require__(81),
 	    isObjectLike = __webpack_require__(48),
-	    wrapperClone = __webpack_require__(309);
+	    wrapperClone = __webpack_require__(312);
 	
 	/** Used for built-in method references. */
 	var objectProto = global.Object.prototype;
@@ -39767,11 +39934,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 308 */
+/* 311 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(293),
-	    baseLodash = __webpack_require__(302);
+	var baseCreate = __webpack_require__(296),
+	    baseLodash = __webpack_require__(305);
 	
 	/**
 	 * The base constructor for creating `lodash` wrapper objects.
@@ -39795,12 +39962,12 @@
 
 
 /***/ },
-/* 309 */
+/* 312 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(301),
-	    LodashWrapper = __webpack_require__(308),
-	    copyArray = __webpack_require__(299);
+	var LazyWrapper = __webpack_require__(304),
+	    LodashWrapper = __webpack_require__(311),
+	    copyArray = __webpack_require__(302);
 	
 	/**
 	 * Creates a clone of `wrapper`.
@@ -39824,11 +39991,11 @@
 
 
 /***/ },
-/* 310 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(288),
-	    now = __webpack_require__(311);
+	var baseSetData = __webpack_require__(291),
+	    now = __webpack_require__(314);
 	
 	/** Used to detect hot functions by number of calls within a span of milliseconds. */
 	var HOT_COUNT = 150,
@@ -39871,7 +40038,7 @@
 
 
 /***/ },
-/* 311 */
+/* 314 */
 /***/ function(module, exports) {
 
 	/**
@@ -39896,10 +40063,10 @@
 
 
 /***/ },
-/* 312 */
+/* 315 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(299),
+	var copyArray = __webpack_require__(302),
 	    isIndex = __webpack_require__(83);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39931,7 +40098,7 @@
 
 
 /***/ },
-/* 313 */
+/* 316 */
 /***/ function(module, exports) {
 
 	/** Used as the internal argument placeholder. */
@@ -39965,11 +40132,11 @@
 
 
 /***/ },
-/* 314 */
+/* 317 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(292);
+	    createCtorWrapper = __webpack_require__(295);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -40014,13 +40181,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 315 */
+/* 318 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(296),
-	    composeArgsRight = __webpack_require__(297),
-	    copyArray = __webpack_require__(299),
-	    replaceHolders = __webpack_require__(313);
+	var composeArgs = __webpack_require__(299),
+	    composeArgsRight = __webpack_require__(300),
+	    copyArray = __webpack_require__(302),
+	    replaceHolders = __webpack_require__(316);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -40110,20 +40277,20 @@
 
 
 /***/ },
-/* 316 */
+/* 319 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(317);
+	module.exports = __webpack_require__(320);
 
 
 /***/ },
-/* 317 */
+/* 320 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(318),
+	var arrayEach = __webpack_require__(321),
 	    baseEach = __webpack_require__(110),
 	    isArray = __webpack_require__(81),
-	    toFunction = __webpack_require__(319);
+	    toFunction = __webpack_require__(322);
 	
 	/**
 	 * Iterates over elements of `collection` invoking `iteratee` for each element.
@@ -40163,7 +40330,7 @@
 
 
 /***/ },
-/* 318 */
+/* 321 */
 /***/ function(module, exports) {
 
 	/**
@@ -40191,7 +40358,7 @@
 
 
 /***/ },
-/* 319 */
+/* 322 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(106);
@@ -40211,14 +40378,10 @@
 
 
 /***/ },
-/* 320 */
+/* 323 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	
-	var _lodash = __webpack_require__(19);
-	
-	var _lodash2 = _interopRequireDefault(_lodash);
 	
 	var _instanceManager = __webpack_require__(9);
 	
@@ -40226,126 +40389,28 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('ship-production', {
-		components: ['ship-generator'],
+	_instanceManager2.default.get('ecs-manager').registerSystem('waypoint-dequeue', {
+		components: ['waypoint-queue'],
 	
 		init: function init() {
-			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.game = _instanceManager2.default.get('game');
-	
-			this.runOne = _lodash2.default.bind(this.runOne, this);
+			this.worldEntities = _instanceManager2.default.get('world-entities');
 		},
+	
 		runOne: function runOne(entity) {
-			var newShip = undefined;
-			var shipGenerator = entity.getComponent('ship-generator');
-			var activeGenerator = shipGenerator.availableGenerators[shipGenerator.activeGenerator];
-			var entitySprite = entity.getComponent('sprite');
-			var waypoint = entity.getComponent('waypoint');
-	
-			activeGenerator.currentUnitBuildTime += this.game.time.elapsed;
-	
-			if (activeGenerator.currentUnitBuildTime >= activeGenerator.buildTime) {
-				activeGenerator.currentUnitBuildTime = 0;
-				newShip = activeGenerator.prefab({
-					x: entitySprite.x,
-					y: entitySprite.y
-				});
-				newShip.getComponent('team').name = entity.getComponent('team').name;
-	
-				// TODO Figure out why rally point reference is being copied
-				// even though deep cloning
-				newShip.getComponent('waypoint-queue').queue.push({
-					x: waypoint.x,
-					y: waypoint.y
-				});
+			if (entity.hasComponent('waypoint') || !entity.getComponent('waypoint-queue').queue.length) {
+				// TODO Implement a "without componets" param to systems
+				return;
 			}
+	
+			var waypointQueue = entity.getComponent('waypoint-queue');
+	
+			entity.addComponent('waypoint', waypointQueue.queue.shift());
 		}
 	});
 
 /***/ },
-/* 321 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerSystem('orders-interpretation', {
-		components: ['order'],
-	
-		init: function init() {
-			this.game = _instanceManager2.default.get('game');
-			this.moveOrderSound = this.game.add.audio('move-order');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
-		},
-	
-		run: function run(entities) {
-			// TODO Optimize
-			var localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
-			var movableEntities = [];
-			var playerEntities = [];
-			var shipGeneratingEntities = [];
-	
-			// TODO Perhaps change this to make the largest selected entity type
-			// the dominate action?
-			for (var i = 0; i < entities.length; i++) {
-				var entity = entities[i];
-	
-				entity.removeComponent('order');
-	
-				if (entity.getComponent('team').name === 'player') {
-					playerEntities.push(entity);
-	
-					if (entity.hasComponent('movable')) {
-						movableEntities.push(entity);
-					} else if (entity.hasComponent('ship-generator')) {
-						shipGeneratingEntities.push(entity);
-					}
-				}
-			}
-	
-			if (movableEntities.length) {
-				if (movableEntities.length === 1) {
-					if (_instanceManager2.default.get('keyboard-controls').shiftModifier.isDown) {
-						movableEntities[0].getComponent('waypoint-queue').queue.push({
-							x: localPoint.x,
-							y: localPoint.y
-						});
-					} else {
-						movableEntities[0].addComponent('waypoint', {
-							x: localPoint.x,
-							y: localPoint.y
-						});
-					}
-	
-					if (!this.moveOrderSound.isPlaying) {
-						this.moveOrderSound.play();
-					}
-				} else {
-					for (var i = 0; i < movableEntities.length; i++) {
-						movableEntities[i].addComponent('group-movement', {
-							queue: _instanceManager2.default.get('keyboard-controls').shiftModifier.isDown,
-							centralPoint: localPoint
-						});
-					}
-				}
-			} else {
-				for (var i = 0; i < shipGeneratingEntities.length; i++) {
-					shipGeneratingEntities[i].addComponent('waypoint', {
-						x: localPoint.x,
-						y: localPoint.y
-					});
-				}
-			}
-		}
-	});
-
-/***/ },
-/* 322 */
+/* 324 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -40358,7 +40423,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(323);
+	var _mouseControls = __webpack_require__(325);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -40413,14 +40478,14 @@
 	});
 
 /***/ },
-/* 323 */
+/* 325 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _each = __webpack_require__(316);
+	var _each = __webpack_require__(319);
 	
 	var _each2 = _interopRequireDefault(_each);
 	

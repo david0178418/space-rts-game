@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
+import 'components/entity-spawner';
+import 'components/entity-spawn-queue';
 import 'components/sprite';
 import 'components/team';
 

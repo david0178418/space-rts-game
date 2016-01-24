@@ -30,7 +30,7 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 
 				if(entity.hasComponent('movable')) {
 					movableEntities.push(entity);
-				} else if(entity.hasComponent('ship-generator')) {
+				} else if(entity.hasComponent('entity-spawner')) {
 					shipGeneratingEntities.push(entity);
 				}
 			}

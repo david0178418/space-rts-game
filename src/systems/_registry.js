@@ -1,8 +1,8 @@
 import './universe-creation';
 import './camera';
-import './dequeue-waypoint';
+import './entity-spawn-dequeue';
 import './group-coordination';
 import './movement';
-import './selection';
-import './ship-production';
 import './order-processing';
+import './selection';
+import './waypoint-dequeue';

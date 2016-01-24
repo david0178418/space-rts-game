@@ -46,19 +46,30 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		playerPlanet.addComponent('team', {name: 'player'});
 
 		playerPlanet
-			.addComponent()
-			.addComponent('ship-generator', {
-				activeGenerator: 'colony-ship-blueprint',
-				availableGenerators: {
-					'fighter-blueprint': {
-						prefab: fighterPrefab,
-						buildTime: 4000,
-						currentUnitBuildTime: 0,
+			.addComponent('entity-spawn-queue', {
+				queue: [
+					{
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						blueprint: 'colony-ship',
+						elapsedBuildTime: 0,
 					},
-					'colony-ship-blueprint': {
+				],
+			})
+			.addComponent('entity-spawner', {
+				availableBlueprints: {
+					fighter: {
+						baseBuildTime: 4000,
+						cost: 0,
+						label: 'Fighter',
+						prefab: fighterPrefab,
+					},
+					'colony-ship': {
+						baseBuildTime: 8000,
+						cost: 0,
+						label: 'Colony Ship',
 						prefab: colonyShipPrefab,
-						buildTime: 8000,
-						currentUnitBuildTime: 0,
 					},
 				},
 			})
@@ -88,7 +99,7 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		// 		buildTime: 8000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
-		// 	addComponent('ship-generator', {
+		// 	addComponent('entity-spawner', {
 		// 		activeGenerator: 'probe-blueprint',
 		// 		rallyPoint: {
 		// 			x: playerPlanet.x + 100,
@@ -119,7 +130,7 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		// 		buildTime: 8000,
 		// 		currentUnitBuildTime: 0,
 		// 	}).
-		// 	addComponent('ship-generator', {
+		// 	addComponent('entity-spawner', {
 		// 		activeGenerator: 'probe-blueprint',
 		// 		rallyPoint: {
 		// 			x: playerPlanet.x + 100,

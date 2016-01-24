@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('dequeue-waypoint', {
+instanceManager.get('ecs-manager').registerSystem('waypoint-dequeue', {
 	components: [
 		'waypoint-queue',
 	],
