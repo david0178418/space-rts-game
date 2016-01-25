@@ -1,7 +1,24 @@
 import bind from 'lodash/bind';
 import each from 'lodash/each';
+import _ from 'lodash';
 import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
+
+function intersectionObjects(a, b) {
+	let results = [];
+
+	for(let i = 0; i < a.length; i++) {
+		let aElement = a[i];
+		let existsInB = _.some(b, function(bElement) { return _.isEqual(bElement, aElement); });
+
+		if(existsInB) {
+			results.push(aElement);
+		}
+	}
+
+	return results;
+}
+
 
 instanceManager.get('ecs-manager').registerSystem('selection', {
 	SELECTION_PADDING: 30,
@@ -12,7 +29,9 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 
 	init() {
 		this.game = instanceManager.get('game');
+		this.ui = instanceManager.get('ui');
 		this.worldEntities = instanceManager.get('world-entities');
+		this.ecsManager = instanceManager.get('ecs-manager');
 		// this.uiViewModel = instanceManager.get('uiViewModel');
 		this.selectionChanged = false;
 
@@ -25,6 +44,8 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		if(this.selectionChanged) {
 			// this.uiViewModel.update();
 			this.selectionChanged = false;
+
+			this.setUI(this.ecsManager.getEntities(['selected']));
 		}
 	},
 
@@ -57,6 +78,19 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		} else if(selectableComponent.graphic && selectableComponent.graphic.visible) {
 			this.selectionChanged = true;
 			selectableComponent.graphic.visible = false;
+		}
+	},
+
+	setUI(entities) {
+		let spawners = _.filter(entities, function(entity) {
+			return entity.hasComponent('entity-spawner');
+		});
+
+		if(spawners.length === 1) {
+			this.ui.setProductionOptions(spawners[0].getComponent('entity-spawner').availableBlueprints);
+		} else {
+			// dummy code for proof-of-concept since there is only one spawner at the moment
+			this.ui.setProductionOptions(null);
 		}
 	},
 });

@@ -39,7 +39,7 @@ game.state.add('play', {
 
 		ecsManager.runSystemInits();
 
-		instanceManager.get('hud');
+		instanceManager.get('ui');
 	},
 	update() {
 		MouseControls.update();

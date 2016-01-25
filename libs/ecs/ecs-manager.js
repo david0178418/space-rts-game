@@ -80,6 +80,9 @@ class ECSManager {
 			return this[entities].slice(0);
 		}
 
+		// TODO Possible improvement: Figure out a way to send the components
+		// bundled with the entities.  This could save on a pass that will
+		// likely need to happen any way when the entity is being used.
 		return _.filter(this[entities], function(entity) {
 			return entity.hasComponents(components);
 		});

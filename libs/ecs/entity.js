@@ -1,12 +1,12 @@
 import _ from 'lodash';
 
 const components = 'components'; // Symbol('components');
-const entityManager = Symbol('entity-manager');
+const ecsManager = Symbol('entity-manager');
 const id = Symbol('id');
 
 class Entity {
-	constructor(entityManagerReference) {
-		this[entityManager] = entityManagerReference;
+	constructor(ecsManagerReference) {
+		this[ecsManager] = ecsManagerReference;
 		this[components] = {};
 
 		this[id] = _.uniqueId('entity-');
@@ -19,7 +19,7 @@ class Entity {
 			return this;
 		}
 
-		this[components][component] = this[entityManager].createComponent(component, props);
+		this[components][component] = this[ecsManager].createComponent(component, props);
 
 		return this;
 	}
@@ -48,7 +48,7 @@ class Entity {
 			return;
 		}
 
-		this[entityManager].getComponentCleanup(name)(component);
+		this[ecsManager].getComponentCleanup(name)(component);
 		delete this[components][name];
 	}
 
