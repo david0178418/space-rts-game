@@ -49,9 +49,23 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 			.addComponent('entity-spawn-queue', {
 				queue: [
 					{
+						label: 'fighter',
 						blueprint: 'fighter',
 						elapsedBuildTime: 0,
 					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'Colony Ship',
 						blueprint: 'colony-ship',
 						elapsedBuildTime: 0,
 					},

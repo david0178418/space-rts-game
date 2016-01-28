@@ -10,11 +10,26 @@ instanceManager.registerResource('ui', {
 			document.getElementById('ui')
 		);
 
+		let productionOptions = null;
+		let buildQueue = null;
+
 		return {
-			setProductionOptions(productionOptions) {
-				reactComponent.setState({
-					productionOptions,
-				});
+			setProductionOptions(newState) {
+				// if(productionOptions !== newState) {
+					productionOptions = newState;
+					reactComponent.setState({
+						productionOptions: newState,
+					});
+				// }
+			},
+
+			setBuildQueue(newState) {
+				// if(buildQueue !== newState) {
+					buildQueue = newState;
+					reactComponent.setState({
+						buildQueue: newState,
+					});
+				// }
 			},
 		};
 	},

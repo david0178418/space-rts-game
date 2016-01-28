@@ -60,9 +60,9 @@
 	
 	__webpack_require__(11);
 	
-	__webpack_require__(206);
+	__webpack_require__(207);
 	
-	__webpack_require__(261);
+	__webpack_require__(264);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -15355,7 +15355,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _reactDom = __webpack_require__(205);
+	var _reactDom = __webpack_require__(206);
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
@@ -15365,11 +15365,25 @@
 		init: function init() {
 			var reactComponent = _reactDom2.default.render(_react2.default.createElement(_ui2.default, {}), document.getElementById('ui'));
 	
+			var productionOptions = null;
+			var buildQueue = null;
+	
 			return {
-				setProductionOptions: function setProductionOptions(productionOptions) {
+				setProductionOptions: function setProductionOptions(newState) {
+					// if(productionOptions !== newState) {
+					productionOptions = newState;
 					reactComponent.setState({
-						productionOptions: productionOptions
+						productionOptions: newState
 					});
+					// }
+				},
+				setBuildQueue: function setBuildQueue(newState) {
+					// if(buildQueue !== newState) {
+					buildQueue = newState;
+					reactComponent.setState({
+						buildQueue: newState
+					});
+					// }
 				}
 			};
 		}
@@ -15391,7 +15405,11 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _productionOptions = __webpack_require__(182);
+	var _buildQueue = __webpack_require__(182);
+	
+	var _buildQueue2 = _interopRequireDefault(_buildQueue);
+	
+	var _productionOptions = __webpack_require__(205);
 	
 	var _productionOptions2 = _interopRequireDefault(_productionOptions);
 	
@@ -15404,9 +15422,12 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /* eslint no-unused-vars: 0 */
 	
 	var styles = {
-		left: '50px',
+		height: 0,
+		left: 0,
+		margin: '20px',
 		position: 'absolute',
-		top: '50px',
+		top: 0,
+		width: '100%',
 		zIndex: 10
 	};
 	
@@ -15419,7 +15440,8 @@
 			var _this = _possibleConstructorReturn(this, _Component.call(this, props));
 	
 			_this.state = {
-				productionOptions: null
+				productionOptions: null,
+				buildQueue: null
 			};
 			return _this;
 		}
@@ -15430,6 +15452,9 @@
 				{ style: styles },
 				this.state.productionOptions && _react2.default.createElement(_productionOptions2.default, {
 					productionOptions: this.state.productionOptions
+				}),
+				this.state.buildQueue && _react2.default.createElement(_buildQueue2.default, {
+					buildQueue: this.state.buildQueue
 				})
 			);
 		};
@@ -35034,26 +35059,31 @@
 	exports.__esModule = true;
 	
 	exports.default = function (props) {
-		console.log('DEBUG: rerendering ui!');
-		var result = [];
+		var buildQueueButtons = [];
 	
-		(0, _forOwn2.default)(props.productionOptions, function (blueprint, key) {
-			result.push(_react2.default.createElement(
+		_lodash2.default.each(props.buildQueue, function (queuedItem, index) {
+			buildQueueButtons.push(_react2.default.createElement(
 				'button',
 				{
-					key: key,
+					key: queuedItem.label + index,
 					className: 'icon-button',
-					style: styles,
-					onClick: _lodash2.default.bind(handleSelectBlueprint, null, key)
+					style: buttonStyles,
+					onClick: _lodash2.default.bind(dequeueBuildItem, null, index)
 				},
-				blueprint.label
+				queuedItem.label
 			));
 		});
 	
 		return _react2.default.createElement(
-			'span',
-			null,
-			result
+			'div',
+			{ style: styles },
+			_react2.default.createElement(
+				'label',
+				{ style: labelStyles },
+				'Build Queue:'
+			),
+			' ',
+			buildQueueButtons
 		);
 	};
 	
@@ -35080,24 +35110,31 @@
 	var ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 	var styles = {
+		left: 0,
+		position: 'absolute',
+		top: '50px'
+	};
+	var buttonStyles = {
 		backgroundColor: 'transparent',
 		border: '2px solid #1ed81e',
 		color: '#1ed81e',
 		cursor: 'pointer',
 		marginRight: '10px'
 	};
+	var labelStyles = {
+		color: 'white',
+		fontWeight: 'bold'
+	};
 	
-	function handleSelectBlueprint(key) {
+	function dequeueBuildItem(index) {
 		// TODO Create a system or something to process an order like this
-		// rather than directly updating selected entities
+		// rather than directly updating selected entities. Things like resources
+		// will have to be reclaimed
 		var entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 	
-		_lodash2.default.each(entities, function (entity) {
-			entity.getComponent('entity-spawn-queue').queue.push({
-				blueprint: key,
-				elapsedBuildTime: 0
-			});
-		});
+		// NOTE For now, assuming there will only be 1 entity with a queue selected.
+		// Likely will need to figure out how to handle multiple being selected.
+		entities[0].getComponent('entity-spawn-queue').queue.splice(index, 1);
 	}
 
 /***/ },
@@ -35809,18 +35846,106 @@
 
 	'use strict';
 	
-	module.exports = __webpack_require__(27);
-
+	exports.__esModule = true;
+	
+	exports.default = function (props) {
+		var result = [];
+	
+		(0, _forOwn2.default)(props.productionOptions, function (blueprint, key) {
+			result.push(_react2.default.createElement(
+				'button',
+				{
+					key: key,
+					className: 'icon-button',
+					style: buttonStyles,
+					onClick: _lodash2.default.bind(handleSelectBlueprint, null, key, blueprint.label)
+				},
+				blueprint.label
+			));
+		});
+	
+		return _react2.default.createElement(
+			'div',
+			{ style: styles },
+			_react2.default.createElement(
+				'label',
+				{ style: labelStyles },
+				'Blueprints:'
+			),
+			' ',
+			result
+		);
+	};
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _forOwn = __webpack_require__(183);
+	
+	var _forOwn2 = _interopRequireDefault(_forOwn);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _react = __webpack_require__(25);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	/* eslint no-unused-vars: 0 */
+	
+	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	
+	var styles = {
+		left: 0,
+		position: 'absolute',
+		top: '20px'
+	};
+	var buttonStyles = {
+		backgroundColor: 'transparent',
+		border: '2px solid #1ed81e',
+		color: '#1ed81e',
+		cursor: 'pointer',
+		marginRight: '10px'
+	};
+	var labelStyles = {
+		color: 'white',
+		fontWeight: 'bold'
+	};
+	
+	function handleSelectBlueprint(key, label) {
+		// TODO Create a system or something to process an order like this
+		// rather than directly updating selected entities
+		var entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
+	
+		_lodash2.default.each(entities, function (entity) {
+			entity.getComponent('entity-spawn-queue').queue.push({
+				label: label,
+				blueprint: key,
+				elapsedBuildTime: 0
+			});
+		});
+	}
 
 /***/ },
 /* 206 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	module.exports = __webpack_require__(27);
 
-	__webpack_require__(207);
 
-	__webpack_require__(216);
+/***/ },
+/* 207 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	__webpack_require__(208);
 
 	__webpack_require__(217);
 
@@ -35832,10 +35957,16 @@
 
 	__webpack_require__(221);
 
-	__webpack_require__(260);
+	__webpack_require__(222);
+
+	__webpack_require__(261);
+
+	__webpack_require__(267);
+
+	__webpack_require__(266);
 
 /***/ },
-/* 207 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -35852,15 +35983,15 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _colonyShip = __webpack_require__(208);
+	var _colonyShip = __webpack_require__(209);
 	
 	var _colonyShip2 = _interopRequireDefault(_colonyShip);
 	
-	var _fighter = __webpack_require__(213);
+	var _fighter = __webpack_require__(214);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
-	var _planet = __webpack_require__(215);
+	var _planet = __webpack_require__(216);
 	
 	var _planet2 = _interopRequireDefault(_planet);
 	
@@ -35906,9 +36037,23 @@
 	
 			playerPlanet.addComponent('entity-spawn-queue', {
 				queue: [{
+					label: 'fighter',
 					blueprint: 'fighter',
 					elapsedBuildTime: 0
 				}, {
+					label: 'fighter',
+					blueprint: 'fighter',
+					elapsedBuildTime: 0
+				}, {
+					label: 'fighter',
+					blueprint: 'fighter',
+					elapsedBuildTime: 0
+				}, {
+					label: 'fighter',
+					blueprint: 'fighter',
+					elapsedBuildTime: 0
+				}, {
+					label: 'Colony Ship',
 					blueprint: 'colony-ship',
 					elapsedBuildTime: 0
 				}]
@@ -35995,7 +36140,7 @@
 	});
 
 /***/ },
-/* 208 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36026,18 +36171,18 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(209);
-
 	__webpack_require__(210);
 
 	__webpack_require__(211);
 
 	__webpack_require__(212);
 
+	__webpack_require__(213);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 209 */
+/* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36059,7 +36204,7 @@
 	});
 
 /***/ },
-/* 210 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36081,7 +36226,7 @@
 	});
 
 /***/ },
-/* 211 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36124,7 +36269,7 @@
 	});
 
 /***/ },
-/* 212 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36142,7 +36287,7 @@
 	});
 
 /***/ },
-/* 213 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36167,16 +36312,16 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(211);
-
 	__webpack_require__(212);
 
-	__webpack_require__(214);
+	__webpack_require__(213);
+
+	__webpack_require__(215);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 214 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36196,7 +36341,7 @@
 	});
 
 /***/ },
-/* 215 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36222,14 +36367,14 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(211);
-
 	__webpack_require__(212);
+
+	__webpack_require__(213);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 216 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36348,7 +36493,7 @@
 	});
 
 /***/ },
-/* 217 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36408,7 +36553,7 @@
 	});
 
 /***/ },
-/* 218 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36511,7 +36656,7 @@
 	});
 
 /***/ },
-/* 219 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36579,7 +36724,7 @@
 	// Determine how to best store references to libraries and global instances
 
 /***/ },
-/* 220 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36661,22 +36806,22 @@
 	});
 
 /***/ },
-/* 221 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _bind = __webpack_require__(222);
-	
-	var _bind2 = _interopRequireDefault(_bind);
-	
-	var _each = __webpack_require__(255);
-	
-	var _each2 = _interopRequireDefault(_each);
-	
 	var _lodash = __webpack_require__(19);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _bind = __webpack_require__(223);
+	
+	var _bind2 = _interopRequireDefault(_bind);
+	
+	var _each = __webpack_require__(256);
+	
+	var _each2 = _interopRequireDefault(_each);
 	
 	var _instanceManager = __webpack_require__(9);
 	
@@ -36688,27 +36833,6 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function intersectionObjects(a, b) {
-		var results = [];
-	
-		var _loop = function _loop(i) {
-			var aElement = a[i];
-			var existsInB = _lodash2.default.some(b, function (bElement) {
-				return _lodash2.default.isEqual(bElement, aElement);
-			});
-	
-			if (existsInB) {
-				results.push(aElement);
-			}
-		};
-	
-		for (var i = 0; i < a.length; i++) {
-			_loop(i);
-		}
-	
-		return results;
-	}
-	
 	_instanceManager2.default.get('ecs-manager').registerSystem('selection', {
 		SELECTION_PADDING: 30,
 	
@@ -36716,7 +36840,6 @@
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
-			this.ui = _instanceManager2.default.get('ui');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 			// this.uiViewModel = instanceManager.get('uiViewModel');
@@ -36728,10 +36851,7 @@
 			(0, _each2.default)(entities, this.checkSelection, this);
 	
 			if (this.selectionChanged) {
-				// this.uiViewModel.update();
 				this.selectionChanged = false;
-	
-				this.setUI(this.ecsManager.getEntities(['selected']));
 			}
 		},
 		checkSelection: function checkSelection(entity) {
@@ -36762,27 +36882,15 @@
 				this.selectionChanged = true;
 				selectableComponent.graphic.visible = false;
 			}
-		},
-		setUI: function setUI(entities) {
-			var spawners = _lodash2.default.filter(entities, function (entity) {
-				return entity.hasComponent('entity-spawner');
-			});
-	
-			if (spawners.length === 1) {
-				this.ui.setProductionOptions(spawners[0].getComponent('entity-spawner').availableBlueprints);
-			} else {
-				// dummy code for proof-of-concept since there is only one spawner at the moment
-				this.ui.setProductionOptions(null);
-			}
 		}
 	});
 
 /***/ },
-/* 222 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createWrapper = __webpack_require__(223),
-	    replaceHolders = __webpack_require__(252),
+	var createWrapper = __webpack_require__(224),
+	    replaceHolders = __webpack_require__(253),
 	    rest = __webpack_require__(3);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -36837,17 +36945,17 @@
 
 
 /***/ },
-/* 223 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(224),
-	    createBaseWrapper = __webpack_require__(230),
-	    createCurryWrapper = __webpack_require__(233),
-	    createHybridWrapper = __webpack_require__(234),
-	    createPartialWrapper = __webpack_require__(253),
-	    getData = __webpack_require__(242),
-	    mergeData = __webpack_require__(254),
-	    setData = __webpack_require__(249),
+	var baseSetData = __webpack_require__(225),
+	    createBaseWrapper = __webpack_require__(231),
+	    createCurryWrapper = __webpack_require__(234),
+	    createHybridWrapper = __webpack_require__(235),
+	    createPartialWrapper = __webpack_require__(254),
+	    getData = __webpack_require__(243),
+	    mergeData = __webpack_require__(255),
+	    setData = __webpack_require__(250),
 	    toInteger = __webpack_require__(5);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -36944,11 +37052,11 @@
 
 
 /***/ },
-/* 224 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(204),
-	    metaMap = __webpack_require__(225);
+	    metaMap = __webpack_require__(226);
 	
 	/**
 	 * The base implementation of `setData` without support for hot loop detection.
@@ -36967,10 +37075,10 @@
 
 
 /***/ },
-/* 225 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WeakMap = __webpack_require__(226);
+	var WeakMap = __webpack_require__(227);
 	
 	/** Used to store function metadata. */
 	var metaMap = WeakMap && new WeakMap;
@@ -36979,10 +37087,10 @@
 
 
 /***/ },
-/* 226 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var getNative = __webpack_require__(227);
+	/* WEBPACK VAR INJECTION */(function(global) {var getNative = __webpack_require__(228);
 	
 	/* Built-in method references that are verified to be native. */
 	var WeakMap = getNative(global, 'WeakMap');
@@ -36992,10 +37100,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 227 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isNative = __webpack_require__(228);
+	var isNative = __webpack_require__(229);
 	
 	/**
 	 * Gets the native function at `key` of `object`.
@@ -37014,11 +37122,11 @@
 
 
 /***/ },
-/* 228 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var isFunction = __webpack_require__(7),
-	    isHostObject = __webpack_require__(229),
+	    isHostObject = __webpack_require__(230),
 	    isObjectLike = __webpack_require__(198);
 	
 	/** Used to match `RegExp` [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns). */
@@ -37074,7 +37182,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 229 */
+/* 230 */
 /***/ function(module, exports) {
 
 	/**
@@ -37100,10 +37208,10 @@
 
 
 /***/ },
-/* 230 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var createCtorWrapper = __webpack_require__(231);
+	/* WEBPACK VAR INJECTION */(function(global) {var createCtorWrapper = __webpack_require__(232);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -37134,10 +37242,10 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 231 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(232),
+	var baseCreate = __webpack_require__(233),
 	    isObject = __webpack_require__(8);
 	
 	/**
@@ -37177,7 +37285,7 @@
 
 
 /***/ },
-/* 232 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(8);
@@ -37206,14 +37314,14 @@
 
 
 /***/ },
-/* 233 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(231),
-	    createHybridWrapper = __webpack_require__(234),
-	    createRecurryWrapper = __webpack_require__(237),
-	    replaceHolders = __webpack_require__(252);
+	    createCtorWrapper = __webpack_require__(232),
+	    createHybridWrapper = __webpack_require__(235),
+	    createRecurryWrapper = __webpack_require__(238),
+	    replaceHolders = __webpack_require__(253);
 	
 	/**
 	 * Creates a function that wraps `func` to enable currying.
@@ -37254,15 +37362,15 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 234 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var composeArgs = __webpack_require__(235),
-	    composeArgsRight = __webpack_require__(236),
-	    createCtorWrapper = __webpack_require__(231),
-	    createRecurryWrapper = __webpack_require__(237),
-	    reorder = __webpack_require__(251),
-	    replaceHolders = __webpack_require__(252);
+	/* WEBPACK VAR INJECTION */(function(global) {var composeArgs = __webpack_require__(236),
+	    composeArgsRight = __webpack_require__(237),
+	    createCtorWrapper = __webpack_require__(232),
+	    createRecurryWrapper = __webpack_require__(238),
+	    reorder = __webpack_require__(252),
+	    replaceHolders = __webpack_require__(253);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -37345,7 +37453,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 235 */
+/* 236 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -37385,7 +37493,7 @@
 
 
 /***/ },
-/* 236 */
+/* 237 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -37427,12 +37535,12 @@
 
 
 /***/ },
-/* 237 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(238),
-	    isLaziable = __webpack_require__(239),
-	    setData = __webpack_require__(249);
+	var copyArray = __webpack_require__(239),
+	    isLaziable = __webpack_require__(240),
+	    setData = __webpack_require__(250);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -37486,7 +37594,7 @@
 
 
 /***/ },
-/* 238 */
+/* 239 */
 /***/ function(module, exports) {
 
 	/**
@@ -37512,13 +37620,13 @@
 
 
 /***/ },
-/* 239 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(240),
-	    getData = __webpack_require__(242),
-	    getFuncName = __webpack_require__(244),
-	    lodash = __webpack_require__(246);
+	var LazyWrapper = __webpack_require__(241),
+	    getData = __webpack_require__(243),
+	    getFuncName = __webpack_require__(245),
+	    lodash = __webpack_require__(247);
 	
 	/**
 	 * Checks if `func` has a lazy counterpart.
@@ -37545,11 +37653,11 @@
 
 
 /***/ },
-/* 240 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(232),
-	    baseLodash = __webpack_require__(241);
+	var baseCreate = __webpack_require__(233),
+	    baseLodash = __webpack_require__(242);
 	
 	/** Used as references for the maximum length and index of an array. */
 	var MAX_ARRAY_LENGTH = 4294967295;
@@ -37577,7 +37685,7 @@
 
 
 /***/ },
-/* 241 */
+/* 242 */
 /***/ function(module, exports) {
 
 	/**
@@ -37593,11 +37701,11 @@
 
 
 /***/ },
-/* 242 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var metaMap = __webpack_require__(225),
-	    noop = __webpack_require__(243);
+	var metaMap = __webpack_require__(226),
+	    noop = __webpack_require__(244);
 	
 	/**
 	 * Gets metadata for `func`.
@@ -37614,7 +37722,7 @@
 
 
 /***/ },
-/* 243 */
+/* 244 */
 /***/ function(module, exports) {
 
 	/**
@@ -37639,10 +37747,10 @@
 
 
 /***/ },
-/* 244 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var realNames = __webpack_require__(245);
+	var realNames = __webpack_require__(246);
 	
 	/**
 	 * Gets the name of `func`.
@@ -37670,7 +37778,7 @@
 
 
 /***/ },
-/* 245 */
+/* 246 */
 /***/ function(module, exports) {
 
 	/** Used to lookup unminified function names. */
@@ -37680,15 +37788,15 @@
 
 
 /***/ },
-/* 246 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var LazyWrapper = __webpack_require__(240),
-	    LodashWrapper = __webpack_require__(247),
-	    baseLodash = __webpack_require__(241),
+	/* WEBPACK VAR INJECTION */(function(global) {var LazyWrapper = __webpack_require__(241),
+	    LodashWrapper = __webpack_require__(248),
+	    baseLodash = __webpack_require__(242),
 	    isArray = __webpack_require__(199),
 	    isObjectLike = __webpack_require__(198),
-	    wrapperClone = __webpack_require__(248);
+	    wrapperClone = __webpack_require__(249);
 	
 	/** Used for built-in method references. */
 	var objectProto = global.Object.prototype;
@@ -37826,11 +37934,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 247 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(232),
-	    baseLodash = __webpack_require__(241);
+	var baseCreate = __webpack_require__(233),
+	    baseLodash = __webpack_require__(242);
 	
 	/**
 	 * The base constructor for creating `lodash` wrapper objects.
@@ -37854,12 +37962,12 @@
 
 
 /***/ },
-/* 248 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(240),
-	    LodashWrapper = __webpack_require__(247),
-	    copyArray = __webpack_require__(238);
+	var LazyWrapper = __webpack_require__(241),
+	    LodashWrapper = __webpack_require__(248),
+	    copyArray = __webpack_require__(239);
 	
 	/**
 	 * Creates a clone of `wrapper`.
@@ -37883,11 +37991,11 @@
 
 
 /***/ },
-/* 249 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(224),
-	    now = __webpack_require__(250);
+	var baseSetData = __webpack_require__(225),
+	    now = __webpack_require__(251);
 	
 	/** Used to detect hot functions by number of calls within a span of milliseconds. */
 	var HOT_COUNT = 150,
@@ -37930,7 +38038,7 @@
 
 
 /***/ },
-/* 250 */
+/* 251 */
 /***/ function(module, exports) {
 
 	/**
@@ -37955,10 +38063,10 @@
 
 
 /***/ },
-/* 251 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(238),
+	var copyArray = __webpack_require__(239),
 	    isIndex = __webpack_require__(201);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -37990,7 +38098,7 @@
 
 
 /***/ },
-/* 252 */
+/* 253 */
 /***/ function(module, exports) {
 
 	/** Used as the internal argument placeholder. */
@@ -38024,11 +38132,11 @@
 
 
 /***/ },
-/* 253 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(231);
+	    createCtorWrapper = __webpack_require__(232);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -38073,13 +38181,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 254 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(235),
-	    composeArgsRight = __webpack_require__(236),
-	    copyArray = __webpack_require__(238),
-	    replaceHolders = __webpack_require__(252);
+	var composeArgs = __webpack_require__(236),
+	    composeArgsRight = __webpack_require__(237),
+	    copyArray = __webpack_require__(239),
+	    replaceHolders = __webpack_require__(253);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38169,18 +38277,18 @@
 
 
 /***/ },
-/* 255 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(256);
-
-
-/***/ },
 /* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(257),
-	    baseEach = __webpack_require__(258),
+	module.exports = __webpack_require__(257);
+
+
+/***/ },
+/* 257 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var arrayEach = __webpack_require__(258),
+	    baseEach = __webpack_require__(259),
 	    isArray = __webpack_require__(199),
 	    toFunction = __webpack_require__(203);
 	
@@ -38222,7 +38330,7 @@
 
 
 /***/ },
-/* 257 */
+/* 258 */
 /***/ function(module, exports) {
 
 	/**
@@ -38250,11 +38358,11 @@
 
 
 /***/ },
-/* 258 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseForOwn = __webpack_require__(184),
-	    createBaseEach = __webpack_require__(259);
+	    createBaseEach = __webpack_require__(260);
 	
 	/**
 	 * The base implementation of `_.forEach` without support for iteratee shorthands.
@@ -38270,7 +38378,7 @@
 
 
 /***/ },
-/* 259 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isArrayLike = __webpack_require__(194);
@@ -38308,7 +38416,7 @@
 
 
 /***/ },
-/* 260 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38340,7 +38448,9 @@
 	});
 
 /***/ },
-/* 261 */
+/* 262 */,
+/* 263 */,
+/* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -38353,7 +38463,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(262);
+	var _mouseControls = __webpack_require__(265);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -38408,14 +38518,14 @@
 	});
 
 /***/ },
-/* 262 */
+/* 265 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _each = __webpack_require__(255);
+	var _each = __webpack_require__(256);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -38642,6 +38752,80 @@
 			return topEntity;
 		}
 	};
+
+/***/ },
+/* 266 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('ui-render', {
+		components: ['entity-spawn-queue'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.ui = _instanceManager2.default.get('ui');
+		},
+	
+		run: _lodash2.default.throttle(function (entities) {
+			var selectedEntities = _lodash2.default.filter(entities, function (entity) {
+				return entity.hasComponent('selected');
+			});
+	
+			if (selectedEntities.length === 1) {
+				this.ui.setBuildQueue(selectedEntities[0].getComponent('entity-spawn-queue').queue);
+			} else {
+				this.ui.setBuildQueue(null);
+			}
+		}, 100)
+	});
+
+/***/ },
+/* 267 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _lodash = __webpack_require__(19);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerSystem('render-production-options', {
+		components: ['entity-spawner'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.ui = _instanceManager2.default.get('ui');
+		},
+	
+		run: _lodash2.default.throttle(function (entities) {
+			var selectedEntities = _lodash2.default.filter(entities, function (entity) {
+				return entity.hasComponent('selected');
+			});
+	
+			if (selectedEntities.length) {
+				this.ui.setProductionOptions(selectedEntities[0].getComponent('entity-spawner').availableBlueprints);
+			} else {
+				this.ui.setProductionOptions(null);
+			}
+		}, 100)
+	});
 
 /***/ }
 /******/ ]);

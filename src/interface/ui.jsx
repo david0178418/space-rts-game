@@ -1,12 +1,17 @@
 /* eslint no-unused-vars: 0 */
 import instanceManager from 'instance-manager';
 import React, { Component } from 'react';
+
+import BuildQueue from './build-queue';
 import ProdctionOptions from './production-options';
 
 const styles = {
-	left: '50px',
+	height: 0,
+	left: 0,
+	margin: '20px',
 	position: 'absolute',
-	top: '50px',
+	top: 0,
+	width: '100%',
 	zIndex: 10,
 };
 
@@ -17,6 +22,7 @@ class UI extends Component {
 
 		this.state = {
 			productionOptions: null,
+			buildQueue: null,
 		};
 	}
 
@@ -26,6 +32,11 @@ class UI extends Component {
 				{this.state.productionOptions && (
 					<ProdctionOptions
 						productionOptions={this.state.productionOptions}
+					/>
+				)}
+				{this.state.buildQueue && (
+					<BuildQueue
+						buildQueue={this.state.buildQueue}
 					/>
 				)}
 			</div>

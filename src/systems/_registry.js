@@ -6,3 +6,5 @@ import './movement';
 import './order-processing';
 import './selection';
 import './waypoint-dequeue';
+import './render-production-options';
+import './render-build-queue';

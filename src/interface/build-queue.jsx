@@ -9,7 +9,7 @@ const ecsManager = instanceManager.get('ecs-manager');
 const styles = {
 	left: 0,
 	position: 'absolute',
-	top: '20px',
+	top: '50px',
 };
 const buttonStyles = {
 	backgroundColor: 'transparent',
@@ -23,40 +23,37 @@ const labelStyles = {
 	fontWeight: 'bold',
 };
 
-function handleSelectBlueprint(key, label) {
+function dequeueBuildItem(index) {
 	// TODO Create a system or something to process an order like this
-	// rather than directly updating selected entities
+	// rather than directly updating selected entities. Things like resources
+	// will have to be reclaimed
 	let entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 
-	_.each(entities, function(entity) {
-		entity.getComponent('entity-spawn-queue').queue.push({
-			label: label,
-			blueprint: key,
-			elapsedBuildTime: 0,
-		});
-	});
+	// NOTE For now, assuming there will only be 1 entity with a queue selected.
+	// Likely will need to figure out how to handle multiple being selected.
+	entities[0].getComponent('entity-spawn-queue').queue.splice(index, 1);
 }
 
 export default
 function(props) {
-	let result = [];
+	let buildQueueButtons = [];
 
-	forOwn(props.productionOptions, (blueprint, key) => {
-		result.push(
+	_.each(props.buildQueue, (queuedItem, index) => {
+		buildQueueButtons.push(
 			<button
-				key={key}
+				key={queuedItem.label + index}
 				className="icon-button"
 				style={buttonStyles}
-				onClick={_.bind(handleSelectBlueprint, null, key, blueprint.label)}
+				onClick={_.bind(dequeueBuildItem, null, index)}
 			>
-				{blueprint.label}
+				{queuedItem.label}
 			</button>
 		);
 	});
 
 	return (
 		<div style={styles}>
-			<label style={labelStyles}>Blueprints:</label> {result}
+			<label style={labelStyles}>Build Queue:</label> {buildQueueButtons}
 		</div>
 	);
 }
