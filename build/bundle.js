@@ -36171,7 +36171,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerComponent('spawn-queue', {
+	_instanceManager2.default.get('ecs-manager').registerComponent('entity-spawn-queue', {
 		factory: function factory() {
 			var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
@@ -38683,8 +38683,6 @@
 			this.game.physics.startSystem(_phaser2.default.Physics.ARCADE);
 	
 			ecsManager.runSystemInits();
-	
-			_instanceManager2.default.get('ui');
 		},
 		update: function update() {
 			_mouseControls2.default.update();

@@ -38,8 +38,6 @@ game.state.add('play', {
 		this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
 		ecsManager.runSystemInits();
-
-		instanceManager.get('ui');
 	},
 	update() {
 		MouseControls.update();
