@@ -2,6 +2,8 @@ import _ from 'lodash';
 import Config from 'config';
 import instanceManager from 'instance-manager';
 
+import 'components/entity-spawn-queue';
+
 import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 import planetFactory from 'prefabs/planet';
@@ -46,6 +48,7 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		playerPlanet.addComponent('team', {name: 'player'});
 
 		playerPlanet
+			.removeComponent('colonizable')
 			.addComponent('entity-spawn-queue', {
 				queue: [
 					{

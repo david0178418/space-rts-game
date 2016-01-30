@@ -29,6 +29,10 @@ class Entity {
 		return _.keys(this[components]);
 	}
 
+	destroy() {
+		this.removeComponents();
+	}
+
 	getComponent(component) {
 		return this[components][component];
 	}
@@ -41,6 +45,14 @@ class Entity {
 		return _.every(components, this.hasComponent);
 	}
 
+	removeComponents() {
+		_.each(this.currentComponents(), (component) => {
+			this.removeComponent(component);
+		});
+
+		return this;
+	}
+
 	removeComponent(name) {
 		let component = this[components][name];
 
@@ -50,6 +62,8 @@ class Entity {
 
 		this[ecsManager].getComponentCleanup(name)(component);
 		delete this[components][name];
+
+		return this;
 	}
 
 	toggleComponent(component, addComponent, props) {

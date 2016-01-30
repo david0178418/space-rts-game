@@ -9,6 +9,7 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 		this.game = instanceManager.get('game');
 		this.moveOrderSound = this.game.add.audio('move-order');
 		this.worldEntities = instanceManager.get('world-entities');
+		this.ecsManager = instanceManager.get('ecs-manager');
 	},
 
 	run: function(entities) {
@@ -43,7 +44,7 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 						x: localPoint.x,
 						y: localPoint.y,
 					});
-				} else {
+				} else if(!(movableEntities[0].hasComponent('colonizer') && this.colonizeTarget(movableEntities[0], this.game.input.mousePointer.position))) {
 					movableEntities[0].addComponent('waypoint', {
 						x: localPoint.x,
 						y: localPoint.y,
@@ -55,10 +56,14 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 				}
 			} else {
 				for(let i = 0; i < movableEntities.length; i++) {
-					movableEntities[i].addComponent('group-movement', {
-						queue: instanceManager.get('keyboard-controls').shiftModifier.isDown,
-						centralPoint: localPoint,
-					});
+					// TODO Rather than directly read mousePointer, need to be able to
+					// properly convert between screen and world coordinates.
+					if(!(movableEntities[i].hasComponent('colonizer') && this.colonizeTarget(movableEntities[i], localPoint))) {
+						movableEntities[i].addComponent('group-movement', {
+							queue: instanceManager.get('keyboard-controls').shiftModifier.isDown,
+							centralPoint: localPoint,
+						});
+					}
 				}
 			}
 		} else {
@@ -69,5 +74,26 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 				});
 			}
 		}
+	},
+	colonizeTarget(entity, location) {
+		let colonizableEntities = this.ecsManager.getEntities(['colonizable']);
+
+		for(let i = 0; i < colonizableEntities.length; i++) {
+			let colonizableSprite = colonizableEntities[i].getComponent('sprite');
+
+			if(colonizableSprite.getBounds().contains(location.x, location.y)) {
+				entity
+					.addComponent('colonize', {
+						target: colonizableEntities[i],
+					})
+					.addComponent('waypoint', {
+						x: colonizableSprite.x,
+						y: colonizableSprite.y,
+					});
+				return true;
+			}
+		}
+
+		return false;
 	},
 });

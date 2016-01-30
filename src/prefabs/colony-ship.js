@@ -14,6 +14,7 @@ function(position) {
 		.addComponent('selectable')
 		.addComponent('team')
 		.addComponent('waypoint-queue')
+		.addComponent('colonizer')
 		.addComponent('environment', {
 			type: '',
 			habitability: 0,

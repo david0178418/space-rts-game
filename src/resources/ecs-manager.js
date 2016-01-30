@@ -4,6 +4,6 @@ import instanceManager from 'instance-manager';
 instanceManager.registerResource('ecs-manager', {
 	init() {
 		// TODO Remove debug variable
-		return window.entityManager = new ECSManager();
+		return window.ecsManager = new ECSManager();
 	},
 });

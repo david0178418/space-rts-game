@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import bind from 'lodash/bind';
 import each from 'lodash/each';
 import instanceManager from 'instance-manager';
@@ -16,7 +15,6 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 		this.ecsManager = instanceManager.get('ecs-manager');
-		// this.uiViewModel = instanceManager.get('uiViewModel');
 		this.selectionChanged = false;
 
 		this.checkSelection = bind(this.checkSelection, this);

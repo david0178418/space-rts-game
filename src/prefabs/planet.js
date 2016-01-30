@@ -10,6 +10,7 @@ function(position) {
 		.createEntity()
 		.addComponent('sprite', _.extend({graphic: 'planet'}, position))
 		.addComponent('selectable')
+		.addComponent('colonizable')
 		.addComponent('environment', {
 			type: '',
 			habitability: 0,

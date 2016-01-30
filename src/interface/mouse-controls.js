@@ -95,6 +95,7 @@ export default {
 			return;
 		}
 
+		// TODO Remove debug
 		let selectedEntites = window.selectedEntites = [];
 
 		this.drawDragArea(dragX, dragY);

@@ -1,5 +1,6 @@
 import './universe-creation';
 import './camera';
+import './colonize';
 import './entity-spawn-dequeue';
 import './group-coordination';
 import './movement';
