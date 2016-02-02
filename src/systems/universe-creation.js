@@ -40,12 +40,13 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 	assignTeams(planets) {
 		let playerPlanet = planets[0];
 		let playerPlanetSpriteComponent = playerPlanet.getComponent('sprite');
-		// let enemyPlanet = planets[1];
+		let enemyPlanet = planets[planets.length - 1];
 
 		this.worldEntities.x = -playerPlanetSpriteComponent.x + Config.screen.width / 2;
 		this.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
 
 		playerPlanet.addComponent('team', {name: 'player'});
+		enemyPlanet.addComponent('team', {name: 'ai'});
 
 		playerPlanet
 			.removeComponent('colonizable')
@@ -80,7 +81,7 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 						baseBuildTime: 4000,
 						cost: 0,
 						label: 'Fighter',
-						prefab: fighterPrefab,
+						prefab: fighterPrefab('green'),
 					},
 					'colony-ship': {
 						baseBuildTime: 8000,
@@ -94,65 +95,56 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 				x: playerPlanet.getComponent('sprite').x + 100,
 				y: playerPlanet.getComponent('sprite').y + 75,
 			});
-		//
-		// playerPlanet.
-		// 	addComponent('probe-blueprint', {
-		// 		prefab: require('prefabs/probe'),
-		// 		buildTime: 3000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('fighter-blueprint', {
-		// 		prefab: require('prefabs/fighter'),
-		// 		buildTime: 4000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('battleship-blueprint', {
-		// 		prefab: require('prefabs/battleship'),
-		// 		buildTime: 6000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('colony-ship-blueprint', {
-		// 		prefab: require('prefabs/colony-ship'),
-		// 		buildTime: 8000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('entity-spawner', {
-		// 		activeGenerator: 'probe-blueprint',
-		// 		rallyPoint: {
-		// 			x: playerPlanet.x + 100,
-		// 			y: playerPlanet.y + 75,
-		// 		},
-		// 	});
-		//
-		// enemyPlanet.components.team.name = 'enemy';
-		//
-		// enemyPlanet.
-		// 	addComponent('probe-blueprint', {
-		// 		prefab: require('prefabs/probe'),
-		// 		buildTime: 3000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('fighter-blueprint', {
-		// 		prefab: require('prefabs/fighter'),
-		// 		buildTime: 4000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('battleship-blueprint', {
-		// 		prefab: require('prefabs/battleship'),
-		// 		buildTime: 6000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('colony-ship-blueprint', {
-		// 		prefab: require('prefabs/colony-ship'),
-		// 		buildTime: 8000,
-		// 		currentUnitBuildTime: 0,
-		// 	}).
-		// 	addComponent('entity-spawner', {
-		// 		activeGenerator: 'probe-blueprint',
-		// 		rallyPoint: {
-		// 			x: playerPlanet.x + 100,
-		// 			y: playerPlanet.y + 75,
-		// 		},
-		// 	});
+
+		enemyPlanet
+			.removeComponent('colonizable')
+			.addComponent('entity-spawn-queue', {
+				queue: [
+					{
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'Colony Ship',
+						blueprint: 'colony-ship',
+						elapsedBuildTime: 0,
+					},
+				],
+			})
+			.addComponent('entity-spawner', {
+				availableBlueprints: {
+					fighter: {
+						baseBuildTime: 4000,
+						cost: 0,
+						label: 'Fighter',
+						prefab: fighterPrefab('red'),
+					},
+					'colony-ship': {
+						baseBuildTime: 8000,
+						cost: 0,
+						label: 'Colony Ship',
+						prefab: colonyShipPrefab,
+					},
+				},
+			})
+			.addComponent('waypoint', {
+				x: playerPlanet.getComponent('sprite').x + 100,
+				y: playerPlanet.getComponent('sprite').y + 75,
+			});
+
+		// TODO Remove debug
+		window.enemyPlanet = enemyPlanet;
 	},
 });

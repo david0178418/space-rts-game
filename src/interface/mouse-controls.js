@@ -26,6 +26,7 @@ export default {
 		this.graphic = this.game.add.graphics(-500, -500);
 		this.graphic.alpha = 0.25;
 		this.graphic.visible = false;
+		this.graphic.smoothed = false;
 
 		this.game.input.onUp.add(this.markClick.bind(this));
 		this.game.input.onTap.add(this.differentiateClick.bind(this));

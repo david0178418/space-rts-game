@@ -8,9 +8,11 @@ const ecsManager = instanceManager.get('ecs-manager');
 
 game.state.add('play', {
 	preload(game) {
+		game.load.image('green-fighter', 'assets/images/green-fighter.png');
+		game.load.image('red-fighter', 'assets/images/red-fighter.png');
+
 		game.load.image('battleship', 'assets/images/battleship.png');
 		game.load.image('colony-ship', 'assets/images/colony-ship.png');
-		game.load.image('fighter', 'assets/images/fighter.png');
 		game.load.image('planet', 'assets/images/planet.png');
 		game.load.image('probe', 'assets/images/probe.png');
 
