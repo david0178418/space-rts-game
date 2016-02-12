@@ -27,7 +27,6 @@ game.state.add('play', {
 	},
 
 	create(game) {
-		game.physics.startSystem(Phaser.Physics.NINJA);
 		game.scale.setShowAll();
 		game.world.setBounds(0, 0, Config.stage.width, Config.stage.height);
 		game.scale.refresh();
