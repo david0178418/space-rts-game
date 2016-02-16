@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import Entity from './entity';
 
-const components = Symbol('components');
+// TODO Figure out if I want to make private or not.
+const components = 'components';// Symbol('components');
 const entities = 'entities'; // Symbol('entities');
 const initSystems = Symbol('init-systems');
 const runSystems = Symbol('run-systems');
@@ -46,14 +47,14 @@ class ECSManager {
 	// @return {object}
 	// TODO Consider case of over-writing a component that has an
 	// "onRemove" callback (such as "sprite")
-	createComponent(name, state = {}) {
+	createComponent(name, state = {}, entityContext) {
 		let component = this[components][name];
 
 		if(!component) {
 			this.registerComponent(name, {state});
 			return state;
 		} else if(component.factory) {
-			return component.factory(state);
+			return component.factory.call(entityContext, state);
 		} else {
 			return extend({}, component.state, state);
 		}
@@ -110,7 +111,7 @@ class ECSManager {
 	}
 
 	runSystemInits() {
-		_.each(this[initSystems], function(system) {
+		_.each(_.values(this[initSystems]), function(system) {
 			system.init();
 		});
 	}

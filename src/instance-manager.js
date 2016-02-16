@@ -11,7 +11,7 @@ class InstanceManager {
 		let resourceInstance = this[INSTANCES_KEY][resourceName];
 		const resources = this[RESOURCES_KEY];
 
-		if(!resourceInstance) {
+		if(!resourceInstance && resourceName) {
 			resourceInstance = resources[resourceName].init();
 
 			if(resources[resourceName].cache || resources[resourceName].cache === undefined) {

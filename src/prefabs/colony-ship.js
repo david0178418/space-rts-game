@@ -3,6 +3,7 @@ import instanceManager from 'instance-manager';
 
 import 'components/entity-spawner';
 import 'components/entity-spawn-queue';
+import 'components/physics';
 import 'components/sprite';
 import 'components/team';
 
@@ -11,6 +12,7 @@ function(position) {
 	return instanceManager.get('ecs-manager')
 		.createEntity()
 		.addComponent('sprite', _.extend({graphic: 'colony-ship'}, position))
+		.addComponent('physics')
 		.addComponent('selectable')
 		.addComponent('team')
 		.addComponent('waypoint-queue')

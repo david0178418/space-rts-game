@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+// TODO Figure out if I want to make private or not.
 const components = 'components'; // Symbol('components');
 const ecsManager = Symbol('entity-manager');
 const id = Symbol('id');
@@ -19,7 +20,7 @@ class Entity {
 			return this;
 		}
 
-		this[components][component] = this[ecsManager].createComponent(component, props);
+		this[components][component] = this[ecsManager].createComponent(component, props, this);
 
 		return this;
 	}
@@ -60,7 +61,7 @@ class Entity {
 			return;
 		}
 
-		this[ecsManager].getComponentCleanup(name)(component);
+		this[ecsManager].getComponentCleanup.call(this, name)(component);
 		delete this[components][name];
 
 		return this;
