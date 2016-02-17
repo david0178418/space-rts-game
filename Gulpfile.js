@@ -14,7 +14,6 @@ gulp.task('webserver', function() {
 });
 
 let myDevConfig = Object.create(webpackConfig);
-myDevConfig.debug = true;
 
 // create a single instance of the compiler to allow caching
 let devCompiler = webpack(myDevConfig);

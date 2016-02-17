@@ -33,7 +33,7 @@ game.state.add('play', {
 
 		this.bgm = game.add.audio('lasting-hope');
 		this.bgm.loop = true;
-		this.bgm.play();
+		// this.bgm.play();
 
 		MouseControls.init();
 

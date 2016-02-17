@@ -15577,7 +15577,7 @@
 				return;
 			}
 	
-			this[ecsManager].getComponentCleanup.call(this, name)(component);
+			this[ecsManager].getComponentCleanup(name).call(this, component);
 			delete this[components][name];
 	
 			return this;
@@ -36719,7 +36719,9 @@
 			return true;
 		},
 		onRemove: function onRemove() {
-			this.components.physics.immovable = false;
+			if (this.components.physics) {
+				this.components.physics.immovable = false;
+			}
 		}
 	});
 
@@ -39078,7 +39080,7 @@
 	
 			this.bgm = game.add.audio('lasting-hope');
 			this.bgm.loop = true;
-			this.bgm.play();
+			// this.bgm.play();
 	
 			_mouseControls2.default.init();
 	

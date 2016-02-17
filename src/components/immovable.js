@@ -9,6 +9,8 @@ instanceManager
 			return true;
 		},
 		onRemove() {
-			this.components.physics.immovable = false;
+			if (this.components.physics) {
+				this.components.physics.immovable = false;
+			}
 		},
 	});

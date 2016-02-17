@@ -34,7 +34,7 @@ module.exports = {
 	},
 	plugins: [
 	],
-	devtool: 'eval-source-map',
+	devtool: 'source-map',
 	externals: {
 		'phaser': 'Phaser',
 	},

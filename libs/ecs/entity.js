@@ -61,7 +61,7 @@ class Entity {
 			return;
 		}
 
-		this[ecsManager].getComponentCleanup.call(this, name)(component);
+		this[ecsManager].getComponentCleanup(name).call(this, component);
 		delete this[components][name];
 
 		return this;
