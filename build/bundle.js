@@ -15549,7 +15549,7 @@
 		};
 	
 		Entity.prototype.getComponent = function getComponent(component) {
-			return this[components][component];
+			return this[components][component] || {};
 		};
 	
 		Entity.prototype.hasComponent = function hasComponent(component) {
@@ -36714,13 +36714,13 @@
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('immovable', {
 		factory: function factory() {
-			this.components.physics.immovable = true;
+			this.getComponent('physics').immovable = true;
 	
 			return true;
 		},
 		onRemove: function onRemove() {
-			if (this.components.physics) {
-				this.components.physics.immovable = false;
+			if (this.hasComponent('physics')) {
+				this.getComponent('physics').immovable = false;
 			}
 		}
 	});
