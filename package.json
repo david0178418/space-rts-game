@@ -22,7 +22,10 @@
     "eslint": "^2.1.0",
     "eslint-plugin-no-console-log": "^1.0.0",
     "eslint-plugin-react": "^3.15.0",
-    "webpack": "^1.12.12"
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.7",
+    "gulp-webserver": "^0.9.1",
+    "webpack": "^1.12.13"
   },
   "dependencies": {
     "ensy": "^1.0.0",
