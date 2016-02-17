@@ -6,4 +6,5 @@ import './quadtree';
 import './dynamic-quadtree';
 import './planets-quadtree';
 import './ecs-manager';
+import './team-colors';
 import './ui';

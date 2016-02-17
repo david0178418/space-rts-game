@@ -46,7 +46,7 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		this.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
 
 		playerPlanet.addComponent('team', {name: 'player'});
-		enemyPlanet.addComponent('team', {name: 'ai'});
+		enemyPlanet.addComponent('team', {name: 'ai1'});
 
 		playerPlanet
 			.removeComponent('colonizable')

@@ -1,8 +1,9 @@
 {
-    "parse": "babel-eslint",
+    "parser": "babel-eslint",
     "extends": "eslint:recommended",
     "plugins": [
-        "react"
+        "react",
+        "no-console-log"
       ],
     "env": {
         "es6": true,
@@ -39,7 +40,9 @@
                 "args": "none",
             }
         ],
-        "no-var": 2
+        "no-var": 2,
+        "no-console": 0,
+        "no-console-log/no-console-log": 2
     },
     "ecmaFeatures": {
         "arrowFunctions": true,
