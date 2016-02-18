@@ -15549,7 +15549,7 @@
 		};
 	
 		Entity.prototype.getComponent = function getComponent(component) {
-			return this[components][component] || {};
+			return this[components][component];
 		};
 	
 		Entity.prototype.hasComponent = function hasComponent(component) {

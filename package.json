@@ -25,6 +25,7 @@
     "gulp": "^3.9.1",
     "gulp-util": "^3.0.7",
     "gulp-webserver": "^0.9.1",
+    "phaser": "^2.4.5",
     "webpack": "^1.12.13"
   },
   "dependencies": {
