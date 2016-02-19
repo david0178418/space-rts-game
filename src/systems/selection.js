@@ -3,8 +3,7 @@ import each from 'lodash/each';
 import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
 
-
-instanceManager.get('ecs-manager').registerSystem('selection', {
+export default {
 	SELECTION_PADDING: 30,
 
 	components: [
@@ -59,4 +58,4 @@ instanceManager.get('ecs-manager').registerSystem('selection', {
 			selectableComponent.graphic.visible = false;
 		}
 	},
-});
+};

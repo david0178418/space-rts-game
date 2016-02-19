@@ -93,6 +93,8 @@ class ECSManager {
 	// @param {object} [defaultData={}] - provide an optional baseline for a component
 	registerComponent(name, defaultData) {
 		this[components][name] = defaultData;
+
+		return this;
 	}
 
 	// @param {string} name
@@ -108,6 +110,8 @@ class ECSManager {
 		if(system.run || system.runOne) {
 			this[runSystems][name] = system;
 		}
+
+		return this;
 	}
 
 	runSystemInits() {

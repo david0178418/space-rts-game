@@ -2,7 +2,7 @@ import _ from 'lodash';
 import Config from 'config';
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('camera', {
+export default {
 	dirtyBackground: true,
 	panSpeed: 8,
 	zoomIncrement: 5, // %
@@ -103,4 +103,4 @@ instanceManager.get('ecs-manager').registerSystem('camera', {
 		this.limitView();
 		this.updateBackground();
 	},
-});
+};

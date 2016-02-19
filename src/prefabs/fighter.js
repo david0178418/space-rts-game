@@ -12,6 +12,9 @@ function(color) {
 		return instanceManager.get('ecs-manager')
 			.createEntity()
 			.addComponent('sprite', _.extend({graphic: `${color}-fighter`}, position))
+			.addComponent('radar', {
+				range: 500,
+			})
 			.addComponent('dockable', {
 				size: 10,
 			})

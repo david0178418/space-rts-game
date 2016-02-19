@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('render-production-options', {
+export default {
 	components: [
 		'entity-spawner',
 	],
@@ -22,4 +22,4 @@ instanceManager.get('ecs-manager').registerSystem('render-production-options', {
 			this.ui.setProductionOptions(null);
 		}
 	}, 100),
-});
+};

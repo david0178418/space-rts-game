@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('dequeue-entity-spawn', {
+export default {
 	components: [
 		'entity-spawner',
 		'entity-spawn-queue',
@@ -46,4 +46,4 @@ instanceManager.get('ecs-manager').registerSystem('dequeue-entity-spawn', {
 			});
 		}
 	},
-});
+};

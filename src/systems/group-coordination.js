@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('group-coordination', {
+export default {
 	components: [
 		'group-movement',
 	],
@@ -29,7 +29,6 @@ instanceManager.get('ecs-manager').registerSystem('group-coordination', {
 		let movableSelectedCount = 0;
 		let rowCount;
 		let slotWidth = 80;
-		let waypointsComponent;
 		let xTotal = 0;
 		let yTotal = 0;
 
@@ -88,4 +87,4 @@ instanceManager.get('ecs-manager').registerSystem('group-coordination', {
 			this.moveOrderSound.play();
 		}
 	},
-});
+};

@@ -62,7 +62,7 @@
 	
 	__webpack_require__(210);
 	
-	__webpack_require__(273);
+	__webpack_require__(274);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -855,6 +855,8 @@
 	
 		ECSManager.prototype.registerComponent = function registerComponent(name, defaultData) {
 			this[components][name] = defaultData;
+	
+			return this;
 		};
 	
 		// @param {string} name
@@ -871,6 +873,8 @@
 			if (system.run || system.runOne) {
 				this[_runSystems][name] = system;
 			}
+	
+			return this;
 		};
 	
 		ECSManager.prototype.runSystemInits = function runSystemInits() {
@@ -36234,34 +36238,24 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
-	__webpack_require__(211);
-
-	__webpack_require__(223);
-
-	__webpack_require__(224);
-
-	__webpack_require__(225);
-
-	__webpack_require__(226);
-
-	__webpack_require__(227);
-
-	__webpack_require__(228);
-
-	__webpack_require__(229);
-
-	__webpack_require__(270);
-
-	__webpack_require__(271);
-
-	__webpack_require__(272);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	
+	ecsManager.registerSystem('universe-creation', __webpack_require__(211).default).registerSystem('camera', __webpack_require__(223).default).registerSystem('colonize', __webpack_require__(224).default).registerSystem('entity-spawn-dequeue', __webpack_require__(225).default).registerSystem('group-coordination', __webpack_require__(226).default).registerSystem('movement', __webpack_require__(227).default).registerSystem('order-processing', __webpack_require__(228).default).registerSystem('selection', __webpack_require__(229).default).registerSystem('waypoint-dequeue', __webpack_require__(270).default).registerSystem('render-production-options', __webpack_require__(271).default).registerSystem('render-build-queue', __webpack_require__(272).default).registerSystem('radar-detection', __webpack_require__(273).default);
 
 /***/ },
 /* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(22);
 	
@@ -36291,7 +36285,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('universe-creation', {
+	exports.default = {
 		init: function init() {
 			var planets = [];
 	
@@ -36417,7 +36411,7 @@
 			// TODO Remove debug
 			window.enemyPlanet = enemyPlanet;
 		}
-	});
+	};
 
 /***/ },
 /* 212 */
@@ -36604,7 +36598,9 @@
 	
 	exports.default = function (color) {
 		return function (position) {
-			return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: color + '-fighter' }, position)).addComponent('dockable', {
+			return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: color + '-fighter' }, position)).addComponent('radar', {
+				range: 500
+			}).addComponent('dockable', {
 				size: 10
 			}).addComponent('team').addComponent('selectable').addComponent('waypoint-queue').addComponent('movable', {
 				acceleration: 150,
@@ -36634,9 +36630,19 @@
 
 /***/ },
 /* 219 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	_instanceManager2.default.get('ecs-manager').registerComponent('radar', {
+		range: 0
+	});
 
 /***/ },
 /* 220 */
@@ -36731,6 +36737,8 @@
 
 	'use strict';
 	
+	exports.__esModule = true;
+	
 	var _lodash = __webpack_require__(22);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
@@ -36745,7 +36753,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('camera', {
+	exports.default = {
 		dirtyBackground: true,
 		panSpeed: 8,
 		zoomIncrement: 5, // %
@@ -36842,13 +36850,15 @@
 			this.limitView();
 			this.updateBackground();
 		}
-	});
+	};
 
 /***/ },
 /* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _instanceManager = __webpack_require__(9);
 	
@@ -36864,7 +36874,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('colonize', {
+	exports.default = {
 		components: ['colonize'],
 	
 		init: function init() {
@@ -36910,13 +36920,15 @@
 	
 			this.ecsManager.destroyEntity(entity);
 		}
-	});
+	};
 
 /***/ },
 /* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(22);
 	
@@ -36928,7 +36940,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('dequeue-entity-spawn', {
+	exports.default = {
 		components: ['entity-spawner', 'entity-spawn-queue'],
 	
 		init: function init() {
@@ -36970,13 +36982,15 @@
 				});
 			}
 		}
-	});
+	};
 
 /***/ },
 /* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(22);
 	
@@ -36988,7 +37002,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('group-coordination', {
+	exports.default = {
 		components: ['group-movement'],
 	
 		init: function init() {
@@ -37014,7 +37028,6 @@
 			var movableSelectedCount = 0;
 			var rowCount = undefined;
 			var slotWidth = 80;
-			var waypointsComponent = undefined;
 			var xTotal = 0;
 			var yTotal = 0;
 	
@@ -37073,13 +37086,15 @@
 				this.moveOrderSound.play();
 			}
 		}
-	});
+	};
 
 /***/ },
 /* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(22);
 	
@@ -37091,7 +37106,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('movement', {
+	exports.default = {
 		components: ['movable', 'waypoint'],
 	
 		init: function init() {
@@ -37137,8 +37152,8 @@
 			sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
 			sprite.position.y += Math.sin(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
 		}
-	});
-	
+	};
+
 	// TODO Refactor systems and others that need larger references for performance
 	// See the following jsperf: https://jsperf.com/closure-vs-property/12
 	// Determine how to best store references to libraries and global instances
@@ -37149,13 +37164,15 @@
 
 	'use strict';
 	
+	exports.__esModule = true;
+	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('orders-interpretation', {
+	exports.default = {
 		components: ['order'],
 	
 		init: function init() {
@@ -37247,13 +37264,15 @@
 	
 			return false;
 		}
-	});
+	};
 
 /***/ },
 /* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _bind = __webpack_require__(230);
 	
@@ -37273,7 +37292,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('selection', {
+	exports.default = {
 		SELECTION_PADDING: 30,
 	
 		components: ['selectable'],
@@ -37322,7 +37341,7 @@
 				selectableComponent.graphic.visible = false;
 			}
 		}
-	});
+	};
 
 /***/ },
 /* 230 */
@@ -38927,13 +38946,15 @@
 
 	'use strict';
 	
+	exports.__esModule = true;
+	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('waypoint-dequeue', {
+	exports.default = {
 		components: ['waypoint-queue'],
 	
 		init: function init() {
@@ -38951,13 +38972,15 @@
 	
 			entity.addComponent('waypoint', waypointQueue.queue.shift());
 		}
-	});
+	};
 
 /***/ },
 /* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(22);
 	
@@ -38969,7 +38992,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('render-production-options', {
+	exports.default = {
 		components: ['entity-spawner'],
 	
 		init: function init() {
@@ -38988,13 +39011,15 @@
 				this.ui.setProductionOptions(null);
 			}
 		}, 100)
-	});
+	};
 
 /***/ },
 /* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+	
+	exports.__esModule = true;
 	
 	var _lodash = __webpack_require__(22);
 	
@@ -39006,7 +39031,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	_instanceManager2.default.get('ecs-manager').registerSystem('ui-render', {
+	exports.default = {
 		components: ['entity-spawn-queue'],
 	
 		init: function init() {
@@ -39025,10 +39050,41 @@
 				this.ui.setBuildQueue(null);
 			}
 		}, 100)
-	});
+	};
 
 /***/ },
 /* 273 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _lodash = __webpack_require__(22);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	exports.default = {
+		components: ['entity-spawn-queue'],
+	
+		init: function init() {
+			this.game = _instanceManager2.default.get('game');
+			this.ui = _instanceManager2.default.get('ui');
+		},
+	
+		run: _lodash2.default.throttle(function (entities) {
+			console.debug(1);
+		}, 100)
+	};
+
+/***/ },
+/* 274 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39041,7 +39097,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(274);
+	var _mouseControls = __webpack_require__(275);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -39096,7 +39152,7 @@
 	});
 
 /***/ },
-/* 274 */
+/* 275 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

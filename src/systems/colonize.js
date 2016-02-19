@@ -3,7 +3,7 @@ import instanceManager from 'instance-manager';
 import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 
-instanceManager.get('ecs-manager').registerSystem('colonize', {
+export default {
 	components: [
 		'colonize',
 	],
@@ -56,4 +56,4 @@ instanceManager.get('ecs-manager').registerSystem('colonize', {
 
 		this.ecsManager.destroyEntity(entity);
 	},
-});
+};

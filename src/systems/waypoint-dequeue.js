@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('waypoint-dequeue', {
+export default {
 	components: [
 		'waypoint-queue',
 	],
@@ -20,4 +20,4 @@ instanceManager.get('ecs-manager').registerSystem('waypoint-dequeue', {
 
 		entity.addComponent('waypoint', waypointQueue.queue.shift());
 	},
-});
+};

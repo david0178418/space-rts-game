@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('ui-render', {
+export default {
 	components: [
 		'entity-spawn-queue',
 	],
@@ -22,4 +22,4 @@ instanceManager.get('ecs-manager').registerSystem('ui-render', {
 			this.ui.setBuildQueue(null);
 		}
 	}, 100),
-});
+};

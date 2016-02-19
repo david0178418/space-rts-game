@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
+export default {
 	components: [
 		'order',
 	],
@@ -96,4 +96,4 @@ instanceManager.get('ecs-manager').registerSystem('orders-interpretation', {
 
 		return false;
 	},
-});
+};

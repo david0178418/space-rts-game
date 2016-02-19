@@ -8,7 +8,7 @@ import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 import planetFactory from 'prefabs/planet';
 
-instanceManager.get('ecs-manager').registerSystem('universe-creation', {
+export default {
 	init() {
 		let planets = [];
 
@@ -147,4 +147,4 @@ instanceManager.get('ecs-manager').registerSystem('universe-creation', {
 		// TODO Remove debug
 		window.enemyPlanet = enemyPlanet;
 	},
-});
+};

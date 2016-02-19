@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
-instanceManager.get('ecs-manager').registerSystem('movement', {
+export default {
 	components: [
 		'movable',
 		'waypoint',
@@ -50,7 +50,7 @@ instanceManager.get('ecs-manager').registerSystem('movement', {
 		sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
 		sprite.position.y += Math.sin(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
 	},
-});
+};
 
 // TODO Refactor systems and others that need larger references for performance
 // See the following jsperf: https://jsperf.com/closure-vs-property/12
