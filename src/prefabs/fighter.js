@@ -18,6 +18,15 @@ function(color) {
 			.addComponent('dockable', {
 				size: 10,
 			})
+			.addComponent('gun', {
+				power: 10,
+				cooldown: 50,
+				remainingCooldown: 0,
+			})
+			.addComponent('health', {
+				max: 100,
+				current: 100,
+			})
 			.addComponent('team')
 			.addComponent('selectable')
 			.addComponent('waypoint-queue')

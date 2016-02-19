@@ -36444,7 +36444,14 @@
 	exports.__esModule = true;
 	
 	exports.default = function (position) {
-		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'colony-ship' }, position)).addComponent('physics').addComponent('selectable').addComponent('team').addComponent('waypoint-queue').addComponent('colonizer').addComponent('environment', {
+		return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'colony-ship' }, position)).addComponent('physics').addComponent('selectable').addComponent('team').addComponent('waypoint-queue').addComponent('colonizer').addComponent('health', {
+			max: 500,
+			current: 500
+		}).addComponent('gun', {
+			power: 70,
+			cooldown: 500,
+			remainingCooldown: 0
+		}).addComponent('environment', {
 			type: '',
 			habitability: 0,
 			resources: {}
@@ -36602,6 +36609,13 @@
 				range: 500
 			}).addComponent('dockable', {
 				size: 10
+			}).addComponent('gun', {
+				power: 10,
+				cooldown: 50,
+				remainingCooldown: 0
+			}).addComponent('health', {
+				max: 100,
+				current: 100
 			}).addComponent('team').addComponent('selectable').addComponent('waypoint-queue').addComponent('movable', {
 				acceleration: 150,
 				currentSpeed: 0,
@@ -39070,18 +39084,65 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
-		components: ['entity-spawn-queue'],
+	var RadarDetectionSystem = {};
+	_lodash2.default.extend(RadarDetectionSystem, {
+		components: ['sprite', 'radar', 'team', 'gun'],
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ui = _instanceManager2.default.get('ui');
+			this.quadtree = _instanceManager2.default.get('quadtree');
+			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 		},
 	
-		run: _lodash2.default.throttle(function (entities) {
-			console.debug(1);
-		}, 100)
-	};
+		// TODO Optimize with quadtree
+		runOne: _lodash2.default.throttle(_lodash2.default.bind(function (entity) {
+			var gun = entity.getComponent('gun');
+			var sprite = undefined;
+			var radar = undefined;
+	
+			gun.remainingCooldown = Math.max(gun.remainingCooldown - this.game.time.physicsElapsedMS, 0);
+	
+			if (gun.remainingCooldown) {
+				console.debug('Gun has ' + gun.remainingCooldown + ' time to fire');
+				return;
+			}
+	
+			sprite = entity.getComponent('sprite');
+			radar = entity.getComponent('radar');
+	
+			_lodash2.default.find(this.ecsManager.getEntities(['team', 'sprite', 'health']), _lodash2.default.bind(function (potentialTarget) {
+				if (potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
+					if (this.isDetected(sprite.position, radar.range, potentialTarget.getComponent('sprite').position)) {
+						this.damage(gun, potentialTarget);
+						return true;
+					}
+				}
+				return false;
+			}, this));
+		}, RadarDetectionSystem), 100),
+	
+		// TODO Consider target width?
+		isDetected: function isDetected(position, range, targetEntityPosition) {
+			return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y) <= range;
+		},
+		damage: function damage(gun, entity) {
+			var health = entity.getComponent('health');
+	
+			health.current -= gun.power;
+	
+			gun.remainingCooldown = gun.cooldown;
+	
+			console.debug('Entity "' + entity.id + '" took ' + gun.power + ' damage and has ' + health.current + ' health left');
+	
+			if (health.current <= 0) {
+				console.debug('Killing entity "' + entity.id + '"');
+				entity.destroy();
+			}
+		}
+	});
+	
+	exports.default = RadarDetectionSystem;
 
 /***/ },
 /* 274 */

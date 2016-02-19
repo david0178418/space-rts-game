@@ -17,6 +17,15 @@ function(position) {
 		.addComponent('team')
 		.addComponent('waypoint-queue')
 		.addComponent('colonizer')
+		.addComponent('health', {
+			max: 500,
+			current: 500,
+		})
+		.addComponent('gun', {
+			power: 70,
+			cooldown: 500,
+			remainingCooldown: 0,
+		})
 		.addComponent('environment', {
 			type: '',
 			habitability: 0,
