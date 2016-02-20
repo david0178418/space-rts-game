@@ -14,4 +14,5 @@ ecsManager
 	.registerSystem('waypoint-dequeue', require('./waypoint-dequeue').default)
 	.registerSystem('render-production-options', require('./render-production-options').default)
 	.registerSystem('render-build-queue', require('./render-build-queue').default)
-	.registerSystem('radar-detection', require('./radar-detection').default);
+	.registerSystem('radar-detection', require('./radar-detection').default)
+	.registerSystem('weapon-detonation', require('./weapon-detonation').default);

@@ -18,7 +18,7 @@ _.extend(RadarDetectionSystem, {
 	},
 
 	// TODO Optimize with quadtree
-	runOne: _.throttle(_.bind(function(entity) {
+	runOne: _.bind(function(entity) {
 		let gun = entity.getComponent('gun');
 		let sprite;
 		let radar;
@@ -29,46 +29,49 @@ _.extend(RadarDetectionSystem, {
 		);
 
 		if(gun.remainingCooldown) {
-			console.debug(`Gun has ${gun.remainingCooldown} time to fire`);
 			return;
 		}
 
 		sprite = entity.getComponent('sprite');
 		radar = entity.getComponent('radar');
 
-		_.find(this.ecsManager.getEntities([
+		let potentialTargets = this.ecsManager.getEntities([
 			'team',
 			'sprite',
 			'health',
-		]), _.bind(function(potentialTarget) {
-			if(potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
-				if(this.isDetected(sprite.position, radar.range, potentialTarget.getComponent('sprite').position)) {
-					this.damage(gun, potentialTarget);
-					return true;
+		]);
+		_.find(potentialTargets,
+			_.bind(function(potentialTarget) {
+				if(potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
+					if(this.isDetected(sprite.position, radar.range, potentialTarget.getComponent('sprite').position)) {
+						this.fire(sprite, gun, potentialTarget);
+						return true;
+					}
 				}
-			}
-			return false;
-		}, this));
-	}, RadarDetectionSystem), 100),
+				return false;
+			}, this)
+		);
+	}, RadarDetectionSystem),
 
 	// TODO Consider target width?
 	isDetected(position, range, targetEntityPosition) {
 		return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y) <= range;
 	},
 
-	damage(gun, entity) {
-		let health = entity.getComponent('health');
+	fire(firingSprite, gun, target) {
+		let angle = this.game.math.angleBetweenPoints(firingSprite.position, target.getComponent('sprite').position);
 
-		health.current -= gun.power;
+		firingSprite.rotation = angle;
 
 		gun.remainingCooldown = gun.cooldown;
 
-		console.debug(`Entity "${entity.id}" took ${gun.power} damage and has ${health.current} health left`);
+		gun.prefab({
+			damage: gun.power,
+			position: firingSprite.position,
+			target,
+		});
 
-		if(health.current <=0) {
-			console.debug(`Killing entity "${entity.id}"`);
-			entity.destroy();
-		}
+		gun.sound.play();
 	},
 });
 

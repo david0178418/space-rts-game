@@ -6,6 +6,8 @@ import 'components/sprite';
 import 'components/team';
 import 'components/waypoint-queue';
 
+import Beam from './beam';
+
 export default
 function(color) {
 	return function(position) {
@@ -20,8 +22,10 @@ function(color) {
 			})
 			.addComponent('gun', {
 				power: 10,
-				cooldown: 50,
+				cooldown: 2000,
 				remainingCooldown: 0,
+				prefab: Beam,
+				sound: instanceManager.get('game').add.audio('laser'),
 			})
 			.addComponent('health', {
 				max: 100,

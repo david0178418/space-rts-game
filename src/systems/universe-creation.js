@@ -113,12 +113,48 @@ export default {
 						blueprint: 'fighter',
 						elapsedBuildTime: 0,
 					}, {
+						label: 'Colony Ship',
+						blueprint: 'colony-ship',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
 						label: 'fighter',
 						blueprint: 'fighter',
 						elapsedBuildTime: 0,
 					}, {
 						label: 'Colony Ship',
 						blueprint: 'colony-ship',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
+						elapsedBuildTime: 0,
+					}, {
+						label: 'fighter',
+						blueprint: 'fighter',
 						elapsedBuildTime: 0,
 					},
 				],

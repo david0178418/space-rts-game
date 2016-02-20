@@ -8,6 +8,8 @@ const ecsManager = instanceManager.get('ecs-manager');
 
 game.state.add('play', {
 	preload(game) {
+		game.load.image('beam', 'assets/images/blue.png');
+
 		game.load.image('green-fighter', 'assets/images/green-fighter.png');
 		game.load.image('red-fighter', 'assets/images/red-fighter.png');
 
@@ -22,6 +24,7 @@ game.state.add('play', {
 		game.load.image('background1-layer1', 'assets/images/backdrop-black-little-spark-black.png', 512, 512);
 		game.load.image('background1-layer2', 'assets/images/backdrop-black-little-spark-transparent.png', 512, 512);
 
+		game.load.audio( 'laser', 'assets/audio/laser1.ogg');
 		game.load.audio( 'move-order', 'assets/audio/move-order.ogg');
 		game.load.audio( 'lasting-hope', 'assets/audio/bgm-lasting-hope.mp3');
 	},
@@ -33,7 +36,7 @@ game.state.add('play', {
 
 		this.bgm = game.add.audio('lasting-hope');
 		this.bgm.loop = true;
-		// this.bgm.play();
+		this.bgm.play();
 
 		MouseControls.init();
 
