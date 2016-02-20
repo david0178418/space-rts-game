@@ -76,8 +76,8 @@ class ECSManager {
 		});
 	}
 
-	getEntities(components) {
-		if(!components) {
+	getEntities(withComponents, withoutComponents) {
+		if(!(withComponents || withoutComponents)) {
 			return this[entities].slice(0);
 		}
 
@@ -85,7 +85,7 @@ class ECSManager {
 		// bundled with the entities.  This could save on a pass that will
 		// likely need to happen any way when the entity is being used.
 		return _.filter(this[entities], function(entity) {
-			return entity.hasComponents(components);
+			return entity.hasComponents(withComponents) && entity.doesNotHaveComponents(withoutComponents);
 		});
 	}
 
@@ -123,7 +123,7 @@ class ECSManager {
 	runSystems() {
 		_.each(this[runSystems], (system) => {
 			if(system.components) {
-				let matchedEntities = this.getEntities(system.components);
+				let matchedEntities = this.getEntities(system.components.with, system.components.without);
 
 				if(matchedEntities.length) {
 					system.run && system.run(matchedEntities);

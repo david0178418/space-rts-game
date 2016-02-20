@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {bind, each, every, includes, isUndefined, keys, uniqueId} from 'lodash';
 
 // TODO Figure out if I want to make private or not.
 const components = 'components'; // Symbol('components');
@@ -10,9 +10,10 @@ class Entity {
 		this[ecsManager] = ecsManagerReference;
 		this[components] = {};
 
-		this[id] = _.uniqueId('entity-');
+		this[id] = uniqueId('entity-');
 
-		this.hasComponent = _.bind(this.hasComponent, this);
+		this.doesNotHaveComponent = bind(this.doesNotHaveComponent, this);
+		this.hasComponent = bind(this.hasComponent, this);
 	}
 
 	addComponent(component, props) {
@@ -27,11 +28,19 @@ class Entity {
 
 	currentComponents() {
 		// TODO Cache this
-		return _.keys(this[components]);
+		return keys(this[components]);
 	}
 
 	destroy() {
 		this.removeComponents();
+	}
+
+	doesNotHaveComponent(component) {
+		return !includes(this.currentComponents(), component);
+	}
+
+	doesNotHaveComponents(components) {
+		return every(components, this.doesNotHaveComponent);
 	}
 
 	getComponent(component) {
@@ -39,15 +48,15 @@ class Entity {
 	}
 
 	hasComponent(component) {
-		return _.includes(this.currentComponents(), component);
+		return includes(this.currentComponents(), component);
 	}
 
 	hasComponents(components) {
-		return _.every(components, this.hasComponent);
+		return every(components, this.hasComponent);
 	}
 
 	removeComponents() {
-		_.each(this.currentComponents(), (component) => {
+		each(this.currentComponents(), (component) => {
 			this.removeComponent(component);
 		});
 
@@ -68,7 +77,7 @@ class Entity {
 	}
 
 	toggleComponent(component, addComponent, props) {
-		addComponent = _.isUndefined(addComponent) ? !this[components][component] : addComponent;
+		addComponent = isUndefined(addComponent) ? !this[components][component] : addComponent;
 
 		addComponent ? this.addComponent(component, props): this.removeComponent(component);
 	}

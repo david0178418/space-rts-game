@@ -837,8 +837,8 @@
 			});
 		};
 	
-		ECSManager.prototype.getEntities = function getEntities(components) {
-			if (!components) {
+		ECSManager.prototype.getEntities = function getEntities(withComponents, withoutComponents) {
+			if (!(withComponents || withoutComponents)) {
 				return this[entities].slice(0);
 			}
 	
@@ -846,7 +846,7 @@
 			// bundled with the entities.  This could save on a pass that will
 			// likely need to happen any way when the entity is being used.
 			return _lodash2.default.filter(this[entities], function (entity) {
-				return entity.hasComponents(components);
+				return entity.hasComponents(withComponents) && entity.doesNotHaveComponents(withoutComponents);
 			});
 		};
 	
@@ -888,7 +888,7 @@
 	
 			_lodash2.default.each(this[_runSystems], function (system) {
 				if (system.components) {
-					var matchedEntities = _this.getEntities(system.components);
+					var matchedEntities = _this.getEntities(system.components.with, system.components.without);
 	
 					if (matchedEntities.length) {
 						system.run && system.run(matchedEntities);
@@ -15510,10 +15510,6 @@
 	
 	var _lodash = __webpack_require__(22);
 	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
 	// TODO Figure out if I want to make private or not.
@@ -15528,9 +15524,10 @@
 			this[ecsManager] = ecsManagerReference;
 			this[components] = {};
 	
-			this[id] = _lodash2.default.uniqueId('entity-');
+			this[id] = (0, _lodash.uniqueId)('entity-');
 	
-			this.hasComponent = _lodash2.default.bind(this.hasComponent, this);
+			this.doesNotHaveComponent = (0, _lodash.bind)(this.doesNotHaveComponent, this);
+			this.hasComponent = (0, _lodash.bind)(this.hasComponent, this);
 		}
 	
 		Entity.prototype.addComponent = function addComponent(component, props) {
@@ -15545,11 +15542,19 @@
 	
 		Entity.prototype.currentComponents = function currentComponents() {
 			// TODO Cache this
-			return _lodash2.default.keys(this[components]);
+			return (0, _lodash.keys)(this[components]);
 		};
 	
 		Entity.prototype.destroy = function destroy() {
 			this.removeComponents();
+		};
+	
+		Entity.prototype.doesNotHaveComponent = function doesNotHaveComponent(component) {
+			return !(0, _lodash.includes)(this.currentComponents(), component);
+		};
+	
+		Entity.prototype.doesNotHaveComponents = function doesNotHaveComponents(components) {
+			return (0, _lodash.every)(components, this.doesNotHaveComponent);
 		};
 	
 		Entity.prototype.getComponent = function getComponent(component) {
@@ -15557,17 +15562,17 @@
 		};
 	
 		Entity.prototype.hasComponent = function hasComponent(component) {
-			return _lodash2.default.includes(this.currentComponents(), component);
+			return (0, _lodash.includes)(this.currentComponents(), component);
 		};
 	
 		Entity.prototype.hasComponents = function hasComponents(components) {
-			return _lodash2.default.every(components, this.hasComponent);
+			return (0, _lodash.every)(components, this.hasComponent);
 		};
 	
 		Entity.prototype.removeComponents = function removeComponents() {
 			var _this = this;
 	
-			_lodash2.default.each(this.currentComponents(), function (component) {
+			(0, _lodash.each)(this.currentComponents(), function (component) {
 				_this.removeComponent(component);
 			});
 	
@@ -15588,7 +15593,7 @@
 		};
 	
 		Entity.prototype.toggleComponent = function toggleComponent(component, addComponent, props) {
-			addComponent = _lodash2.default.isUndefined(addComponent) ? !this[components][component] : addComponent;
+			addComponent = (0, _lodash.isUndefined)(addComponent) ? !this[components][component] : addComponent;
 	
 			addComponent ? this.addComponent(component, props) : this.removeComponent(component);
 		};
@@ -36978,7 +36983,9 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['colonize'],
+		components: {
+			with: ['colonize']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -37044,7 +37051,9 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['entity-spawner', 'entity-spawn-queue'],
+		components: {
+			with: ['entity-spawner', 'entity-spawn-queue']
+		},
 	
 		init: function init() {
 			this.worldEntities = _instanceManager2.default.get('world-entities');
@@ -37106,7 +37115,9 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['group-movement'],
+		components: {
+			with: ['group-movement']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -37210,7 +37221,10 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['movable', 'waypoint'],
+		components: {
+			with: ['movable', 'waypoint'],
+			without: ['stopped']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -37276,7 +37290,9 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['order'],
+		components: {
+			with: ['order']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -37398,7 +37414,9 @@
 	exports.default = {
 		SELECTION_PADDING: 30,
 	
-		components: ['selectable'],
+		components: {
+			with: ['selectable']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -39058,7 +39076,10 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['waypoint-queue'],
+		components: {
+			with: ['waypoint-queue'],
+			without: ['waypoint']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -39066,7 +39087,7 @@
 		},
 	
 		runOne: function runOne(entity) {
-			if (entity.hasComponent('waypoint') || !entity.getComponent('waypoint-queue').queue.length) {
+			if (!entity.getComponent('waypoint-queue').queue.length) {
 				// TODO Implement a "without componets" param to systems
 				return;
 			}
@@ -39096,7 +39117,9 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['entity-spawner'],
+		components: {
+			with: ['entity-spawner']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -39135,7 +39158,9 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['entity-spawn-queue'],
+		components: {
+			with: ['entity-spawn-queue']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -39173,7 +39198,9 @@
 	
 	var RadarDetectionSystem = {};
 	(0, _lodash.extend)(RadarDetectionSystem, {
-		components: ['sprite', 'radar', 'team', 'gun'],
+		components: {
+			with: ['sprite', 'radar', 'team', 'gun']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -39256,7 +39283,10 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		components: ['detonation-fuse'],
+		components: {
+			with: ['detonation-fuse'],
+			without: ['waypoint']
+		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
@@ -39264,10 +39294,6 @@
 		},
 	
 		runOne: function runOne(entity) {
-			if (entity.hasComponent('waypoint')) {
-				return;
-			}
-	
 			var detonationFuse = entity.getComponent('detonation-fuse');
 			var targetHealth = detonationFuse.target.getComponent('health');
 	

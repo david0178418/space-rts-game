@@ -6,9 +6,11 @@ import Phaser from 'phaser';
 export default {
 	SELECTION_PADDING: 30,
 
-	components: [
-		'selectable',
-	],
+	components: {
+		with: [
+			'selectable',
+		],
+	},
 
 	init() {
 		this.game = instanceManager.get('game');

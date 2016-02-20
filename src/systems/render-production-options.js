@@ -2,9 +2,11 @@ import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'entity-spawner',
-	],
+	components: {
+		with: [
+			'entity-spawner',
+		],
+	},
 
 	init() {
 		this.game = instanceManager.get('game');

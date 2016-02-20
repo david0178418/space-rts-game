@@ -2,10 +2,12 @@ import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'entity-spawner',
-		'entity-spawn-queue',
-	],
+	components: {
+		with: [
+			'entity-spawner',
+			'entity-spawn-queue',
+		],
+	},
 
 	init() {
 		this.worldEntities = instanceManager.get('world-entities');

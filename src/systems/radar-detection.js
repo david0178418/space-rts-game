@@ -3,12 +3,14 @@ import instanceManager from 'instance-manager';
 
 let RadarDetectionSystem = {};
 extend(RadarDetectionSystem, {
-	components: [
-		'sprite',
-		'radar',
-		'team',
-		'gun',
-	],
+	components: {
+		with: [
+			'sprite',
+			'radar',
+			'team',
+			'gun',
+		],
+	},
 
 	init() {
 		this.game = instanceManager.get('game');

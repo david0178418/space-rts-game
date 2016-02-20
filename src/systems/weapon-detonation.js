@@ -1,9 +1,14 @@
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'detonation-fuse',
-	],
+	components: {
+		with: [
+			'detonation-fuse',
+		],
+		without: [
+			'waypoint',
+		],
+	},
 
 	init: function() {
 		this.game = instanceManager.get('game');
@@ -11,10 +16,6 @@ export default {
 	},
 
 	runOne: function(entity) {
-		if(entity.hasComponent('waypoint')) {
-			return;
-		}
-
 		let detonationFuse = entity.getComponent('detonation-fuse');
 		let targetHealth = detonationFuse.target.getComponent('health');
 

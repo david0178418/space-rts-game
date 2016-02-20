@@ -2,10 +2,15 @@ import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'movable',
-		'waypoint',
-	],
+	components: {
+		with: [
+			'movable',
+			'waypoint',
+		],
+		without: [
+			'stopped',
+		],
+	},
 
 	init: function() {
 		this.game = instanceManager.get('game');

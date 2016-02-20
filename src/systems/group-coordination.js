@@ -2,9 +2,11 @@ import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'group-movement',
-	],
+	components:{
+		with: [
+			'group-movement',
+		],
+	},
 
 	init: function() {
 		this.game = instanceManager.get('game');

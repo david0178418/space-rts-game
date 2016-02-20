@@ -1,9 +1,14 @@
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'waypoint-queue',
-	],
+	components: {
+		with: [
+			'waypoint-queue',
+		],
+		without: [
+			'waypoint',
+		],
+	},
 
 	init: function() {
 		this.game = instanceManager.get('game');
@@ -11,7 +16,7 @@ export default {
 	},
 
 	runOne: function(entity) {
-		if(entity.hasComponent('waypoint') || !entity.getComponent('waypoint-queue').queue.length) {
+		if(!entity.getComponent('waypoint-queue').queue.length) {
 			// TODO Implement a "without componets" param to systems
 			return;
 		}

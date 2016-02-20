@@ -1,9 +1,11 @@
 import instanceManager from 'instance-manager';
 
 export default {
-	components: [
-		'order',
-	],
+	components: {
+		with: [
+			'order',
+		],
+	},
 
 	init() {
 		this.game = instanceManager.get('game');

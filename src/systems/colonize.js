@@ -4,9 +4,11 @@ import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 
 export default {
-	components: [
-		'colonize',
-	],
+	components:{
+		with: [
+			'colonize',
+		],
+	},
 
 	init() {
 		this.game = instanceManager.get('game');
