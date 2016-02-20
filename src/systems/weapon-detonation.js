@@ -25,15 +25,11 @@ export default {
 			return;
 		}
 
-
 		targetHealth.current -= detonationFuse.damage;
-
-		console.debug(`Entity "${targetHealth.id}" took ${detonationFuse.damage} damage and has ${targetHealth.current} health left`);
 
 		// TODO some sort of death system
 		if(targetHealth.current <= 0) {
 			detonationFuse.target.destroy();
-			console.debug(`Killing entity "${detonationFuse.target.id}"`);
 		}
 	},
 };
