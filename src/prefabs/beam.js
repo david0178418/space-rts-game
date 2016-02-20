@@ -4,8 +4,7 @@ import instanceManager from 'instance-manager';
 import 'components/sprite';
 
 export default
-function(params) {
-	let {position, target, damage} = params;
+function({position, target, damage}) {
 	let targetPosition = target.getComponent('sprite').position;
 
 	let beam = instanceManager.get('ecs-manager')

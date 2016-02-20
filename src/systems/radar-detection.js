@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import {each, extend, bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
 let RadarDetectionSystem = {};
-_.extend(RadarDetectionSystem, {
+extend(RadarDetectionSystem, {
 	components: [
 		'sprite',
 		'radar',
@@ -18,10 +18,12 @@ _.extend(RadarDetectionSystem, {
 	},
 
 	// TODO Optimize with quadtree
-	runOne: _.bind(function(entity) {
+	runOne: bind(function(entity) {
 		let gun = entity.getComponent('gun');
 		let sprite;
 		let radar;
+		let currentTarget;
+		let currentTargetDistance;
 
 		gun.remainingCooldown = Math.max(
 			gun.remainingCooldown - this.game.time.physicsElapsedMS,
@@ -40,22 +42,33 @@ _.extend(RadarDetectionSystem, {
 			'sprite',
 			'health',
 		]);
-		_.find(potentialTargets,
-			_.bind(function(potentialTarget) {
+		each(potentialTargets,
+			bind(function(potentialTarget) {
 				if(potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
-					if(this.isDetected(sprite.position, radar.range, potentialTarget.getComponent('sprite').position)) {
-						this.fire(sprite, gun, potentialTarget);
-						return true;
+					let targetDistance =
+						this.calculateTargetDistance(
+							sprite.position,
+							potentialTarget.getComponent('sprite').position
+						);
+
+					if(targetDistance <= radar.range){
+						if(!currentTarget || targetDistance < currentTargetDistance) {
+							currentTargetDistance = targetDistance;
+							currentTarget = potentialTarget;
+						}
 					}
 				}
-				return false;
 			}, this)
 		);
+
+		if(currentTarget) {
+			this.fire(sprite, gun, currentTarget);
+		}
 	}, RadarDetectionSystem),
 
 	// TODO Consider target width?
-	isDetected(position, range, targetEntityPosition) {
-		return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y) <= range;
+	calculateTargetDistance(position, targetEntityPosition) {
+		return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 	},
 
 	fire(firingSprite, gun, target) {

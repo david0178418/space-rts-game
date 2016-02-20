@@ -36730,10 +36730,10 @@
 	
 	exports.__esModule = true;
 	
-	exports.default = function (params) {
-		var position = params.position;
-		var target = params.target;
-		var damage = params.damage;
+	exports.default = function (_ref) {
+		var position = _ref.position;
+		var target = _ref.target;
+		var damage = _ref.damage;
 	
 		var targetPosition = target.getComponent('sprite').position;
 	
@@ -39165,8 +39165,6 @@
 	
 	var _lodash = __webpack_require__(22);
 	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
@@ -39174,7 +39172,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var RadarDetectionSystem = {};
-	_lodash2.default.extend(RadarDetectionSystem, {
+	(0, _lodash.extend)(RadarDetectionSystem, {
 		components: ['sprite', 'radar', 'team', 'gun'],
 	
 		init: function init() {
@@ -39185,10 +39183,12 @@
 		},
 	
 		// TODO Optimize with quadtree
-		runOne: _lodash2.default.bind(function (entity) {
+		runOne: (0, _lodash.bind)(function (entity) {
 			var gun = entity.getComponent('gun');
 			var sprite = undefined;
 			var radar = undefined;
+			var currentTarget = undefined;
+			var currentTargetDistance = undefined;
 	
 			gun.remainingCooldown = Math.max(gun.remainingCooldown - this.game.time.physicsElapsedMS, 0);
 	
@@ -39200,20 +39200,27 @@
 			radar = entity.getComponent('radar');
 	
 			var potentialTargets = this.ecsManager.getEntities(['team', 'sprite', 'health']);
-			_lodash2.default.find(potentialTargets, _lodash2.default.bind(function (potentialTarget) {
+			(0, _lodash.each)(potentialTargets, (0, _lodash.bind)(function (potentialTarget) {
 				if (potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
-					if (this.isDetected(sprite.position, radar.range, potentialTarget.getComponent('sprite').position)) {
-						this.fire(sprite, gun, potentialTarget);
-						return true;
+					var targetDistance = this.calculateTargetDistance(sprite.position, potentialTarget.getComponent('sprite').position);
+	
+					if (targetDistance <= radar.range) {
+						if (!currentTarget || targetDistance < currentTargetDistance) {
+							currentTargetDistance = targetDistance;
+							currentTarget = potentialTarget;
+						}
 					}
 				}
-				return false;
 			}, this));
+	
+			if (currentTarget) {
+				this.fire(sprite, gun, currentTarget);
+			}
 		}, RadarDetectionSystem),
 	
 		// TODO Consider target width?
-		isDetected: function isDetected(position, range, targetEntityPosition) {
-			return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y) <= range;
+		calculateTargetDistance: function calculateTargetDistance(position, targetEntityPosition) {
+			return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 		},
 		fire: function fire(firingSprite, gun, target) {
 			var angle = this.game.math.angleBetweenPoints(firingSprite.position, target.getComponent('sprite').position);
