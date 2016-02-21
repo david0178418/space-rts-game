@@ -5,6 +5,7 @@ let ecsManager = instanceManager.get('ecs-manager');
 ecsManager
 	.registerSystem('universe-creation', require('./universe-creation').default)
 	.registerSystem('camera', require('./camera').default)
+	.registerSystem('breaking', require('./breaking').default)
 	.registerSystem('colonize', require('./colonize').default)
 	.registerSystem('entity-spawn-dequeue', require('./entity-spawn-dequeue').default)
 	.registerSystem('group-coordination', require('./group-coordination').default)

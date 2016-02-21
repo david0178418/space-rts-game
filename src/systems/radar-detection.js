@@ -64,7 +64,13 @@ extend(RadarDetectionSystem, {
 		);
 
 		if(currentTarget) {
-			this.fire(sprite, gun, currentTarget);
+			if(entity.hasComponent('movable') && entity.getComponent('movable').currentSpeed === 0) {
+				this.fire(sprite, gun, currentTarget);
+			} else if(!entity.hasComponent('breaks')) {
+				entity.addComponent('breaks');
+			}
+		} else if(entity.hasComponent('breaks')) {
+			entity.removeComponent('breaks');
 		}
 	}, RadarDetectionSystem),
 
