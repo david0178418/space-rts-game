@@ -1,5 +1,6 @@
-import _ from 'lodash';
+import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
+import Utils from './_utils';
 
 export default {
 	components: {
@@ -8,7 +9,7 @@ export default {
 			'waypoint',
 		],
 		without: [
-			'stopped',
+			'breaks',
 		],
 	},
 
@@ -16,7 +17,7 @@ export default {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 
-		this.runOne = _.bind(this.runOne, this);
+		this.runOne = bind(this.runOne, this);
 	},
 
 	runOne: function(entity) {
@@ -27,9 +28,8 @@ export default {
 		let sprite = entity.getComponent('sprite');
 		let waypoint = entity.getComponent('waypoint');
 
-		// d = (Vf^2 - Vf^2) / (2*a)
-		breakingDistance = (movable.currentSpeed * movable.currentSpeed) / (2 * movable.acceleration);
-		distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+		breakingDistance = Utils.breakingDistance(movable.currentSpeed, movable.acceleration);
+		distance = Utils.distanceBetween(sprite, waypoint);
 
 		if(distance <= breakingDistance) {
 			movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
@@ -49,7 +49,8 @@ export default {
 			}
 		}
 
-		angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
+		// TODO Cache angle
+		angle = Utils.angleBetween(sprite.position, waypoint);
 
 		sprite.rotation = angle; // TODO Animate angle change
 		sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;

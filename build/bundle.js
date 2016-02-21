@@ -62,7 +62,7 @@
 	
 	__webpack_require__(210);
 	
-	__webpack_require__(276);
+	__webpack_require__(277);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -36252,7 +36252,7 @@
 	
 	var ecsManager = _instanceManager2.default.get('ecs-manager');
 	
-	ecsManager.registerSystem('universe-creation', __webpack_require__(211).default).registerSystem('camera', __webpack_require__(224).default).registerSystem('colonize', __webpack_require__(225).default).registerSystem('entity-spawn-dequeue', __webpack_require__(226).default).registerSystem('group-coordination', __webpack_require__(227).default).registerSystem('movement', __webpack_require__(228).default).registerSystem('order-processing', __webpack_require__(229).default).registerSystem('selection', __webpack_require__(230).default).registerSystem('waypoint-dequeue', __webpack_require__(271).default).registerSystem('render-production-options', __webpack_require__(272).default).registerSystem('render-build-queue', __webpack_require__(273).default).registerSystem('radar-detection', __webpack_require__(274).default).registerSystem('weapon-detonation', __webpack_require__(275).default);
+	ecsManager.registerSystem('universe-creation', __webpack_require__(211).default).registerSystem('camera', __webpack_require__(224).default).registerSystem('colonize', __webpack_require__(225).default).registerSystem('entity-spawn-dequeue', __webpack_require__(226).default).registerSystem('group-coordination', __webpack_require__(227).default).registerSystem('movement', __webpack_require__(228).default).registerSystem('order-processing', __webpack_require__(230).default).registerSystem('selection', __webpack_require__(231).default).registerSystem('waypoint-dequeue', __webpack_require__(272).default).registerSystem('render-production-options', __webpack_require__(273).default).registerSystem('render-build-queue', __webpack_require__(274).default).registerSystem('radar-detection', __webpack_require__(275).default).registerSystem('weapon-detonation', __webpack_require__(276).default);
 
 /***/ },
 /* 211 */
@@ -37212,25 +37212,27 @@
 	
 	var _lodash = __webpack_require__(22);
 	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _utils = __webpack_require__(229);
+	
+	var _utils2 = _interopRequireDefault(_utils);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
 		components: {
 			with: ['movable', 'waypoint'],
-			without: ['stopped']
+			without: ['breaks']
 		},
 	
 		init: function init() {
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
-			this.runOne = _lodash2.default.bind(this.runOne, this);
+			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne: function runOne(entity) {
@@ -37241,9 +37243,8 @@
 			var sprite = entity.getComponent('sprite');
 			var waypoint = entity.getComponent('waypoint');
 	
-			// d = (Vf^2 - Vf^2) / (2*a)
-			breakingDistance = movable.currentSpeed * movable.currentSpeed / (2 * movable.acceleration);
-			distance = this.game.physics.arcade.distanceToXY(sprite, waypoint.x, waypoint.y);
+			breakingDistance = _utils2.default.breakingDistance(movable.currentSpeed, movable.acceleration);
+			distance = _utils2.default.distanceBetween(sprite, waypoint);
 	
 			if (distance <= breakingDistance) {
 				movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
@@ -37263,7 +37264,8 @@
 				}
 			}
 	
-			angle = this.game.math.angleBetweenPoints(sprite.position, waypoint);
+			// TODO Cache angle
+			angle = _utils2.default.angleBetween(sprite.position, waypoint);
 	
 			sprite.rotation = angle; // TODO Animate angle change
 			sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
@@ -37277,6 +37279,29 @@
 
 /***/ },
 /* 229 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	exports.__esModule = true;
+	exports.default = {
+		angleBetween: function angleBetween(point1, point2) {
+			return Math.atan2(point2.y - point1.y, point2.x - point1.x);
+		},
+		breakingDistance: function breakingDistance(currentSpeed, acceleration) {
+			// d = (Vf^2 - Vf^2) / (2*a)
+			return currentSpeed * currentSpeed / (2 * acceleration);
+		},
+		distanceBetween: function distanceBetween(objA, objB) {
+			var dx = objA.x - objB.x;
+			var dy = objA.y - objB.y;
+	
+			return Math.sqrt(dx * dx + dy * dy);
+		}
+	};
+
+/***/ },
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37386,18 +37411,18 @@
 	};
 
 /***/ },
-/* 230 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _bind = __webpack_require__(231);
+	var _bind = __webpack_require__(232);
 	
 	var _bind2 = _interopRequireDefault(_bind);
 	
-	var _each = __webpack_require__(266);
+	var _each = __webpack_require__(267);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -37465,11 +37490,11 @@
 	};
 
 /***/ },
-/* 231 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createWrapper = __webpack_require__(232),
-	    replaceHolders = __webpack_require__(263),
+	var createWrapper = __webpack_require__(233),
+	    replaceHolders = __webpack_require__(264),
 	    rest = __webpack_require__(3);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -37526,17 +37551,17 @@
 
 
 /***/ },
-/* 232 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(233),
-	    createBaseWrapper = __webpack_require__(241),
-	    createCurryWrapper = __webpack_require__(244),
-	    createHybridWrapper = __webpack_require__(245),
-	    createPartialWrapper = __webpack_require__(264),
-	    getData = __webpack_require__(253),
-	    mergeData = __webpack_require__(265),
-	    setData = __webpack_require__(260),
+	var baseSetData = __webpack_require__(234),
+	    createBaseWrapper = __webpack_require__(242),
+	    createCurryWrapper = __webpack_require__(245),
+	    createHybridWrapper = __webpack_require__(246),
+	    createPartialWrapper = __webpack_require__(265),
+	    getData = __webpack_require__(254),
+	    mergeData = __webpack_require__(266),
+	    setData = __webpack_require__(261),
 	    toInteger = __webpack_require__(5);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -37633,11 +37658,11 @@
 
 
 /***/ },
-/* 233 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(207),
-	    metaMap = __webpack_require__(234);
+	    metaMap = __webpack_require__(235);
 	
 	/**
 	 * The base implementation of `setData` without support for hot loop detection.
@@ -37656,10 +37681,10 @@
 
 
 /***/ },
-/* 234 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WeakMap = __webpack_require__(235);
+	var WeakMap = __webpack_require__(236);
 	
 	/** Used to store function metadata. */
 	var metaMap = WeakMap && new WeakMap;
@@ -37668,11 +37693,11 @@
 
 
 /***/ },
-/* 235 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getNative = __webpack_require__(236),
-	    root = __webpack_require__(239);
+	var getNative = __webpack_require__(237),
+	    root = __webpack_require__(240);
 	
 	/* Built-in method references that are verified to be native. */
 	var WeakMap = getNative(root, 'WeakMap');
@@ -37681,10 +37706,10 @@
 
 
 /***/ },
-/* 236 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isNative = __webpack_require__(237);
+	var isNative = __webpack_require__(238);
 	
 	/**
 	 * Gets the native function at `key` of `object`.
@@ -37703,11 +37728,11 @@
 
 
 /***/ },
-/* 237 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isFunction = __webpack_require__(7),
-	    isHostObject = __webpack_require__(238),
+	    isHostObject = __webpack_require__(239),
 	    isObjectLike = __webpack_require__(201);
 	
 	/** Used to match `RegExp` [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns). */
@@ -37762,7 +37787,7 @@
 
 
 /***/ },
-/* 238 */
+/* 239 */
 /***/ function(module, exports) {
 
 	/**
@@ -37788,10 +37813,10 @@
 
 
 /***/ },
-/* 239 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(module, global) {var checkGlobal = __webpack_require__(240);
+	/* WEBPACK VAR INJECTION */(function(module, global) {var checkGlobal = __webpack_require__(241);
 	
 	/** Used to determine if values are of the language type `Object`. */
 	var objectTypes = {
@@ -37830,7 +37855,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(23)(module), (function() { return this; }())))
 
 /***/ },
-/* 240 */
+/* 241 */
 /***/ function(module, exports) {
 
 	/**
@@ -37848,11 +37873,11 @@
 
 
 /***/ },
-/* 241 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createCtorWrapper = __webpack_require__(242),
-	    root = __webpack_require__(239);
+	var createCtorWrapper = __webpack_require__(243),
+	    root = __webpack_require__(240);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -37882,10 +37907,10 @@
 
 
 /***/ },
-/* 242 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(243),
+	var baseCreate = __webpack_require__(244),
 	    isObject = __webpack_require__(8);
 	
 	/**
@@ -37925,7 +37950,7 @@
 
 
 /***/ },
-/* 243 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(8);
@@ -37954,15 +37979,15 @@
 
 
 /***/ },
-/* 244 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(242),
-	    createHybridWrapper = __webpack_require__(245),
-	    createRecurryWrapper = __webpack_require__(248),
-	    replaceHolders = __webpack_require__(263),
-	    root = __webpack_require__(239);
+	    createCtorWrapper = __webpack_require__(243),
+	    createHybridWrapper = __webpack_require__(246),
+	    createRecurryWrapper = __webpack_require__(249),
+	    replaceHolders = __webpack_require__(264),
+	    root = __webpack_require__(240);
 	
 	/**
 	 * Creates a function that wraps `func` to enable currying.
@@ -38002,16 +38027,16 @@
 
 
 /***/ },
-/* 245 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(246),
-	    composeArgsRight = __webpack_require__(247),
-	    createCtorWrapper = __webpack_require__(242),
-	    createRecurryWrapper = __webpack_require__(248),
-	    reorder = __webpack_require__(262),
-	    replaceHolders = __webpack_require__(263),
-	    root = __webpack_require__(239);
+	var composeArgs = __webpack_require__(247),
+	    composeArgsRight = __webpack_require__(248),
+	    createCtorWrapper = __webpack_require__(243),
+	    createRecurryWrapper = __webpack_require__(249),
+	    reorder = __webpack_require__(263),
+	    replaceHolders = __webpack_require__(264),
+	    root = __webpack_require__(240);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38093,7 +38118,7 @@
 
 
 /***/ },
-/* 246 */
+/* 247 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38133,7 +38158,7 @@
 
 
 /***/ },
-/* 247 */
+/* 248 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38175,12 +38200,12 @@
 
 
 /***/ },
-/* 248 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(249),
-	    isLaziable = __webpack_require__(250),
-	    setData = __webpack_require__(260);
+	var copyArray = __webpack_require__(250),
+	    isLaziable = __webpack_require__(251),
+	    setData = __webpack_require__(261);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38234,7 +38259,7 @@
 
 
 /***/ },
-/* 249 */
+/* 250 */
 /***/ function(module, exports) {
 
 	/**
@@ -38260,13 +38285,13 @@
 
 
 /***/ },
-/* 250 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(251),
-	    getData = __webpack_require__(253),
-	    getFuncName = __webpack_require__(255),
-	    lodash = __webpack_require__(257);
+	var LazyWrapper = __webpack_require__(252),
+	    getData = __webpack_require__(254),
+	    getFuncName = __webpack_require__(256),
+	    lodash = __webpack_require__(258);
 	
 	/**
 	 * Checks if `func` has a lazy counterpart.
@@ -38293,11 +38318,11 @@
 
 
 /***/ },
-/* 251 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(243),
-	    baseLodash = __webpack_require__(252);
+	var baseCreate = __webpack_require__(244),
+	    baseLodash = __webpack_require__(253);
 	
 	/** Used as references for the maximum length and index of an array. */
 	var MAX_ARRAY_LENGTH = 4294967295;
@@ -38325,7 +38350,7 @@
 
 
 /***/ },
-/* 252 */
+/* 253 */
 /***/ function(module, exports) {
 
 	/**
@@ -38341,11 +38366,11 @@
 
 
 /***/ },
-/* 253 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var metaMap = __webpack_require__(234),
-	    noop = __webpack_require__(254);
+	var metaMap = __webpack_require__(235),
+	    noop = __webpack_require__(255);
 	
 	/**
 	 * Gets metadata for `func`.
@@ -38362,7 +38387,7 @@
 
 
 /***/ },
-/* 254 */
+/* 255 */
 /***/ function(module, exports) {
 
 	/**
@@ -38387,10 +38412,10 @@
 
 
 /***/ },
-/* 255 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var realNames = __webpack_require__(256);
+	var realNames = __webpack_require__(257);
 	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
@@ -38424,7 +38449,7 @@
 
 
 /***/ },
-/* 256 */
+/* 257 */
 /***/ function(module, exports) {
 
 	/** Used to lookup unminified function names. */
@@ -38434,15 +38459,15 @@
 
 
 /***/ },
-/* 257 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(251),
-	    LodashWrapper = __webpack_require__(258),
-	    baseLodash = __webpack_require__(252),
+	var LazyWrapper = __webpack_require__(252),
+	    LodashWrapper = __webpack_require__(259),
+	    baseLodash = __webpack_require__(253),
 	    isArray = __webpack_require__(202),
 	    isObjectLike = __webpack_require__(201),
-	    wrapperClone = __webpack_require__(259);
+	    wrapperClone = __webpack_require__(260);
 	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
@@ -38580,11 +38605,11 @@
 
 
 /***/ },
-/* 258 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(243),
-	    baseLodash = __webpack_require__(252);
+	var baseCreate = __webpack_require__(244),
+	    baseLodash = __webpack_require__(253);
 	
 	/**
 	 * The base constructor for creating `lodash` wrapper objects.
@@ -38608,12 +38633,12 @@
 
 
 /***/ },
-/* 259 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(251),
-	    LodashWrapper = __webpack_require__(258),
-	    copyArray = __webpack_require__(249);
+	var LazyWrapper = __webpack_require__(252),
+	    LodashWrapper = __webpack_require__(259),
+	    copyArray = __webpack_require__(250);
 	
 	/**
 	 * Creates a clone of `wrapper`.
@@ -38637,11 +38662,11 @@
 
 
 /***/ },
-/* 260 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(233),
-	    now = __webpack_require__(261);
+	var baseSetData = __webpack_require__(234),
+	    now = __webpack_require__(262);
 	
 	/** Used to detect hot functions by number of calls within a span of milliseconds. */
 	var HOT_COUNT = 150,
@@ -38684,7 +38709,7 @@
 
 
 /***/ },
-/* 261 */
+/* 262 */
 /***/ function(module, exports) {
 
 	/**
@@ -38709,10 +38734,10 @@
 
 
 /***/ },
-/* 262 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(249),
+	var copyArray = __webpack_require__(250),
 	    isIndex = __webpack_require__(204);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38744,7 +38769,7 @@
 
 
 /***/ },
-/* 263 */
+/* 264 */
 /***/ function(module, exports) {
 
 	/** Used as the internal argument placeholder. */
@@ -38778,12 +38803,12 @@
 
 
 /***/ },
-/* 264 */
+/* 265 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(242),
-	    root = __webpack_require__(239);
+	    createCtorWrapper = __webpack_require__(243),
+	    root = __webpack_require__(240);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -38827,13 +38852,13 @@
 
 
 /***/ },
-/* 265 */
+/* 266 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(246),
-	    composeArgsRight = __webpack_require__(247),
-	    copyArray = __webpack_require__(249),
-	    replaceHolders = __webpack_require__(263);
+	var composeArgs = __webpack_require__(247),
+	    composeArgsRight = __webpack_require__(248),
+	    copyArray = __webpack_require__(250),
+	    replaceHolders = __webpack_require__(264);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38923,18 +38948,18 @@
 
 
 /***/ },
-/* 266 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(267);
-
-
-/***/ },
 /* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(268),
-	    baseEach = __webpack_require__(269),
+	module.exports = __webpack_require__(268);
+
+
+/***/ },
+/* 268 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var arrayEach = __webpack_require__(269),
+	    baseEach = __webpack_require__(270),
 	    isArray = __webpack_require__(202),
 	    toFunction = __webpack_require__(206);
 	
@@ -38976,7 +39001,7 @@
 
 
 /***/ },
-/* 268 */
+/* 269 */
 /***/ function(module, exports) {
 
 	/**
@@ -39004,11 +39029,11 @@
 
 
 /***/ },
-/* 269 */
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseForOwn = __webpack_require__(187),
-	    createBaseEach = __webpack_require__(270);
+	    createBaseEach = __webpack_require__(271);
 	
 	/**
 	 * The base implementation of `_.forEach` without support for iteratee shorthands.
@@ -39024,7 +39049,7 @@
 
 
 /***/ },
-/* 270 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isArrayLike = __webpack_require__(197);
@@ -39062,7 +39087,7 @@
 
 
 /***/ },
-/* 271 */
+/* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39099,7 +39124,7 @@
 	};
 
 /***/ },
-/* 272 */
+/* 273 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39140,7 +39165,7 @@
 	};
 
 /***/ },
-/* 273 */
+/* 274 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39181,7 +39206,7 @@
 	};
 
 /***/ },
-/* 274 */
+/* 275 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39269,7 +39294,7 @@
 	exports.default = RadarDetectionSystem;
 
 /***/ },
-/* 275 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39314,7 +39339,7 @@
 	};
 
 /***/ },
-/* 276 */
+/* 277 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39327,7 +39352,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(277);
+	var _mouseControls = __webpack_require__(278);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -39385,14 +39410,14 @@
 	});
 
 /***/ },
-/* 277 */
+/* 278 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _each = __webpack_require__(266);
+	var _each = __webpack_require__(267);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
