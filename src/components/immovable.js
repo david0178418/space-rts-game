@@ -3,7 +3,7 @@ import instanceManager from 'instance-manager';
 instanceManager
 	.get('ecs-manager')
 	.registerComponent('immovable', {
-		factory: function() {
+		factory() {
 			this.getComponent('physics').immovable = true;
 
 			return true;

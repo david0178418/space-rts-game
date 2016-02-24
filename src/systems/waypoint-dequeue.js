@@ -10,12 +10,12 @@ export default {
 		],
 	},
 
-	init: function() {
+	init() {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 	},
 
-	runOne: function(entity) {
+	runOne(entity) {
 		if(!entity.getComponent('waypoint-queue').queue.length) {
 			// TODO Implement a "without componets" param to systems
 			return;

@@ -4,7 +4,7 @@ import {Physics} from 'phaser';
 instanceManager
 	.get('ecs-manager')
 	.registerComponent('physics', {
-		factory: function(params = {}) {
+		factory(params = {}) {
 			let sprite = this.components.sprite;
 
 			instanceManager.get('game').physics.enable(sprite, Physics.ARCADE);

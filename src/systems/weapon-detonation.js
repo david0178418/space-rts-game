@@ -10,12 +10,12 @@ export default {
 		],
 	},
 
-	init: function() {
+	init() {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 	},
 
-	runOne: function(entity) {
+	runOne(entity) {
 		let detonationFuse = entity.getComponent('detonation-fuse');
 		let targetHealth = detonationFuse.target.getComponent('health');
 

@@ -13,14 +13,14 @@ export default {
 		],
 	},
 
-	init: function() {
+	init() {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 
 		this.runOne = bind(this.runOne, this);
 	},
 
-	runOne: function(entity) {
+	runOne(entity) {
 		let angle;
 		let breakingDistance;
 		let distance;

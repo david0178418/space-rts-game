@@ -8,13 +8,13 @@ export default {
 		],
 	},
 
-	init: function() {
+	init() {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 		this.moveOrderSound = this.game.add.audio('move-order');
 	},
 
-	run: function(entities) {
+	run(entities) {
 		let colCount;
 		let formationCenterOffsetX;
 		let formationCenterOffsetY;

@@ -36986,7 +36986,6 @@
 	
 			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
-	
 		runOne: function runOne(entity) {
 			if (entity.hasComponent('waypoint')) {
 				entity.getComponent('waypoint-queue').queue.unshift(entity.getComponent('waypoint'));
@@ -37176,7 +37175,6 @@
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.moveOrderSound = this.game.add.audio('move-order');
 		},
-	
 		run: function run(entities) {
 			var colCount = undefined;
 			var formationCenterOffsetX = undefined;
@@ -37286,7 +37284,6 @@
 	
 			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
-	
 		runOne: function runOne(entity) {
 			var angle = undefined;
 			var breakingDistance = undefined;
@@ -37377,7 +37374,6 @@
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 		},
-	
 		run: function run(entities) {
 			// TODO Optimize
 			var localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
@@ -39162,7 +39158,6 @@
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 		},
-	
 		runOne: function runOne(entity) {
 			if (!entity.getComponent('waypoint-queue').queue.length) {
 				// TODO Implement a "without componets" param to systems
@@ -39375,7 +39370,6 @@
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 		},
-	
 		runOne: function runOne(entity) {
 			var detonationFuse = entity.getComponent('detonation-fuse');
 			var targetHealth = detonationFuse.target.getComponent('health');

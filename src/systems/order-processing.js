@@ -14,7 +14,7 @@ export default {
 		this.ecsManager = instanceManager.get('ecs-manager');
 	},
 
-	run: function(entities) {
+	run(entities) {
 		// TODO Optimize
 		let localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
 		let movableEntities = [];

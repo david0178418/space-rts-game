@@ -9,7 +9,7 @@ export default {
 		],
 	},
 
-	init: function() {
+	init() {
 		this.game = instanceManager.get('game');
 
 		this.runOne = bind(this.runOne, this);
