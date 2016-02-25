@@ -18,8 +18,12 @@ module.exports = {
 					path.resolve(__dirname, 'node_modules'),
 				],
 				query: {
+					plugins: [
+						['babel-plugin-transform-es2015-modules-commonjs', {loose: true}],
+						['babel-plugin-transform-es2015-spread', {loose: true}],
+						['babel-plugin-transform-es2015-object-super', {loose: true}],
+					],
 					presets: [
-						'es2015-loose',
 						'react',
 					],
 				},

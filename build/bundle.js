@@ -66,7 +66,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var game = _instanceManager2.default.get('game');
+	const game = _instanceManager2.default.get('game');
 	
 	game.state.start('play');
 	
@@ -438,23 +438,18 @@
 	'use strict';
 	
 	exports.__esModule = true;
+	const INSTANCES_KEY = Symbol('instances');
+	const RESOURCES_KEY = Symbol('resources');
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var INSTANCES_KEY = Symbol('instances');
-	var RESOURCES_KEY = Symbol('resources');
-	
-	var InstanceManager = function () {
-		function InstanceManager() {
-			_classCallCheck(this, InstanceManager);
-	
+	class InstanceManager {
+		constructor() {
 			this[INSTANCES_KEY] = {};
 			this[RESOURCES_KEY] = {};
 		}
 	
-		InstanceManager.prototype.get = function get(resourceName) {
-			var resourceInstance = this[INSTANCES_KEY][resourceName];
-			var resources = this[RESOURCES_KEY];
+		get(resourceName) {
+			let resourceInstance = this[INSTANCES_KEY][resourceName];
+			const resources = this[RESOURCES_KEY];
 	
 			if (!resourceInstance) {
 				if (resourceName && resources[resourceName]) {
@@ -464,26 +459,23 @@
 						this[INSTANCES_KEY][resourceName] = resourceInstance;
 					}
 				} else {
-					console.error('InstanceManager Error: Resource "' + resourceName + '" not available.');
+					console.error(`InstanceManager Error: Resource "${ resourceName }" not available.`);
 				}
 			}
 	
 			return resourceInstance;
-		};
+		}
 	
-		InstanceManager.prototype.reset = function reset(dependency) {
+		reset(dependency) {
 			this[INSTANCES_KEY][dependency] = this[RESOURCES_KEY][dependency]();
-		};
+		}
 	
-		InstanceManager.prototype.registerResource = function registerResource(name, resource) {
+		registerResource(name, resource) {
 			this[RESOURCES_KEY][name] = resource;
-		};
-	
-		return InstanceManager;
-	}();
+		}
+	}
 	
 	// TODO remove global debug
-	
 	exports.default = window.instanceManager = new InstanceManager();
 
 /***/ },
@@ -539,7 +531,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('game', {
-		init: function init() {
+		init() {
 			return window.game = new _phaser2.default.Game(_config2.default.screen.width, _config2.default.screen.height, _phaser2.default.AUTO, 'phaser', undefined, false);
 		}
 	});
@@ -591,10 +583,10 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('keyboard-controls', {
-		init: function init() {
-			var KeyCodes = _phaser2.default.Keyboard;
-			var game = _instanceManager2.default.get('game');
-			var keyboard = game.input.keyboard;
+		init() {
+			const KeyCodes = _phaser2.default.Keyboard;
+			let game = _instanceManager2.default.get('game');
+			let keyboard = game.input.keyboard;
 	
 			return {
 				panUp: keyboard.addKey(KeyCodes[_config2.default.controls.panUp]),
@@ -620,7 +612,7 @@
 	
 	_instanceManager2.default.registerResource('group', {
 		cache: false,
-		init: function init() {
+		init() {
 			return _instanceManager2.default.get('game').add.group();
 		}
 	});
@@ -638,7 +630,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('world-entities', {
-		init: function init() {
+		init() {
 			// TODO: Remove global debug
 			return window.worldEntities = _instanceManager2.default.get('group');
 		}
@@ -662,12 +654,12 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var MAX_LEVELS = 4;
-	var MAX_OBJECTS = 10;
+	const MAX_LEVELS = 4;
+	const MAX_OBJECTS = 10;
 	
 	_instanceManager2.default.registerResource('quadtree', {
 		cache: false,
-		init: function init() {
+		init() {
 			return new _phaser.QuadTree(0, 0, _config2.default.stage.width, _config2.default.stage.height, MAX_OBJECTS, MAX_LEVELS);
 		}
 	});
@@ -687,7 +679,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('dynamic-quadtree', {
-		init: function init() {
+		init() {
 			// TODO: Remove global debug
 			return window.dynamicQuadtree = _instanceManager2.default.get('quadtree');
 		}
@@ -708,7 +700,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('planets-quadtree', {
-		init: function init() {
+		init() {
 			// TODO: Remove global debug
 			return window.planetsQuadtree = _instanceManager2.default.get('quadtree');
 		}
@@ -731,7 +723,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('ecs-manager', {
-		init: function init() {
+		init() {
 			// TODO Remove debug variable
 			return window.ecsManager = new _ecsManager2.default();
 		}
@@ -755,19 +747,17 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
 	// TODO Figure out if I want to make private or not.
-	var components = 'components'; // Symbol('components');
-	var entities = 'entities'; // Symbol('entities');
-	var initSystems = Symbol('init-systems');
-	var _runSystems = Symbol('run-systems');
+	const components = 'components'; // Symbol('components');
+	const entities = 'entities'; // Symbol('entities');
+	const initSystems = Symbol('init-systems');
+	const runSystems = Symbol('run-systems');
 	
 	// Util function to copy getter definitions as well as properties.
-	var extend = function extend(obj) {
+	const extend = function (obj) {
 		Array.prototype.slice.call(arguments, 1).forEach(function (source) {
-			var descriptor = undefined;
-			var prop = undefined;
+			let descriptor;
+			let prop;
 	
 			if (source) {
 				for (prop in source) {
@@ -781,22 +771,20 @@
 	};
 	// END Util function to copy getter definitions as well as properties.
 	
-	var ECSManager = function () {
-		function ECSManager() {
-			_classCallCheck(this, ECSManager);
-	
+	class ECSManager {
+		constructor() {
 			this[components] = {};
 			this[entities] = [];
 			this[initSystems] = {};
-			this[_runSystems] = {};
+			this[runSystems] = {};
 		}
 	
-		ECSManager.prototype.createEntity = function createEntity() {
-			var entity = new _entity2.default(this);
+		createEntity() {
+			let entity = new _entity2.default(this);
 	
 			this[entities].push(entity);
 			return entity;
-		};
+		}
 	
 		// @param {string} name - component name.  If component with matching name doesn't
 		//		exist, a new one will be created using the provided properties as defaults
@@ -804,40 +792,36 @@
 		// @return {object}
 		// TODO Consider case of over-writing a component that has an
 		// "onRemove" callback (such as "sprite")
-	
-		ECSManager.prototype.createComponent = function createComponent(name) {
-			var state = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-			var entityContext = arguments[2];
-	
-			var component = this[components][name];
+		createComponent(name, state = {}, entityContext) {
+			let component = this[components][name];
 	
 			if (!component) {
-				this.registerComponent(name, { state: state });
+				this.registerComponent(name, { state });
 				return state;
 			} else if (component.factory) {
 				return component.factory.call(entityContext, state);
 			} else {
 				return extend({}, component.state, state);
 			}
-		};
+		}
 	
-		ECSManager.prototype.destroyEntity = function destroyEntity(entity) {
+		destroyEntity(entity) {
 			this[entities].splice(this[entities].indexOf(entity), 1);
 			entity.destroy();
 			return this;
-		};
+		}
 	
-		ECSManager.prototype.getComponentCleanup = function getComponentCleanup(name) {
+		getComponentCleanup(name) {
 			return this[components][name].onRemove || _lodash2.default.noop;
-		};
+		}
 	
-		ECSManager.prototype.getEntityById = function getEntityById(id) {
+		getEntityById(id) {
 			return _lodash2.default.find(this[entities], function (entity) {
 				return entity.id === id;
 			});
-		};
+		}
 	
-		ECSManager.prototype.getEntities = function getEntities(withComponents, withoutComponents) {
+		getEntities(withComponents, withoutComponents) {
 			if (!(withComponents || withoutComponents)) {
 				return this[entities].slice(0);
 			}
@@ -848,47 +832,43 @@
 			return _lodash2.default.filter(this[entities], function (entity) {
 				return entity.hasComponents(withComponents) && entity.doesNotHaveComponents(withoutComponents);
 			});
-		};
+		}
 	
 		// @param {string} name
 		// @param {object} [defaultData={}] - provide an optional baseline for a component
-	
-		ECSManager.prototype.registerComponent = function registerComponent(name, defaultData) {
+		registerComponent(name, defaultData) {
 			this[components][name] = defaultData;
 	
 			return this;
-		};
+		}
 	
 		// @param {string} name
 		// @param {object} system
 		// @param {array} system.components - listing of components required for system operation
 		// @param {function} system.run - system tick logic.  Receives array of all matching entities.
 		// @param {function} system.init - system initialization.
-	
-		ECSManager.prototype.registerSystem = function registerSystem(name, system) {
+		registerSystem(name, system) {
 			if (system.init) {
 				this[initSystems][name] = system;
 			}
 	
 			if (system.run || system.runOne) {
-				this[_runSystems][name] = system;
+				this[runSystems][name] = system;
 			}
 	
 			return this;
-		};
+		}
 	
-		ECSManager.prototype.runSystemInits = function runSystemInits() {
+		runSystemInits() {
 			_lodash2.default.each(_lodash2.default.values(this[initSystems]), function (system) {
 				system.init();
 			});
-		};
+		}
 	
-		ECSManager.prototype.runSystems = function runSystems() {
-			var _this = this;
-	
-			_lodash2.default.each(this[_runSystems], function (system) {
+		runSystems() {
+			_lodash2.default.each(this[runSystems], system => {
 				if (system.components) {
-					var matchedEntities = _this.getEntities(system.components.with, system.components.without);
+					let matchedEntities = this.getEntities(system.components.with, system.components.without);
 	
 					if (matchedEntities.length) {
 						system.run && system.run(matchedEntities);
@@ -898,11 +878,8 @@
 					system.run();
 				}
 			});
-		};
-	
-		return ECSManager;
-	}();
-
+		}
+	}
 	exports.default = ECSManager;
 
 /***/ },
@@ -15506,21 +15483,15 @@
 
 	'use strict';
 	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
 	var _lodash = __webpack_require__(22);
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
 	// TODO Figure out if I want to make private or not.
-	var components = 'components'; // Symbol('components');
-	var ecsManager = Symbol('entity-manager');
-	var id = Symbol('id');
+	const components = 'components'; // Symbol('components');
+	const ecsManager = Symbol('entity-manager');
+	const id = Symbol('id');
 	
-	var Entity = function () {
-		function Entity(ecsManagerReference) {
-			_classCallCheck(this, Entity);
-	
+	class Entity {
+		constructor(ecsManagerReference) {
 			this[ecsManager] = ecsManagerReference;
 			this[components] = {};
 	
@@ -15530,7 +15501,7 @@
 			this.hasComponent = (0, _lodash.bind)(this.hasComponent, this);
 		}
 	
-		Entity.prototype.addComponent = function addComponent(component, props) {
+		addComponent(component, props) {
 			if (this[components][component] && !props) {
 				return this;
 			}
@@ -15538,49 +15509,47 @@
 			this[components][component] = this[ecsManager].createComponent(component, props, this);
 	
 			return this;
-		};
+		}
 	
-		Entity.prototype.currentComponents = function currentComponents() {
+		currentComponents() {
 			// TODO Cache this
 			return (0, _lodash.keys)(this[components]);
-		};
+		}
 	
-		Entity.prototype.destroy = function destroy() {
+		destroy() {
 			this.removeComponents();
-		};
+		}
 	
-		Entity.prototype.doesNotHaveComponent = function doesNotHaveComponent(component) {
+		doesNotHaveComponent(component) {
 			return !(0, _lodash.includes)(this.currentComponents(), component);
-		};
+		}
 	
-		Entity.prototype.doesNotHaveComponents = function doesNotHaveComponents(components) {
+		doesNotHaveComponents(components) {
 			return (0, _lodash.every)(components, this.doesNotHaveComponent);
-		};
+		}
 	
-		Entity.prototype.getComponent = function getComponent(component) {
+		getComponent(component) {
 			return this[components][component];
-		};
+		}
 	
-		Entity.prototype.hasComponent = function hasComponent(component) {
+		hasComponent(component) {
 			return (0, _lodash.includes)(this.currentComponents(), component);
-		};
+		}
 	
-		Entity.prototype.hasComponents = function hasComponents(components) {
+		hasComponents(components) {
 			return (0, _lodash.every)(components, this.hasComponent);
-		};
+		}
 	
-		Entity.prototype.removeComponents = function removeComponents() {
-			var _this = this;
-	
-			(0, _lodash.each)(this.currentComponents(), function (component) {
-				_this.removeComponent(component);
+		removeComponents() {
+			(0, _lodash.each)(this.currentComponents(), component => {
+				this.removeComponent(component);
 			});
 	
 			return this;
-		};
+		}
 	
-		Entity.prototype.removeComponent = function removeComponent(name) {
-			var component = this[components][name];
+		removeComponent(name) {
+			let component = this[components][name];
 	
 			if (!component) {
 				return;
@@ -15590,23 +15559,18 @@
 			delete this[components][name];
 	
 			return this;
-		};
+		}
 	
-		Entity.prototype.toggleComponent = function toggleComponent(component, addComponent, props) {
+		toggleComponent(component, addComponent, props) {
 			addComponent = (0, _lodash.isUndefined)(addComponent) ? !this[components][component] : addComponent;
 	
 			addComponent ? this.addComponent(component, props) : this.removeComponent(component);
-		};
+		}
 	
-		_createClass(Entity, [{
-			key: 'id',
-			get: function get() {
-				return this[id];
-			}
-		}]);
-	
-		return Entity;
-	}();
+		get id() {
+			return this[id];
+		}
+	}
 	
 	module.exports = Entity;
 
@@ -15623,7 +15587,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('team-colors', {
-		init: function init() {
+		init() {
 			// TODO: Make this dynamic
 			return {
 				player: 'green',
@@ -15657,14 +15621,14 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.registerResource('ui', {
-		init: function init() {
-			var reactComponent = _reactDom2.default.render(_react2.default.createElement(_ui2.default, {}), document.getElementById('ui'));
+		init() {
+			let reactComponent = _reactDom2.default.render(_react2.default.createElement(_ui2.default, {}), document.getElementById('ui'));
 	
-			var productionOptions = null;
-			var buildQueue = null;
+			let productionOptions = null;
+			let buildQueue = null;
 	
 			return {
-				setProductionOptions: function setProductionOptions(newState) {
+				setProductionOptions(newState) {
 					// if(productionOptions !== newState) {
 					productionOptions = newState;
 					reactComponent.setState({
@@ -15672,7 +15636,8 @@
 					});
 					// }
 				},
-				setBuildQueue: function setBuildQueue(newState) {
+	
+				setBuildQueue(newState) {
 					// if(buildQueue !== newState) {
 					buildQueue = newState;
 					reactComponent.setState({
@@ -15710,13 +15675,9 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	/* eslint no-unused-vars: 0 */
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /* eslint no-unused-vars: 0 */
-	
-	var styles = {
+	const styles = {
 		height: 0,
 		left: 0,
 		margin: '20px',
@@ -15726,22 +15687,17 @@
 		zIndex: 10
 	};
 	
-	var UI = function (_Component) {
-		_inherits(UI, _Component);
+	class UI extends _react.Component {
+		constructor(props) {
+			super(props);
 	
-		function UI(props) {
-			_classCallCheck(this, UI);
-	
-			var _this = _possibleConstructorReturn(this, _Component.call(this, props));
-	
-			_this.state = {
+			this.state = {
 				productionOptions: null,
 				buildQueue: null
 			};
-			return _this;
 		}
 	
-		UI.prototype.render = function render() {
+		render() {
 			return _react2.default.createElement(
 				'div',
 				{ style: styles },
@@ -15752,11 +15708,8 @@
 					buildQueue: this.state.buildQueue
 				})
 			);
-		};
-	
-		return UI;
-	}(_react.Component);
-
+		}
+	}
 	exports.default = UI;
 
 /***/ },
@@ -35360,9 +35313,9 @@
 	exports.__esModule = true;
 	
 	exports.default = function (props) {
-		var buildQueueButtons = [];
+		let buildQueueButtons = [];
 	
-		_lodash2.default.each(props.buildQueue, function (queuedItem, index) {
+		_lodash2.default.each(props.buildQueue, (queuedItem, index) => {
 			buildQueueButtons.push(_react2.default.createElement(
 				'button',
 				{
@@ -35408,21 +35361,21 @@
 	
 	/* eslint no-unused-vars: 0 */
 	
-	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	const ecsManager = _instanceManager2.default.get('ecs-manager');
 	
-	var styles = {
+	const styles = {
 		left: 0,
 		position: 'absolute',
 		top: '50px'
 	};
-	var buttonStyles = {
+	const buttonStyles = {
 		backgroundColor: 'transparent',
 		border: '2px solid #1ed81e',
 		color: '#1ed81e',
 		cursor: 'pointer',
 		marginRight: '10px'
 	};
-	var labelStyles = {
+	const labelStyles = {
 		color: 'white',
 		fontWeight: 'bold'
 	};
@@ -35431,7 +35384,7 @@
 		// TODO Create a system or something to process an order like this
 		// rather than directly updating selected entities. Things like resources
 		// will have to be reclaimed
-		var entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
+		let entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 	
 		// NOTE For now, assuming there will only be 1 entity with a queue selected.
 		// Likely will need to figure out how to handle multiple being selected.
@@ -36148,9 +36101,9 @@
 	exports.__esModule = true;
 	
 	exports.default = function (props) {
-		var result = [];
+		let result = [];
 	
-		(0, _forOwn2.default)(props.productionOptions, function (blueprint, key) {
+		(0, _forOwn2.default)(props.productionOptions, (blueprint, key) => {
 			result.push(_react2.default.createElement(
 				'button',
 				{
@@ -36196,21 +36149,21 @@
 	
 	/* eslint no-unused-vars: 0 */
 	
-	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	const ecsManager = _instanceManager2.default.get('ecs-manager');
 	
-	var styles = {
+	const styles = {
 		left: 0,
 		position: 'absolute',
 		top: '20px'
 	};
-	var buttonStyles = {
+	const buttonStyles = {
 		backgroundColor: 'transparent',
 		border: '2px solid #1ed81e',
 		color: '#1ed81e',
 		cursor: 'pointer',
 		marginRight: '10px'
 	};
-	var labelStyles = {
+	const labelStyles = {
 		color: 'white',
 		fontWeight: 'bold'
 	};
@@ -36218,7 +36171,7 @@
 	function handleSelectBlueprint(key, label) {
 		// TODO Create a system or something to process an order like this
 		// rather than directly updating selected entities
-		var entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
+		let entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 	
 		_lodash2.default.each(entities, function (entity) {
 			entity.getComponent('entity-spawn-queue').queue.push({
@@ -36250,7 +36203,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	let ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 	ecsManager.registerSystem('universe-creation', __webpack_require__(211).default).registerSystem('camera', __webpack_require__(224).default).registerSystem('breaking', __webpack_require__(225).default).registerSystem('colonize', __webpack_require__(226).default).registerSystem('entity-spawn-dequeue', __webpack_require__(227).default).registerSystem('group-coordination', __webpack_require__(228).default).registerSystem('movement', __webpack_require__(229).default).registerSystem('order-processing', __webpack_require__(231).default).registerSystem('selection', __webpack_require__(232).default).registerSystem('waypoint-dequeue', __webpack_require__(273).default).registerSystem('render-production-options', __webpack_require__(274).default).registerSystem('render-build-queue', __webpack_require__(275).default).registerSystem('radar-detection', __webpack_require__(276).default).registerSystem('weapon-detonation', __webpack_require__(277).default);
 
@@ -36291,8 +36244,8 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	exports.default = {
-		init: function init() {
-			var planets = [];
+		init() {
+			let planets = [];
 	
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
@@ -36307,8 +36260,8 @@
 			(0, _planet2.default)({ x: _config2.default.stage.width, y: 0 });
 			(0, _planet2.default)({ x: _config2.default.stage.width, y: _config2.default.stage.height });
 	
-			for (var i = 0; i < _config2.default.universeSize; i++) {
-				var newPlanet = (0, _planet2.default)({
+			for (let i = 0; i < _config2.default.universeSize; i++) {
+				let newPlanet = (0, _planet2.default)({
 					x: _lodash2.default.random(100, _config2.default.stage.width - 100),
 					y: _lodash2.default.random(100, _config2.default.stage.height - 100)
 				});
@@ -36318,10 +36271,11 @@
 	
 			this.assignTeams(planets);
 		},
-		assignTeams: function assignTeams(planets) {
-			var playerPlanet = planets[0];
-			var playerPlanetSpriteComponent = playerPlanet.getComponent('sprite');
-			var enemyPlanet = planets[planets.length - 1];
+	
+		assignTeams(planets) {
+			let playerPlanet = planets[0];
+			let playerPlanetSpriteComponent = playerPlanet.getComponent('sprite');
+			let enemyPlanet = planets[planets.length - 1];
 	
 			this.worldEntities.x = -playerPlanetSpriteComponent.x + _config2.default.screen.width / 2;
 			this.worldEntities.y = -playerPlanetSpriteComponent.y + _config2.default.screen.height / 2;
@@ -36467,9 +36421,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('entity-spawn-queue', {
-		factory: function factory() {
-			var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
+		factory(params = {}) {
 			return {
 				queue: params.queue || []
 			};
@@ -36540,9 +36492,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('entity-spawner', {
-		factory: function factory() {
-			var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
+		factory(params = {}) {
 			return {
 				availableBlueprints: params.availableBlueprints || {}
 			};
@@ -36564,10 +36514,8 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('physics', {
-		factory: function factory() {
-			var params = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
-			var sprite = this.components.sprite;
+		factory(params = {}) {
+			let sprite = this.components.sprite;
 	
 			_instanceManager2.default.get('game').physics.enable(sprite, _phaser.Physics.ARCADE);
 	
@@ -36592,16 +36540,16 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var game = _instanceManager2.default.get('game');
-	var defaultParams = {
+	const game = _instanceManager2.default.get('game');
+	const defaultParams = {
 		x: 0,
 		y: 0,
 		graphic: ''
 	};
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('sprite', {
-		factory: function factory(params) {
-			var sprite = undefined;
+		factory(params) {
+			let sprite;
 	
 			params = params || defaultParams;
 	
@@ -36613,7 +36561,7 @@
 	
 			return sprite;
 		},
-		onRemove: function onRemove(sprite) {
+		onRemove(sprite) {
 			sprite.destroy();
 		}
 	});
@@ -36646,7 +36594,7 @@
 	
 	exports.default = function (color) {
 		return function (position) {
-			return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: color + '-fighter' }, position)).addComponent('radar', {
+			return _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: `${ color }-fighter` }, position)).addComponent('radar', {
 				range: 500
 			}).addComponent('dockable', {
 				size: 10
@@ -36720,7 +36668,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('waypoint-queue', {
-		factory: function factory(params) {
+		factory(params) {
 			return (0, _lodash.defaults)(params, {
 				queue: []
 			});
@@ -36735,16 +36683,12 @@
 	
 	exports.__esModule = true;
 	
-	exports.default = function (_ref) {
-		var position = _ref.position;
-		var target = _ref.target;
-		var damage = _ref.damage;
+	exports.default = function ({ position, target, damage }) {
+		let targetPosition = target.getComponent('sprite').position;
 	
-		var targetPosition = target.getComponent('sprite').position;
-	
-		var beam = _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'beam' }, position)).addComponent('detonation-fuse', {
-			damage: damage,
-			target: target
+		let beam = _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'beam' }, position)).addComponent('detonation-fuse', {
+			damage,
+			target
 		}).addComponent('waypoint', {
 			x: targetPosition.x,
 			y: targetPosition.y
@@ -36781,7 +36725,7 @@
 	exports.__esModule = true;
 	
 	exports.default = function (position) {
-		var planet = _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'planet' }, position)).addComponent('physics').addComponent('immovable').addComponent('selectable').addComponent('colonizable').addComponent('environment', {
+		let planet = _instanceManager2.default.get('ecs-manager').createEntity().addComponent('sprite', _lodash2.default.extend({ graphic: 'planet' }, position)).addComponent('physics').addComponent('immovable').addComponent('selectable').addComponent('colonizable').addComponent('environment', {
 			type: '',
 			habitability: 0
 		}).addComponent('population', {
@@ -36789,7 +36733,7 @@
 			longevity: 0,
 			count: 0
 		});
-		var sprite = planet.components.sprite;
+		let sprite = planet.components.sprite;
 	
 		_instanceManager2.default.get('planets-quadtree').insert(sprite);
 	
@@ -36827,12 +36771,12 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	_instanceManager2.default.get('ecs-manager').registerComponent('immovable', {
-		factory: function factory() {
+		factory() {
 			this.getComponent('physics').immovable = true;
 	
 			return true;
 		},
-		onRemove: function onRemove() {
+		onRemove() {
 			if (this.hasComponent('physics')) {
 				this.getComponent('physics').immovable = false;
 			}
@@ -36870,7 +36814,7 @@
 		zoomTween: null,
 		zoomTarget: 100, // %
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.keyboardControls = _instanceManager2.default.get('keyboard-controls');
 			this.world = this.game.world;
@@ -36883,7 +36827,8 @@
 				this.updateZoomTarget(e.wheelDelta);
 			}, this));
 		},
-		run: function run() {
+	
+		run() {
 			// Vertial pan
 			if (this.keyboardControls.panUp.isDown) {
 				this.dirtyBackground = true;
@@ -36912,7 +36857,7 @@
 	
 			this.dirtyBackground = false;
 		},
-		limitView: function limitView() {
+		limitView() {
 			// Limit view
 			// Run check each tick to account for
 			// other position mutators such as zooming
@@ -36928,21 +36873,24 @@
 				this.worldEntities.x = 0;
 			}
 		},
-		updateBackground: function updateBackground() {
+	
+		updateBackground() {
 			// this.background1layer1.position.x = this.background1layer1.width * 0.005  * this.worldEntities.x / this.game.width;
 			// this.background1layer1.position.y = this.background1layer1.height * 0.005 * this.worldEntities.y / this.game.height;
 			this.background1layer2.position.x = this.background1layer2.width * 0.01 * this.worldEntities.x / this.game.width;
 			this.background1layer2.position.y = this.background1layer2.height * 0.01 * this.worldEntities.y / this.game.height;
 		},
-		updateZoom: function updateZoom() {
-			var zoom = this.zoomTarget / 100;
-			var localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+	
+		updateZoom() {
+			let zoom = this.zoomTarget / 100;
+			let localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
 	
 			this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
 			this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
 			this.worldEntities.scale.setTo(zoom);
 		},
-		updateZoomTarget: function updateZoomTarget(delta) {
+	
+		updateZoomTarget(delta) {
 			if (this.game.paused) {
 				return;
 			}
@@ -36981,24 +36929,25 @@
 			with: ['movable', 'breaks']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 	
 			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
-		runOne: function runOne(entity) {
+	
+		runOne(entity) {
 			if (entity.hasComponent('waypoint')) {
 				entity.getComponent('waypoint-queue').queue.unshift(entity.getComponent('waypoint'));
 				entity.removeComponent('waypoint');
 			}
 	
-			var movable = entity.getComponent('movable');
+			let movable = entity.getComponent('movable');
 	
 			if (movable.currentSpeed === 0) {
 				return;
 			}
 	
-			var sprite = entity.getComponent('sprite');
+			let sprite = entity.getComponent('sprite');
 	
 			movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
 	
@@ -37038,17 +36987,18 @@
 			with: ['colonize']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 			this.runOne = this.runOne.bind(this);
 			this.teamColors = _instanceManager2.default.get('team-colors');
 		},
-		runOne: function runOne(entity) {
-			var colonizeTarget = entity.getComponent('colonize').target;
-			var colonizeTargetSprite = colonizeTarget.getComponent('sprite');
-			var entitySprite = entity.getComponent('sprite');
-			var teamName = entity.getComponent('team').name;
+	
+		runOne(entity) {
+			let colonizeTarget = entity.getComponent('colonize').target;
+			let colonizeTargetSprite = colonizeTarget.getComponent('sprite');
+			let entitySprite = entity.getComponent('sprite');
+			let teamName = entity.getComponent('team').name;
 	
 			if (!this.game.physics.arcade.intersects(entitySprite, colonizeTargetSprite)) {
 				return;
@@ -37106,7 +37056,7 @@
 			with: ['entity-spawner', 'entity-spawn-queue']
 		},
 	
-		init: function init() {
+		init() {
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.game = _instanceManager2.default.get('game');
 			this.runOne = _lodash2.default.bind(this.runOne, this);
@@ -37114,23 +37064,23 @@
 	
 		// TODO make spawn and waypoint queue/dequeue logic more consistent if
 		// possible
-		runOne: function runOne(entity) {
-			var entitySpawnQueue = entity.getComponent('entity-spawn-queue').queue;
+		runOne(entity) {
+			let entitySpawnQueue = entity.getComponent('entity-spawn-queue').queue;
 	
 			if (!entitySpawnQueue.length) {
 				return;
 			}
 	
-			var entitySpawner = entity.getComponent('entity-spawner');
-			var activeConstruction = entitySpawnQueue[0];
-			var spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
+			let entitySpawner = entity.getComponent('entity-spawner');
+			let activeConstruction = entitySpawnQueue[0];
+			let spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 	
 			activeConstruction.elapsedBuildTime += this.game.time.elapsed;
 	
 			if (activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
-				var newEntity = undefined;
-				var spawnerSprite = entity.getComponent('sprite');
-				var waypoint = entity.getComponent('waypoint');
+				let newEntity;
+				let spawnerSprite = entity.getComponent('sprite');
+				let waypoint = entity.getComponent('waypoint');
 	
 				entitySpawnQueue.shift();
 	
@@ -37170,33 +37120,34 @@
 			with: ['group-movement']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.moveOrderSound = this.game.add.audio('move-order');
 		},
-		run: function run(entities) {
-			var colCount = undefined;
-			var formationCenterOffsetX = undefined;
-			var formationCenterOffsetY = undefined;
-			var formationPositionX = undefined;
-			var formationPositionY = undefined;
+	
+		run(entities) {
+			let colCount;
+			let formationCenterOffsetX;
+			let formationCenterOffsetY;
+			let formationPositionX;
+			let formationPositionY;
 			// Theortically, only one is needed since all groups are processed
 			// together.  If multiple group commands are issued simultaniously,
 			// this may need to be changed.
-			var groupMovementComponent = entities[0].getComponent('group-movement');
-			var maxX = this.game.world.height * 10;
-			var maxY = this.game.world.width * 10;
-			var minX = -1;
-			var minY = -1;
-			var movableSelectedCount = 0;
-			var rowCount = undefined;
-			var slotWidth = 80;
-			var xTotal = 0;
-			var yTotal = 0;
+			let groupMovementComponent = entities[0].getComponent('group-movement');
+			let maxX = this.game.world.height * 10;
+			let maxY = this.game.world.width * 10;
+			let minX = -1;
+			let minY = -1;
+			let movableSelectedCount = 0;
+			let rowCount;
+			let slotWidth = 80;
+			let xTotal = 0;
+			let yTotal = 0;
 	
 			_lodash2.default.each(entities, function (entity) {
-				var sprite = entity.getComponent('sprite');
+				let sprite = entity.getComponent('sprite');
 	
 				movableSelectedCount++;
 				xTotal += sprite.x;
@@ -37221,7 +37172,7 @@
 			formationCenterOffsetY = slotWidth * (colCount - 1) / 2;
 	
 			_lodash2.default.each(entities, function (entity, i) {
-				var waypointQueue = entity.getComponent('waypoint-queue');
+				let waypointQueue = entity.getComponent('waypoint-queue');
 	
 				formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
 				formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * (i / rowCount | 0) - formationCenterOffsetY;
@@ -37278,19 +37229,20 @@
 			without: ['breaks']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 	
 			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
-		runOne: function runOne(entity) {
-			var angle = undefined;
-			var breakingDistance = undefined;
-			var distance = undefined;
-			var movable = entity.getComponent('movable');
-			var sprite = entity.getComponent('sprite');
-			var waypoint = entity.getComponent('waypoint');
+	
+		runOne(entity) {
+			let angle;
+			let breakingDistance;
+			let distance;
+			let movable = entity.getComponent('movable');
+			let sprite = entity.getComponent('sprite');
+			let waypoint = entity.getComponent('waypoint');
 	
 			breakingDistance = _utils2.default.breakingDistance(movable.currentSpeed, movable.acceleration);
 			distance = _utils2.default.distanceBetween(sprite, waypoint);
@@ -37334,16 +37286,18 @@
 	
 	exports.__esModule = true;
 	exports.default = {
-		angleBetween: function angleBetween(point1, point2) {
+		angleBetween(point1, point2) {
 			return Math.atan2(point2.y - point1.y, point2.x - point1.x);
 		},
-		breakingDistance: function breakingDistance(currentSpeed, acceleration) {
+	
+		breakingDistance(currentSpeed, acceleration) {
 			// d = (Vf^2 - Vf^2) / (2*a)
 			return currentSpeed * currentSpeed / (2 * acceleration);
 		},
-		distanceBetween: function distanceBetween(objA, objB) {
-			var dx = objA.x - objB.x;
-			var dy = objA.y - objB.y;
+	
+		distanceBetween(objA, objB) {
+			let dx = objA.x - objB.x;
+			let dy = objA.y - objB.y;
 	
 			return Math.sqrt(dx * dx + dy * dy);
 		}
@@ -37368,23 +37322,24 @@
 			with: ['order']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.moveOrderSound = this.game.add.audio('move-order');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 		},
-		run: function run(entities) {
+	
+		run(entities) {
 			// TODO Optimize
-			var localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
-			var movableEntities = [];
-			var playerEntities = [];
-			var shipGeneratingEntities = [];
+			let localPoint = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+			let movableEntities = [];
+			let playerEntities = [];
+			let shipGeneratingEntities = [];
 	
 			// TODO Perhaps change this to make the largest selected entity type
 			// the dominate action?
-			for (var i = 0; i < entities.length; i++) {
-				var entity = entities[i];
+			for (let i = 0; i < entities.length; i++) {
+				let entity = entities[i];
 	
 				entity.removeComponent('order');
 	
@@ -37417,7 +37372,7 @@
 						this.moveOrderSound.play();
 					}
 				} else {
-					for (var i = 0; i < movableEntities.length; i++) {
+					for (let i = 0; i < movableEntities.length; i++) {
 						// TODO Rather than directly read mousePointer, need to be able to
 						// properly convert between screen and world coordinates.
 						if (!(movableEntities[i].hasComponent('colonizer') && this.colonizeTarget(movableEntities[i], localPoint))) {
@@ -37429,7 +37384,7 @@
 					}
 				}
 			} else {
-				for (var i = 0; i < shipGeneratingEntities.length; i++) {
+				for (let i = 0; i < shipGeneratingEntities.length; i++) {
 					shipGeneratingEntities[i].addComponent('waypoint', {
 						x: localPoint.x,
 						y: localPoint.y
@@ -37437,11 +37392,11 @@
 				}
 			}
 		},
-		colonizeTarget: function colonizeTarget(entity, location) {
-			var colonizableEntities = this.ecsManager.getEntities(['colonizable']);
+		colonizeTarget(entity, location) {
+			let colonizableEntities = this.ecsManager.getEntities(['colonizable']);
 	
-			for (var i = 0; i < colonizableEntities.length; i++) {
-				var colonizableSprite = colonizableEntities[i].getComponent('sprite');
+			for (let i = 0; i < colonizableEntities.length; i++) {
+				let colonizableSprite = colonizableEntities[i].getComponent('sprite');
 	
 				if (colonizableSprite.getBounds().contains(location.x, location.y)) {
 					entity.addComponent('colonize', {
@@ -37491,7 +37446,7 @@
 			with: ['selectable']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
@@ -37499,17 +37454,19 @@
 	
 			this.checkSelection = (0, _bind2.default)(this.checkSelection, this);
 		},
-		run: function run(entities) {
+	
+		run(entities) {
 			(0, _each2.default)(entities, this.checkSelection, this);
 	
 			if (this.selectionChanged) {
 				this.selectionChanged = false;
 			}
 		},
-		checkSelection: function checkSelection(entity) {
-			var selectableComponent = entity.getComponent('selectable');
-			var sprite = entity.getComponent('sprite');
-			var graphic = undefined;
+	
+		checkSelection(entity) {
+			let selectableComponent = entity.getComponent('selectable');
+			let sprite = entity.getComponent('sprite');
+			let graphic;
 	
 			if (entity.hasComponent('selected')) {
 				if (!selectableComponent.graphic) {
@@ -39154,17 +39111,18 @@
 			without: ['waypoint']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 		},
-		runOne: function runOne(entity) {
+	
+		runOne(entity) {
 			if (!entity.getComponent('waypoint-queue').queue.length) {
 				// TODO Implement a "without componets" param to systems
 				return;
 			}
 	
-			var waypointQueue = entity.getComponent('waypoint-queue');
+			let waypointQueue = entity.getComponent('waypoint-queue');
 	
 			entity.addComponent('waypoint', waypointQueue.queue.shift());
 		}
@@ -39193,13 +39151,13 @@
 			with: ['entity-spawner']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ui = _instanceManager2.default.get('ui');
 		},
 	
 		run: _lodash2.default.throttle(function (entities) {
-			var selectedEntities = _lodash2.default.filter(entities, function (entity) {
+			let selectedEntities = _lodash2.default.filter(entities, function (entity) {
 				return entity.hasComponent('selected');
 			});
 	
@@ -39234,13 +39192,13 @@
 			with: ['entity-spawn-queue']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ui = _instanceManager2.default.get('ui');
 		},
 	
 		run: _lodash2.default.throttle(function (entities) {
-			var selectedEntities = _lodash2.default.filter(entities, function (entity) {
+			let selectedEntities = _lodash2.default.filter(entities, function (entity) {
 				return entity.hasComponent('selected');
 			});
 	
@@ -39268,13 +39226,13 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var RadarDetectionSystem = {};
+	let RadarDetectionSystem = {};
 	(0, _lodash.extend)(RadarDetectionSystem, {
 		components: {
 			with: ['sprite', 'radar', 'team', 'gun']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ui = _instanceManager2.default.get('ui');
 			this.quadtree = _instanceManager2.default.get('quadtree');
@@ -39283,11 +39241,11 @@
 	
 		// TODO Optimize with quadtree
 		runOne: (0, _lodash.bind)(function (entity) {
-			var gun = entity.getComponent('gun');
-			var sprite = undefined;
-			var radar = undefined;
-			var currentTarget = undefined;
-			var currentTargetDistance = undefined;
+			let gun = entity.getComponent('gun');
+			let sprite;
+			let radar;
+			let currentTarget;
+			let currentTargetDistance;
 	
 			gun.remainingCooldown = Math.max(gun.remainingCooldown - this.game.time.physicsElapsedMS, 0);
 	
@@ -39298,10 +39256,10 @@
 			sprite = entity.getComponent('sprite');
 			radar = entity.getComponent('radar');
 	
-			var potentialTargets = this.ecsManager.getEntities(['team', 'sprite', 'health']);
+			let potentialTargets = this.ecsManager.getEntities(['team', 'sprite', 'health']);
 			(0, _lodash.each)(potentialTargets, (0, _lodash.bind)(function (potentialTarget) {
 				if (potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
-					var targetDistance = this.calculateTargetDistance(sprite.position, potentialTarget.getComponent('sprite').position);
+					let targetDistance = this.calculateTargetDistance(sprite.position, potentialTarget.getComponent('sprite').position);
 	
 					if (targetDistance <= radar.range) {
 						if (!currentTarget || targetDistance < currentTargetDistance) {
@@ -39324,11 +39282,12 @@
 		}, RadarDetectionSystem),
 	
 		// TODO Consider target width?
-		calculateTargetDistance: function calculateTargetDistance(position, targetEntityPosition) {
+		calculateTargetDistance(position, targetEntityPosition) {
 			return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 		},
-		fire: function fire(firingSprite, gun, target) {
-			var angle = this.game.math.angleBetweenPoints(firingSprite.position, target.getComponent('sprite').position);
+	
+		fire(firingSprite, gun, target) {
+			let angle = this.game.math.angleBetweenPoints(firingSprite.position, target.getComponent('sprite').position);
 	
 			firingSprite.rotation = angle;
 	
@@ -39337,7 +39296,7 @@
 			gun.prefab({
 				damage: gun.power,
 				position: firingSprite.position,
-				target: target
+				target
 			});
 	
 			gun.sound.play();
@@ -39366,13 +39325,14 @@
 			without: ['waypoint']
 		},
 	
-		init: function init() {
+		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 		},
-		runOne: function runOne(entity) {
-			var detonationFuse = entity.getComponent('detonation-fuse');
-			var targetHealth = detonationFuse.target.getComponent('health');
+	
+		runOne(entity) {
+			let detonationFuse = entity.getComponent('detonation-fuse');
+			let targetHealth = detonationFuse.target.getComponent('health');
 	
 			entity.destroy();
 	
@@ -39414,11 +39374,11 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var game = _instanceManager2.default.get('game');
-	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	const game = _instanceManager2.default.get('game');
+	const ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 	game.state.add('play', {
-		preload: function preload(game) {
+		preload(game) {
 			game.load.image('beam', 'assets/images/blue.png');
 	
 			game.load.image('green-fighter', 'assets/images/green-fighter.png');
@@ -39439,7 +39399,8 @@
 			game.load.audio('move-order', 'assets/audio/move-order.ogg');
 			game.load.audio('lasting-hope', 'assets/audio/bgm-lasting-hope.mp3');
 		},
-		create: function create(game) {
+	
+		create(game) {
 			game.scale.setShowAll();
 			game.world.setBounds(0, 0, _config2.default.stage.width, _config2.default.stage.height);
 			game.scale.refresh();
@@ -39454,11 +39415,12 @@
 	
 			ecsManager.runSystemInits();
 		},
-		update: function update() {
+		update() {
 			_mouseControls2.default.update();
 			ecsManager.runSystems();
 		},
-		paused: function paused() {}
+	
+		paused() {}
 	});
 
 /***/ },
@@ -39483,8 +39445,8 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	var game = _instanceManager2.default.get('game');
-	var ecsManager = _instanceManager2.default.get('ecs-manager');
+	const game = _instanceManager2.default.get('game');
+	const ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 	exports.default = {
 		checkForDoubleClick: false,
@@ -39497,7 +39459,7 @@
 		startSelection: false,
 		worldEntities: null,
 	
-		init: function init() {
+		init() {
 			this.keyboard = _instanceManager2.default.get('keyboard-controls');
 			this.mousePointer = game.input.mousePointer;
 			this.worldEntities = _instanceManager2.default.get('world-entities');
@@ -39514,7 +39476,8 @@
 			this.game.input.onUp.add(this.dragEnd.bind(this));
 			this.game.input.mouse.mouseMoveCallback = this.drag.bind(this);
 		},
-		update: function update() {
+	
+		update() {
 			if (!this.checkForDoubleClick) {
 				return;
 			}
@@ -39524,7 +39487,8 @@
 				this.leftSingleClick(this.mousePointer.positionUp);
 			}
 		},
-		differentiateClick: function differentiateClick(pointer, isDoubleClick) {
+	
+		differentiateClick(pointer, isDoubleClick) {
 			if (pointer.button === _phaser2.default.Mouse.RIGHT_BUTTON) {
 				this.rightClick(game.input.getLocalPosition(this.worldEntities, pointer));
 				return;
@@ -39546,10 +39510,11 @@
 					this.checkForDoubleClick = true;
 				}
 		},
-		drag: function drag(ev) {
-			var dragX = undefined;
-			var dragY = undefined;
-			var graphic = undefined;
+	
+		drag(ev) {
+			let dragX;
+			let dragY;
+			let graphic;
 			// let selectedEntites;
 	
 			if (game.input.mousePointer.isUp || ev.button !== _phaser2.default.Mouse.LEFT_BUTTON) {
@@ -39575,16 +39540,16 @@
 			}
 	
 			// TODO Remove debug
-			var selectedEntites = window.selectedEntites = [];
+			let selectedEntites = window.selectedEntites = [];
 	
 			this.drawDragArea(dragX, dragY);
 	
 			(0, _each2.default)(ecsManager.getEntities(['selectable']), function (entity) {
-				var isSelected = entity.getComponent('selected');
-				var teamComponent = entity.getComponent('team');
+				let isSelected = entity.getComponent('selected');
+				let teamComponent = entity.getComponent('team');
 	
 				if (teamComponent && teamComponent.name === 'player') {
-					var intersects = graphic.getBounds().intersects(entity.getComponent('sprite').getBounds());
+					let intersects = graphic.getBounds().intersects(entity.getComponent('sprite').getBounds());
 	
 					if (!isSelected && intersects) {
 						entity.addComponent('selected');
@@ -39597,12 +39562,14 @@
 	
 			graphic.visible = true;
 		},
-		dragEnd: function dragEnd() {
+	
+		dragEnd() {
 			this.graphic.visible = false;
 			this.startSelection = false;
 		},
-		drawDragArea: function drawDragArea(dragX, dragY) {
-			var graphic = this.graphic;
+	
+		drawDragArea(dragX, dragY) {
+			let graphic = this.graphic;
 	
 			graphic.clear();
 			graphic.lineStyle(3, 0xFFFF0B);
@@ -39610,11 +39577,12 @@
 			graphic.drawRect(0, 0, dragX - graphic.position.x, dragY - graphic.position.y);
 			graphic.endFill();
 		},
-		leftDoubleClick: function leftDoubleClick(position) {
-			var entities = []; // this.ecs.getEntities('selectable');
-			var selectedEntity = this.getTopEntityAt(entities, position);
-			var selectedEntityTeam = undefined;
-			var selectedEntityTeamComponent = undefined;
+	
+		leftDoubleClick(position) {
+			let entities = []; // this.ecs.getEntities('selectable');
+			let selectedEntity = this.getTopEntityAt(entities, position);
+			let selectedEntityTeam;
+			let selectedEntityTeamComponent;
 	
 			if (!selectedEntity) {
 				return;
@@ -39624,8 +39592,8 @@
 			selectedEntityTeam = selectedEntityTeamComponent && selectedEntityTeamComponent.name;
 	
 			(0, _each2.default)(entities, function (entity) {
-				var entityTeamComponent = entity.getComponent('team');
-				var team = entityTeamComponent && entityTeamComponent.name;
+				let entityTeamComponent = entity.getComponent('team');
+				let team = entityTeamComponent && entityTeamComponent.name;
 	
 				if (entity.entityType === selectedEntity.entityType && selectedEntityTeam === team && entity.inCamera) {
 					entity.addComponent('selected');
@@ -39634,22 +39602,24 @@
 				}
 			});
 		},
-		leftSingleClick: function leftSingleClick(position) {
-			var entities = this.ecsManager.getEntities(['selectable', 'team']);
-			var selectedEntity = this.getTopEntityAt(entities, position);
+	
+		leftSingleClick(position) {
+			let entities = this.ecsManager.getEntities(['selectable', 'team']);
+			let selectedEntity = this.getTopEntityAt(entities, position);
 	
 			(0, _each2.default)(entities, function (entity) {
 				entity.toggleComponent('selected', entity === selectedEntity);
 			});
 		},
-		markClick: function markClick(ev) {
+	
+		markClick(ev) {
 			if (ev.button !== _phaser2.default.Mouse.RIGHT_BUTTON) {
 				return;
 			}
 	
-			var marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypoint-marker');
-			var markerAnimationTime = 250;
-			var markerTween = undefined;
+			let marker = this.game.add.sprite(this.game.input.mousePointer.worldX, this.game.input.mousePointer.worldY, 'waypoint-marker');
+			let markerAnimationTime = 250;
+			let markerTween;
 	
 			marker.anchor.setTo(0.5, 0.5);
 	
@@ -39667,8 +39637,9 @@
 			}, markerAnimationTime).start();
 			markerTween.start();
 		},
-		rightClick: function rightClick(position) {
-			var entities = this.ecsManager.getEntities(['selected']);
+	
+		rightClick(position) {
+			let entities = this.ecsManager.getEntities(['selected']);
 	
 			if (false /* this.uiViewModel.awaitTarget() */) {
 					// this.uiViewModel.awaitTarget(false);
@@ -39685,8 +39656,9 @@
 				});
 			}
 		},
-		getTopEntityAt: function getTopEntityAt(entities, position) {
-			var topEntity = undefined;
+	
+		getTopEntityAt(entities, position) {
+			let topEntity;
 	
 			(0, _each2.default)(entities, function (entity) {
 				// TODO Make a "getComponents"?
