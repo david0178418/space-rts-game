@@ -7,11 +7,16 @@ export default {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+	moveOrderSound: null,
+	worldEntities: null,
+
 	init() {
+		this.ecsManager = instanceManager.get('ecs-manager');
 		this.game = instanceManager.get('game');
 		this.moveOrderSound = this.game.add.audio('move-order');
 		this.worldEntities = instanceManager.get('world-entities');
-		this.ecsManager = instanceManager.get('ecs-manager');
 	},
 
 	run(entities) {
@@ -26,14 +31,14 @@ export default {
 		for(let i = 0; i < entities.length; i++) {
 			let entity = entities[i];
 
-			entity.removeComponent('order');
+			this.ecsManager.removeComponent(entity.id, 'order');
 
-			if(entity.getComponent('team').name === 'player') {
+			if(entity.team.name === 'player') {
 				playerEntities.push(entity);
 
-				if(entity.hasComponent('movable')) {
+				if(entity.movable) {
 					movableEntities.push(entity);
-				} else if(entity.hasComponent('entity-spawner')) {
+				} else if(entity['entity-spawner']) {
 					shipGeneratingEntities.push(entity);
 				}
 			}
@@ -42,12 +47,12 @@ export default {
 		if(movableEntities.length) {
 			if(movableEntities.length === 1) {
 				if(instanceManager.get('keyboard-controls').shiftModifier.isDown) {
-					movableEntities[0].getComponent('waypoint-queue').queue.push({
+					movableEntities[0]['waypoint-queue'].queue.push({
 						x: localPoint.x,
 						y: localPoint.y,
 					});
-				} else if(!(movableEntities[0].hasComponent('colonizer') && this.colonizeTarget(movableEntities[0], this.game.input.mousePointer.position))) {
-					movableEntities[0].addComponent('waypoint', {
+				} else if(!(movableEntities[0].colonizer && this.colonizeTarget(movableEntities[0], this.game.input.mousePointer.position))) {
+					this.ecsManager.addComponent(movableEntities[0].id, 'waypoint', {
 						x: localPoint.x,
 						y: localPoint.y,
 					});
@@ -60,8 +65,8 @@ export default {
 				for(let i = 0; i < movableEntities.length; i++) {
 					// TODO Rather than directly read mousePointer, need to be able to
 					// properly convert between screen and world coordinates.
-					if(!(movableEntities[i].hasComponent('colonizer') && this.colonizeTarget(movableEntities[i], localPoint))) {
-						movableEntities[i].addComponent('group-movement', {
+					if(!(movableEntities[i].colonizer && this.colonizeTarget(movableEntities[i], localPoint))) {
+						this.ecsManager.addComponent(movableEntities[i].id, 'group-movement', {
 							queue: instanceManager.get('keyboard-controls').shiftModifier.isDown,
 							centralPoint: localPoint,
 						});
@@ -70,7 +75,7 @@ export default {
 			}
 		} else {
 			for(let i = 0; i < shipGeneratingEntities.length; i++) {
-				shipGeneratingEntities[i].addComponent('waypoint', {
+				this.ecsManager.addComponent(shipGeneratingEntities[i].id, 'waypoint', {
 					x: localPoint.x,
 					y: localPoint.y,
 				});
@@ -81,17 +86,19 @@ export default {
 		let colonizableEntities = this.ecsManager.getEntities(['colonizable']);
 
 		for(let i = 0; i < colonizableEntities.length; i++) {
-			let colonizableSprite = colonizableEntities[i].getComponent('sprite');
+			let colonizableSprite = colonizableEntities[i].sprite;
 
 			if(colonizableSprite.getBounds().contains(location.x, location.y)) {
-				entity
-					.addComponent('colonize', {
+				this.ecsManager.addComponents(entity.id, {
+					colonize: {
 						target: colonizableEntities[i],
-					})
-					.addComponent('waypoint', {
+					},
+					waypoint: {
 						x: colonizableSprite.x,
 						y: colonizableSprite.y,
-					});
+					},
+				});
+
 				return true;
 			}
 		}

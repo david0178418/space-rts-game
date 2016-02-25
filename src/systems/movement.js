@@ -13,7 +13,12 @@ export default {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+	worldEntities: null,
+
 	init() {
+		this.ecsManager = instanceManager.get('ecs-manager');
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 
@@ -24,9 +29,9 @@ export default {
 		let angle;
 		let breakingDistance;
 		let distance;
-		let movable = entity.getComponent('movable');
-		let sprite = entity.getComponent('sprite');
-		let waypoint = entity.getComponent('waypoint');
+		let movable = entity.movable;
+		let sprite = entity.sprite;
+		let waypoint = entity.waypoint;
 
 		breakingDistance = Utils.breakingDistance(movable.currentSpeed, movable.acceleration);
 		distance = Utils.distanceBetween(sprite, waypoint);
@@ -38,7 +43,7 @@ export default {
 				movable.currentSpeed = 0;
 				sprite.position.x = waypoint.x;
 				sprite.position.y = waypoint.y;
-				entity.removeComponent('waypoint');
+				this.ecsManager.removeComponent(entity.id, 'waypoint');
 				return;
 			}
 		} else if(movable.currentSpeed < movable.topSpeed) {

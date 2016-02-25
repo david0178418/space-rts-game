@@ -5,7 +5,7 @@ instanceManager
 	.get('ecs-manager')
 	.registerComponent('physics', {
 		factory(params = {}) {
-			let sprite = this.components.sprite;
+			let sprite = this.sprite;
 
 			instanceManager.get('game').physics.enable(sprite, Physics.ARCADE);
 

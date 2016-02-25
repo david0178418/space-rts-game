@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
 import 'components/radar';
@@ -11,33 +11,36 @@ import Beam from './beam';
 export default
 function(color) {
 	return function(position) {
-		return instanceManager.get('ecs-manager')
-			.createEntity()
-			.addComponent('sprite', _.extend({graphic: `${color}-fighter`}, position))
-			.addComponent('radar', {
+		let ecsManager = instanceManager.get('ecs-manager');
+		let fighter = ecsManager.createEntity();
+
+		return ecsManager.addComponents(fighter.id, {
+			sprite: extend({graphic: `${color}-fighter`}, position),
+			radar: {
 				range: 500,
-			})
-			.addComponent('dockable', {
+			},
+			dockable: {
 				size: 10,
-			})
-			.addComponent('gun', {
+			},
+			gun: {
 				power: 10,
 				cooldown: 2000,
 				remainingCooldown: 0,
 				prefab: Beam,
 				sound: instanceManager.get('game').add.audio('laser'),
-			})
-			.addComponent('health', {
+			},
+			health: {
 				max: 100,
 				current: 100,
-			})
-			.addComponent('team')
-			.addComponent('selectable')
-			.addComponent('waypoint-queue')
-			.addComponent('movable', {
+			},
+			team: {},
+			selectable: {},
+			'waypoint-queue': {},
+			movable: {
 				acceleration: 150,
 				currentSpeed: 0,
 				topSpeed: 100,
-			});
+			},
+		});
 	};
 }

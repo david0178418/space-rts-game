@@ -10,6 +10,10 @@ export default {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+	teamColors: null,
+
 	init() {
 		this.game = instanceManager.get('game');
 		this.ecsManager = instanceManager.get('ecs-manager');
@@ -18,24 +22,25 @@ export default {
 	},
 
 	runOne(entity) {
-		let colonizeTarget = entity.getComponent('colonize').target;
-		let colonizeTargetSprite = colonizeTarget.getComponent('sprite');
-		let entitySprite = entity.getComponent('sprite');
-		let teamName = entity.getComponent('team').name;
+		let colonizeTarget = entity.colonize.target;
+		let colonizeTargetSprite = colonizeTarget.sprite;
+		let entitySprite = entity.sprite;
+		let teamName = entity.team.name;
 
 		if(!this.game.physics.arcade.intersects(entitySprite, colonizeTargetSprite)) {
 			return;
 		}
 
-		colonizeTarget.addComponent('team', {
-			name: teamName,
-		});
+
 
 		// TODO Figure out how to handle colonization and blueprints
-		colonizeTarget
-			.removeComponent('colonizable')
-			.addComponent('entity-spawn-queue')
-			.addComponent('entity-spawner', {
+		this.ecsManager.removeComponent(colonizeTarget.id, 'colonizable');
+		this.ecsManager.addComponent(colonizeTarget.id, {
+			team: {
+				name: teamName,
+			},
+			'entity-spawn-queue': {},
+			'entity-spawner': {
 				availableBlueprints: {
 					fighter: {
 						baseBuildTime: 4000,
@@ -50,12 +55,13 @@ export default {
 						prefab: colonyShipPrefab,
 					},
 				},
-			})
-			.addComponent('waypoint', {
+			},
+			waypoint: {
 				x: colonizeTargetSprite.x + 100,
 				y: colonizeTargetSprite.y + 75,
-			});
+			},
+		});
 
-		this.ecsManager.destroyEntity(entity);
+		this.ecsManager.destroyEntity(entity.id);
 	},
 };

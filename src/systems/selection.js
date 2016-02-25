@@ -12,15 +12,19 @@ export default {
 		],
 	},
 
+	game: null,
+	selectionChanged: false,
+	worldEntities: null,
+
 	init() {
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
-		this.ecsManager = instanceManager.get('ecs-manager');
 		this.selectionChanged = false;
 
 		this.checkSelection = bind(this.checkSelection, this);
 	},
 
+	// TODO Refactor this since it's using the old paradigm
 	run(entities) {
 		each(entities, this.checkSelection, this);
 
@@ -30,11 +34,11 @@ export default {
 	},
 
 	checkSelection(entity) {
-		let selectableComponent = entity.getComponent('selectable');
-		let sprite = entity.getComponent('sprite');
+		let selectableComponent = entity.selectable;
+		let sprite = entity.sprite;
 		let graphic;
 
-		if(entity.hasComponent('selected')) {
+		if(entity.selected) {
 			if(!selectableComponent.graphic) {
 				graphic = new Phaser.Sprite(this.game, 0, 0, 'selection');
 				graphic.anchor.setTo(0.5, 0.5);

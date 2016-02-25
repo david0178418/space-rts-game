@@ -4,13 +4,13 @@ instanceManager
 	.get('ecs-manager')
 	.registerComponent('immovable', {
 		factory() {
-			this.getComponent('physics').immovable = true;
+			this.physics.immovable = true;
 
 			return true;
 		},
 		onRemove() {
-			if (this.hasComponent('physics')) {
-				this.getComponent('physics').immovable = false;
+			if (this.physics) {
+				this.physics.immovable = false;
 			}
 		},
 	});

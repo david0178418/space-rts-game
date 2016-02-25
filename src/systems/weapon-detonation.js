@@ -10,16 +10,19 @@ export default {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+
 	init() {
+		this.ecsManager = instanceManager.get('ecs-manager');
 		this.game = instanceManager.get('game');
-		this.worldEntities = instanceManager.get('world-entities');
 	},
 
 	runOne(entity) {
-		let detonationFuse = entity.getComponent('detonation-fuse');
-		let targetHealth = detonationFuse.target.getComponent('health');
+		let detonationFuse = entity['detonation-fuse'];
+		let targetHealth = detonationFuse.target.health;
 
-		entity.destroy();
+		this.ecsManager.destroyEntity(entity.id);
 
 		// Check if it's dead already
 		if(!targetHealth) {
@@ -30,7 +33,7 @@ export default {
 
 		// TODO some sort of death system
 		if(targetHealth.current <= 0) {
-			detonationFuse.target.destroy();
+			this.ecsManager.destroyEntity(detonationFuse.target.id);
 		}
 	},
 };

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {each} from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default {
@@ -8,7 +8,13 @@ export default {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+	moveOrderSound: null,
+	worldEntities: null,
+
 	init() {
+		this.ecsManager = instanceManager.get('ecs-manager');
 		this.game = instanceManager.get('game');
 		this.worldEntities = instanceManager.get('world-entities');
 		this.moveOrderSound = this.game.add.audio('move-order');
@@ -23,7 +29,7 @@ export default {
 		// Theortically, only one is needed since all groups are processed
 		// together.  If multiple group commands are issued simultaniously,
 		// this may need to be changed.
-		let groupMovementComponent = entities[0].getComponent('group-movement');
+		let groupMovementComponent = entities[0]['group-movement'];
 		let maxX = this.game.world.height * 10;
 		let maxY = this.game.world.width * 10;
 		let minX = -1;
@@ -34,8 +40,8 @@ export default {
 		let xTotal = 0;
 		let yTotal = 0;
 
-		_.each(entities, function(entity) {
-			let sprite = entity.getComponent('sprite');
+		each(entities, function(entity) {
+			let sprite = entity.sprite;
 
 			movableSelectedCount++;
 			xTotal += sprite.x;
@@ -59,8 +65,8 @@ export default {
 		formationCenterOffsetX = (slotWidth * (rowCount - 1)) / 2;
 		formationCenterOffsetY = (slotWidth * (colCount - 1)) / 2;
 
-		_.each(entities, function(entity, i) {
-			let waypointQueue = entity.getComponent('waypoint-queue');
+		each(entities, (entity, i) => {
+			let waypointQueue = entity['waypoint-queue'];
 
 			formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
 			formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * ((i / rowCount) | 0) - formationCenterOffsetY;
@@ -72,7 +78,7 @@ export default {
 					hyperspace: groupMovementComponent.hyperspace,
 				});
 			} else {
-				entity.addComponent('waypoint', {
+				this.ecsManager.addComponent(entity.id, 'waypoint', {
 					x: formationPositionX,
 					y: formationPositionY,
 				});
@@ -82,7 +88,7 @@ export default {
 				}
 			}
 
-			entity.removeComponent('group-movement');
+			this.ecsManager.removeComponent(entity.id, 'group-movement');
 		});
 
 		if(!this.moveOrderSound.isPlaying) {

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
 import 'components/sprite';
@@ -8,25 +8,27 @@ import 'components/team';
 
 export default
 function(position) {
-	let planet = instanceManager.get('ecs-manager')
-		.createEntity()
-		.addComponent('sprite', _.extend({graphic: 'planet'}, position))
-		.addComponent('physics')
-		.addComponent('immovable')
-		.addComponent('selectable')
-		.addComponent('colonizable')
-		.addComponent('environment', {
+	let ecsManager = instanceManager.get('ecs-manager');
+	let planet = ecsManager.createEntity();
+
+	ecsManager.addComponents(planet.id, {
+		sprite: extend({graphic: 'planet'}, position),
+		physics: {},
+		immovable: {},
+		selectable: {},
+		colonizable: {},
+		environment: {
 			type: '',
 			habitability: 0,
-		})
-		.addComponent('population', {
+		},
+		population: {
 			fertility: 0,
 			longevity: 0,
 			count: 0,
-		});
-	let sprite = planet.components.sprite;
+		},
+	});
 
-	instanceManager.get('planets-quadtree').insert(sprite);
+	instanceManager.get('planets-quadtree').insert(planet.sprite);
 
 	return planet;
 }

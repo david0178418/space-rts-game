@@ -9,16 +9,20 @@ export default {
 		],
 	},
 
+	game: null,
+	ecsManager: null,
+
 	init() {
 		this.game = instanceManager.get('game');
+		this.ecsManager = instanceManager.get('ecsManager');
 
 		this.runOne = bind(this.runOne, this);
 	},
 
 	runOne(entity) {
-		if(entity.hasComponent('waypoint')) {
-			entity.getComponent('waypoint-queue').queue.unshift(entity.getComponent('waypoint'));
-			entity.removeComponent('waypoint');
+		if(entity.waypoint) {
+			entity['waypoint-queue'].queue.unshift(entity.waypoint);
+			this.ecsManager.removeComponent(entity.id, 'waypoint');
 		}
 
 		let movable = entity.getComponent('movable');

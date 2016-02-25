@@ -3,8 +3,13 @@ import Config from 'config';
 import instanceManager from 'instance-manager';
 
 export default {
+	background1layer2: null,
 	dirtyBackground: true,
+	game: null,
+	keyboardControls: null,
 	panSpeed: 8,
+	world: null,
+	worldEntities: null,
 	zoomIncrement: 5, // %
 	zoomMax: 100,
 	zoomMin: 15,
@@ -20,9 +25,9 @@ export default {
 		// this.background1layer1 = this.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
 		this.background1layer2 = this.game.add.tileSprite(Config.screen.width * -0.5, Config.screen.width * -0.5, Config.screen.width * 1.5, Config.screen.width * 1.5, 'background1-layer2');
 
-		window.addEventListener('mousewheel', _.bind(function(e) {
+		window.addEventListener('mousewheel', (e) => {
 			this.updateZoomTarget(e.wheelDelta);
-		}, this));
+		});
 	},
 
 	run() {

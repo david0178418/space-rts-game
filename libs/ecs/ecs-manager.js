@@ -1,9 +1,17 @@
-import _ from 'lodash';
-import Entity from './entity';
+import {
+	each,
+	every,
+	filter,
+	isUndefined,
+	keys,
+	map,
+	uniqueId,
+	values,
+} from 'lodash';
 
-// TODO Figure out if I want to make private or not.
 const components = 'components';// Symbol('components');
 const entities = 'entities'; // Symbol('entities');
+const entityIndex = 'entityIndex'; // Symbol('entityIndex');
 const initSystems = Symbol('init-systems');
 const runSystems = Symbol('run-systems');
 
@@ -29,16 +37,41 @@ export default
 class ECSManager {
 	constructor() {
 		this[components] = {};
-		this[entities] = [];
+		this[entities] = {};
+		this[entityIndex] = [];
 		this[initSystems] = {};
 		this[runSystems] = {};
 	}
 
-	createEntity() {
-		let entity = new Entity(this);
+	addComponent(entityId, component, props) {
+		let entity = this[entities][entityId];
 
-		this[entities].push(entity);
-		return entity;
+		if(entity[component] && !props) {
+			return entity;
+		}
+
+		entity[component] = this.createComponent(component, props, entity);
+	}
+
+	addComponents(entityId, components) {
+		let componentNames = keys(components);
+
+		for(let x = 0; x <= componentNames.length; x++) {
+			this.addComponent(entityId, componentNames[x], components[componentNames[x]]);
+		}
+
+		return this[entities][entityId];
+	}
+
+	createEntity() {
+		let id = uniqueId('entity-');
+
+		this[entities][id] = {
+			id,
+		};
+		this[entityIndex].push(id);
+
+		return this[entities][id];
 	}
 
 	// @param {string} name - component name.  If component with matching name doesn't
@@ -60,32 +93,74 @@ class ECSManager {
 		}
 	}
 
-	destroyEntity(entity) {
-		this[entities].splice(this[entities].indexOf(entity), 1);
-		entity.destroy();
-		return this;
+	destroyEntity(entityId) {
+		let entityIndexPosition = this[entityIndex].indexOf(entityId);
+
+		this.removeComponents(entityId);
+
+		delete this[entities][entityId];
+
+		if(entityIndexPosition !== -1) {
+			this[entityIndex].splice(this[entityIndex].indexOf(entityId), 1);
+		}
 	}
 
-	getComponentCleanup(name) {
-		return this[components][name].onRemove || _.noop;
+	entityDoesNotHaveComponent(entityId, componentName) {
+		return !this[entities][entityId][componentName];
 	}
 
-	getEntityById(id) {
-		return _.find(this[entities], function(entity) {
-			return entity.id === id;
+	entityDoesNotHaveComponents(entityId, componentNames) {
+		return every(componentNames, (componentName) => {
+			this.doesNotHaveComponent(entityId, componentName);
 		});
 	}
 
+	getComponent(entityId, componentName) {
+		return this[entities][entityId][componentName];
+	}
+
+	getComponentCleanup(name) {
+		return this[components][name].onRemove || function() {};
+	}
+
+	getEntityComponents(entityId) {
+		// TODO Cache this
+		return keys(this[entities][entityId]);
+	}
+
+	getEntity(entityId) {
+		return this[entities][entityId];
+	}
+
 	getEntities(withComponents, withoutComponents) {
+		let matchedEntities;
+
 		if(!(withComponents || withoutComponents)) {
 			return this[entities].slice(0);
 		}
 
-		// TODO Possible improvement: Figure out a way to send the components
-		// bundled with the entities.  This could save on a pass that will
-		// likely need to happen any way when the entity is being used.
-		return _.filter(this[entities], function(entity) {
+		matchedEntities = [];
+
+		for(let x = 0; x < this[entityIndex].length; x++) {
+			let entityId = this[entityIndex][x];
+
+			if(this.hasComponents(entityId, withComponents) && this.doesNotHaveComponents(entityId, withoutComponents)) {
+				matchedEntities.push(this[entities][entityId]);
+			}
+		}
+
+		return filter(this[entities], (entity) => {
 			return entity.hasComponents(withComponents) && entity.doesNotHaveComponents(withoutComponents);
+		});
+	}
+
+	hasComponent(entityId, componentName) {
+		return !!this[entities][entityId][componentName];
+	}
+
+	hasComponents(entityId, componentNamess) {
+		return every(componentNamess, (componentName) => {
+			this.hasComponent(entityId, componentName);
 		});
 	}
 
@@ -114,25 +189,50 @@ class ECSManager {
 		return this;
 	}
 
+	removeComponent(entityId, componentName) {
+		let component;
+		let entity = this[entities][entityId];
+
+		component = entity[componentName];
+
+		if(!component) {
+			return;
+		}
+
+		this.getComponentCleanup(componentName)(component, entity);
+		delete entity[componentName];
+	}
+
+	removeComponents(entityId) {
+		each(this.getEntityComponents(entityId), (componentName) => {
+			this.removeComponent(entityId, componentName);
+		});
+	}
+
 	runSystemInits() {
-		_.each(_.values(this[initSystems]), function(system) {
+		each(values(this[initSystems]), function(system) {
 			system.init();
 		});
 	}
 
 	runSystems() {
-		_.each(this[runSystems], (system) => {
+		each(this[runSystems], (system) => {
 			if(system.components) {
 				let matchedEntities = this.getEntities(system.components.with, system.components.without);
 
 				if(matchedEntities.length) {
 					system.run && system.run(matchedEntities);
-					system.runOne && _.map(matchedEntities, system.runOne);
+					system.runOne && map(matchedEntities, system.runOne);
 				}
 			} else {
 				system.run();
 			}
-
 		});
+	}
+
+	toggleComponent(entityId, componentName, addComponent, props) {
+		addComponent = isUndefined(addComponent) ? !this[entities][entityId][componentName] : addComponent;
+
+		addComponent ? this.addComponent(entityId, componentName, props): this.removeComponent(entityId, componentName);
 	}
 }

@@ -10,19 +10,20 @@ export default {
 		],
 	},
 
+	game: null,
+
 	init() {
 		this.game = instanceManager.get('game');
-		this.worldEntities = instanceManager.get('world-entities');
 	},
 
 	runOne(entity) {
-		if(!entity.getComponent('waypoint-queue').queue.length) {
+		if(!entity['waypoint-queue'].queue.length) {
 			// TODO Implement a "without componets" param to systems
 			return;
 		}
 
-		let waypointQueue = entity.getComponent('waypoint-queue');
+		let waypointQueue = entity['waypoint-queue'];
 
-		entity.addComponent('waypoint', waypointQueue.queue.shift());
+		this.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
 	},
 };
