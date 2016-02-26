@@ -31,7 +31,7 @@ function dequeueBuildItem(index) {
 
 	// NOTE For now, assuming there will only be 1 entity with a queue selected.
 	// Likely will need to figure out how to handle multiple being selected.
-	entities[0].getComponent('entity-spawn-queue').queue.splice(index, 1);
+	entities[0]['entity-spawn-queue'].queue.splice(index, 1);
 }
 
 export default

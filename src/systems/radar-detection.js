@@ -47,7 +47,7 @@ extend(RadarDetectionSystem, {
 			'health',
 		]);
 
-		for(let x = 0; x <= potentialTargets.length; x++) {
+		for(let x = 0; x < potentialTargets.length; x++) {
 			if(potentialTargets[x].team.name !== entity.team.name) {
 				let targetDistance =
 					this.calculateTargetDistance(

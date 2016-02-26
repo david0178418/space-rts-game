@@ -9,12 +9,6 @@ import {
 	values,
 } from 'lodash';
 
-const components = 'components';// Symbol('components');
-const entities = 'entities'; // Symbol('entities');
-const entityIndex = 'entityIndex'; // Symbol('entityIndex');
-const initSystems = Symbol('init-systems');
-const runSystems = Symbol('run-systems');
-
 // Util function to copy getter definitions as well as properties.
 const extend = function(obj) {
 	Array.prototype.slice.call(arguments, 1).forEach(function(source) {
@@ -36,15 +30,15 @@ const extend = function(obj) {
 export default
 class ECSManager {
 	constructor() {
-		this[components] = {};
-		this[entities] = {};
-		this[entityIndex] = [];
-		this[initSystems] = {};
-		this[runSystems] = {};
+		this._components = {};
+		this._entities = {};
+		this._entityIndex = [];
+		this._initSystems = {};
+		this._runSystems = {};
 	}
 
 	addComponent(entityId, component, props) {
-		let entity = this[entities][entityId];
+		let entity = this._entities[entityId];
 
 		if(entity[component] && !props) {
 			return entity;
@@ -56,22 +50,22 @@ class ECSManager {
 	addComponents(entityId, components) {
 		let componentNames = keys(components);
 
-		for(let x = 0; x <= componentNames.length; x++) {
+		for(let x = 0; x < componentNames.length; x++) {
 			this.addComponent(entityId, componentNames[x], components[componentNames[x]]);
 		}
 
-		return this[entities][entityId];
+		return this._entities[entityId];
 	}
 
 	createEntity() {
 		let id = uniqueId('entity-');
 
-		this[entities][id] = {
+		this._entities[id] = {
 			id,
 		};
-		this[entityIndex].push(id);
+		this._entityIndex.push(id);
 
-		return this[entities][id];
+		return this._entities[id];
 	}
 
 	// @param {string} name - component name.  If component with matching name doesn't
@@ -81,7 +75,7 @@ class ECSManager {
 	// TODO Consider case of over-writing a component that has an
 	// "onRemove" callback (such as "sprite")
 	createComponent(name, state = {}, entityContext) {
-		let component = this[components][name];
+		let component = this._components[name];
 
 		if(!component) {
 			this.registerComponent(name, {state});
@@ -94,80 +88,81 @@ class ECSManager {
 	}
 
 	destroyEntity(entityId) {
-		let entityIndexPosition = this[entityIndex].indexOf(entityId);
+		let entityIndexPosition = this._entityIndex.indexOf(entityId);
 
 		this.removeComponents(entityId);
 
-		delete this[entities][entityId];
+		delete this._entities[entityId];
 
 		if(entityIndexPosition !== -1) {
-			this[entityIndex].splice(this[entityIndex].indexOf(entityId), 1);
+			this._entityIndex.splice(this._entityIndex.indexOf(entityId), 1);
 		}
 	}
 
 	entityDoesNotHaveComponent(entityId, componentName) {
-		return !this[entities][entityId][componentName];
+		return !this._entities[entityId][componentName];
 	}
 
 	entityDoesNotHaveComponents(entityId, componentNames) {
 		return every(componentNames, (componentName) => {
-			this.doesNotHaveComponent(entityId, componentName);
+			return this.entityDoesNotHaveComponent(entityId, componentName);
 		});
 	}
 
 	getComponent(entityId, componentName) {
-		return this[entities][entityId][componentName];
+		return this._entities[entityId][componentName];
 	}
 
 	getComponentCleanup(name) {
-		return this[components][name].onRemove || function() {};
+		if(name === 'id') {
+			return () => {};
+		}
+		return this._components[name].onRemove || (() => {});
 	}
 
 	getEntityComponents(entityId) {
 		// TODO Cache this
-		return keys(this[entities][entityId]);
+		return keys(this._entities[entityId]);
 	}
 
 	getEntity(entityId) {
-		return this[entities][entityId];
+		return this._entities[entityId];
 	}
 
 	getEntities(withComponents, withoutComponents) {
 		let matchedEntities;
 
 		if(!(withComponents || withoutComponents)) {
-			return this[entities].slice(0);
+			return this._entities.slice(0);
 		}
 
 		matchedEntities = [];
 
-		for(let x = 0; x < this[entityIndex].length; x++) {
-			let entityId = this[entityIndex][x];
+		for(let x = 0; x < this._entityIndex.length; x++) {
+			let entityId = this._entityIndex[x];
 
-			if(this.hasComponents(entityId, withComponents) && this.doesNotHaveComponents(entityId, withoutComponents)) {
-				matchedEntities.push(this[entities][entityId]);
+			if(this.hasComponents(entityId, withComponents) && this.entityDoesNotHaveComponents(entityId, withoutComponents)) {
+				matchedEntities.push(this._entities[entityId]);
 			}
 		}
 
-		return filter(this[entities], (entity) => {
-			return entity.hasComponents(withComponents) && entity.doesNotHaveComponents(withoutComponents);
-		});
+		return matchedEntities;
 	}
 
 	hasComponent(entityId, componentName) {
-		return !!this[entities][entityId][componentName];
+		return !!this._entities[entityId][componentName];
 	}
 
 	hasComponents(entityId, componentNamess) {
 		return every(componentNamess, (componentName) => {
-			this.hasComponent(entityId, componentName);
+			return this._entities[entityId][componentName];
 		});
 	}
 
 	// @param {string} name
 	// @param {object} [defaultData={}] - provide an optional baseline for a component
 	registerComponent(name, defaultData) {
-		this[components][name] = defaultData;
+		this._components[name] = defaultData;
 
 		return this;
 	}
@@ -179,11 +174,11 @@ class ECSManager {
 	// @param {function} system.init - system initialization.
 	registerSystem(name, system) {
 		if(system.init) {
-			this[initSystems][name] = system;
+			this._initSystems[name] = system;
 		}
 
 		if(system.run || system.runOne) {
-			this[runSystems][name] = system;
+			this._runSystems[name] = system;
 		}
 
 		return this;
@@ -191,7 +186,7 @@ class ECSManager {
 
 	removeComponent(entityId, componentName) {
 		let component;
-		let entity = this[entities][entityId];
+		let entity = this._entities[entityId];
 
 		component = entity[componentName];
 
@@ -210,13 +205,13 @@ class ECSManager {
 	}
 
 	runSystemInits() {
-		each(values(this[initSystems]), function(system) {
+		each(values(this._initSystems), function(system) {
 			system.init();
 		});
 	}
 
 	runSystems() {
-		each(this[runSystems], (system) => {
+		each(this._runSystems, (system) => {
 			if(system.components) {
 				let matchedEntities = this.getEntities(system.components.with, system.components.without);
 
@@ -231,7 +226,7 @@ class ECSManager {
 	}
 
 	toggleComponent(entityId, componentName, addComponent, props) {
-		addComponent = isUndefined(addComponent) ? !this[entities][entityId][componentName] : addComponent;
+		addComponent = isUndefined(addComponent) ? !this._entities[entityId][componentName] : addComponent;
 
 		addComponent ? this.addComponent(entityId, componentName, props): this.removeComponent(entityId, componentName);
 	}

@@ -14,7 +14,7 @@ export default {
 
 	init() {
 		this.game = instanceManager.get('game');
-		this.ecsManager = instanceManager.get('ecsManager');
+		this.ecsManager = instanceManager.get('ecs-manager');
 
 		this.runOne = bind(this.runOne, this);
 	},
@@ -25,13 +25,13 @@ export default {
 			this.ecsManager.removeComponent(entity.id, 'waypoint');
 		}
 
-		let movable = entity.getComponent('movable');
+		let movable = entity.movable;
 
 		if(movable.currentSpeed === 0) {
 			return;
 		}
 
-		let sprite = entity.getComponent('sprite');
+		let sprite = entity.sprite;
 
 		movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
 

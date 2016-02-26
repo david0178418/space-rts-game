@@ -1,3 +1,4 @@
+import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default {
@@ -10,10 +11,14 @@ export default {
 		],
 	},
 
+	ecsManager: null,
 	game: null,
 
 	init() {
 		this.game = instanceManager.get('game');
+		this.ecsManager = instanceManager.get('ecs-manager');
+
+		this.runOne = bind(this.runOne, this);
 	},
 
 	runOne(entity) {

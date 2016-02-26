@@ -739,12 +739,6 @@
 	
 	var _lodash = __webpack_require__(22);
 	
-	const components = 'components'; // Symbol('components');
-	const entities = 'entities'; // Symbol('entities');
-	const entityIndex = 'entityIndex'; // Symbol('entityIndex');
-	const initSystems = Symbol('init-systems');
-	const runSystems = Symbol('run-systems');
-	
 	// Util function to copy getter definitions as well as properties.
 	const extend = function (obj) {
 		Array.prototype.slice.call(arguments, 1).forEach(function (source) {
@@ -765,15 +759,15 @@
 	
 	class ECSManager {
 		constructor() {
-			this[components] = {};
-			this[entities] = {};
-			this[entityIndex] = [];
-			this[initSystems] = {};
-			this[runSystems] = {};
+			this._components = {};
+			this._entities = {};
+			this._entityIndex = [];
+			this._initSystems = {};
+			this._runSystems = {};
 		}
 	
 		addComponent(entityId, component, props) {
-			let entity = this[entities][entityId];
+			let entity = this._entities[entityId];
 	
 			if (entity[component] && !props) {
 				return entity;
@@ -785,22 +779,22 @@
 		addComponents(entityId, components) {
 			let componentNames = (0, _lodash.keys)(components);
 	
-			for (let x = 0; x <= componentNames.length; x++) {
+			for (let x = 0; x < componentNames.length; x++) {
 				this.addComponent(entityId, componentNames[x], components[componentNames[x]]);
 			}
 	
-			return this[entities][entityId];
+			return this._entities[entityId];
 		}
 	
 		createEntity() {
 			let id = (0, _lodash.uniqueId)('entity-');
 	
-			this[entities][id] = {
+			this._entities[id] = {
 				id
 			};
-			this[entityIndex].push(id);
+			this._entityIndex.push(id);
 	
-			return this[entities][id];
+			return this._entities[id];
 		}
 	
 		// @param {string} name - component name.  If component with matching name doesn't
@@ -810,7 +804,7 @@
 		// TODO Consider case of over-writing a component that has an
 		// "onRemove" callback (such as "sprite")
 		createComponent(name, state = {}, entityContext) {
-			let component = this[components][name];
+			let component = this._components[name];
 	
 			if (!component) {
 				this.registerComponent(name, { state });
@@ -823,80 +817,81 @@
 		}
 	
 		destroyEntity(entityId) {
-			let entityIndexPosition = this[entityIndex].indexOf(entityId);
+			let entityIndexPosition = this._entityIndex.indexOf(entityId);
 	
 			this.removeComponents(entityId);
 	
-			delete this[entities][entityId];
+			delete this._entities[entityId];
 	
 			if (entityIndexPosition !== -1) {
-				this[entityIndex].splice(this[entityIndex].indexOf(entityId), 1);
+				this._entityIndex.splice(this._entityIndex.indexOf(entityId), 1);
 			}
 		}
 	
 		entityDoesNotHaveComponent(entityId, componentName) {
-			return !this[entities][entityId][componentName];
+			return !this._entities[entityId][componentName];
 		}
 	
 		entityDoesNotHaveComponents(entityId, componentNames) {
 			return (0, _lodash.every)(componentNames, componentName => {
-				this.doesNotHaveComponent(entityId, componentName);
+				return this.entityDoesNotHaveComponent(entityId, componentName);
 			});
 		}
 	
 		getComponent(entityId, componentName) {
-			return this[entities][entityId][componentName];
+			return this._entities[entityId][componentName];
 		}
 	
 		getComponentCleanup(name) {
-			return this[components][name].onRemove || function () {};
+			if (name === 'id') {
+				return () => {};
+			}
+			return this._components[name].onRemove || (() => {});
 		}
 	
 		getEntityComponents(entityId) {
 			// TODO Cache this
-			return (0, _lodash.keys)(this[entities][entityId]);
+			return (0, _lodash.keys)(this._entities[entityId]);
 		}
 	
 		getEntity(entityId) {
-			return this[entities][entityId];
+			return this._entities[entityId];
 		}
 	
 		getEntities(withComponents, withoutComponents) {
 			let matchedEntities;
 	
 			if (!(withComponents || withoutComponents)) {
-				return this[entities].slice(0);
+				return this._entities.slice(0);
 			}
 	
 			matchedEntities = [];
 	
-			for (let x = 0; x < this[entityIndex].length; x++) {
-				let entityId = this[entityIndex][x];
+			for (let x = 0; x < this._entityIndex.length; x++) {
+				let entityId = this._entityIndex[x];
 	
-				if (this.hasComponents(entityId, withComponents) && this.doesNotHaveComponents(entityId, withoutComponents)) {
-					matchedEntities.push(this[entities][entityId]);
+				if (this.hasComponents(entityId, withComponents) && this.entityDoesNotHaveComponents(entityId, withoutComponents)) {
+					matchedEntities.push(this._entities[entityId]);
 				}
 			}
 	
-			return (0, _lodash.filter)(this[entities], entity => {
-				return entity.hasComponents(withComponents) && entity.doesNotHaveComponents(withoutComponents);
-			});
+			return matchedEntities;
 		}
 	
 		hasComponent(entityId, componentName) {
-			return !!this[entities][entityId][componentName];
+			return !!this._entities[entityId][componentName];
 		}
 	
 		hasComponents(entityId, componentNamess) {
 			return (0, _lodash.every)(componentNamess, componentName => {
-				this.hasComponent(entityId, componentName);
+				return this._entities[entityId][componentName];
 			});
 		}
 	
 		// @param {string} name
 		// @param {object} [defaultData={}] - provide an optional baseline for a component
 		registerComponent(name, defaultData) {
-			this[components][name] = defaultData;
+			this._components[name] = defaultData;
 	
 			return this;
 		}
@@ -908,11 +903,11 @@
 		// @param {function} system.init - system initialization.
 		registerSystem(name, system) {
 			if (system.init) {
-				this[initSystems][name] = system;
+				this._initSystems[name] = system;
 			}
 	
 			if (system.run || system.runOne) {
-				this[runSystems][name] = system;
+				this._runSystems[name] = system;
 			}
 	
 			return this;
@@ -920,7 +915,7 @@
 	
 		removeComponent(entityId, componentName) {
 			let component;
-			let entity = this[entities][entityId];
+			let entity = this._entities[entityId];
 	
 			component = entity[componentName];
 	
@@ -939,13 +934,13 @@
 		}
 	
 		runSystemInits() {
-			(0, _lodash.each)((0, _lodash.values)(this[initSystems]), function (system) {
+			(0, _lodash.each)((0, _lodash.values)(this._initSystems), function (system) {
 				system.init();
 			});
 		}
 	
 		runSystems() {
-			(0, _lodash.each)(this[runSystems], system => {
+			(0, _lodash.each)(this._runSystems, system => {
 				if (system.components) {
 					let matchedEntities = this.getEntities(system.components.with, system.components.without);
 	
@@ -960,7 +955,7 @@
 		}
 	
 		toggleComponent(entityId, componentName, addComponent, props) {
-			addComponent = (0, _lodash.isUndefined)(addComponent) ? !this[entities][entityId][componentName] : addComponent;
+			addComponent = (0, _lodash.isUndefined)(addComponent) ? !this._entities[entityId][componentName] : addComponent;
 	
 			addComponent ? this.addComponent(entityId, componentName, props) : this.removeComponent(entityId, componentName);
 		}
@@ -35376,7 +35371,7 @@
 	
 		// NOTE For now, assuming there will only be 1 entity with a queue selected.
 		// Likely will need to figure out how to handle multiple being selected.
-		entities[0].getComponent('entity-spawn-queue').queue.splice(index, 1);
+		entities[0]['entity-spawn-queue'].queue.splice(index, 1);
 	}
 
 /***/ },
@@ -36162,7 +36157,7 @@
 		let entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 	
 		_lodash2.default.each(entities, function (entity) {
-			entity.getComponent('entity-spawn-queue').queue.push({
+			entity['entity-spawn-queue'].queue.push({
 				label: label,
 				blueprint: key,
 				elapsedBuildTime: 0
@@ -36984,7 +36979,7 @@
 	
 		init() {
 			this.game = _instanceManager2.default.get('game');
-			this.ecsManager = _instanceManager2.default.get('ecsManager');
+			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 	
 			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
@@ -36995,13 +36990,13 @@
 				this.ecsManager.removeComponent(entity.id, 'waypoint');
 			}
 	
-			let movable = entity.getComponent('movable');
+			let movable = entity.movable;
 	
 			if (movable.currentSpeed === 0) {
 				return;
 			}
 	
-			let sprite = entity.getComponent('sprite');
+			let sprite = entity.sprite;
 	
 			movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
 	
@@ -39184,6 +39179,8 @@
 	
 	exports.__esModule = true;
 	
+	var _lodash = __webpack_require__(22);
+	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
@@ -39196,10 +39193,14 @@
 			without: ['waypoint']
 		},
 	
+		ecsManager: null,
 		game: null,
 	
 		init() {
 			this.game = _instanceManager2.default.get('game');
+			this.ecsManager = _instanceManager2.default.get('ecs-manager');
+	
+			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne(entity) {
@@ -39348,7 +39349,7 @@
 	
 			let potentialTargets = this.ecsManager.getEntities(['team', 'sprite', 'health']);
 	
-			for (let x = 0; x <= potentialTargets.length; x++) {
+			for (let x = 0; x < potentialTargets.length; x++) {
 				if (potentialTargets[x].team.name !== entity.team.name) {
 					let targetDistance = this.calculateTargetDistance(sprite.position, potentialTargets[x].sprite.position);
 	
@@ -39404,6 +39405,8 @@
 	
 	exports.__esModule = true;
 	
+	var _lodash = __webpack_require__(22);
+	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
@@ -39422,6 +39425,8 @@
 		init() {
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 			this.game = _instanceManager2.default.get('game');
+	
+			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne(entity) {
@@ -39639,17 +39644,17 @@
 			this.drawDragArea(dragX, dragY);
 	
 			(0, _each2.default)(ecsManager.getEntities(['selectable']), function (entity) {
-				let isSelected = entity.getComponent('selected');
-				let teamComponent = entity.getComponent('team');
+				let isSelected = entity.selected;
+				let teamComponent = entity.team;
 	
 				if (teamComponent && teamComponent.name === 'player') {
-					let intersects = graphic.getBounds().intersects(entity.getComponent('sprite').getBounds());
+					let intersects = graphic.getBounds().intersects(entity.sprite.getBounds());
 	
 					if (!isSelected && intersects) {
-						entity.addComponent('selected');
+						ecsManager.addComponent(entity.id, 'selected');
 						selectedEntites.push(entity);
 					} else if (isSelected && !intersects) {
-						entity.removeComponent('selected');
+						ecsManager.removeComponent(entity.id, 'selected');
 					}
 				}
 			});
@@ -39682,17 +39687,17 @@
 				return;
 			}
 	
-			selectedEntityTeamComponent = selectedEntity.getComponent('team');
+			selectedEntityTeamComponent = selectedEntity.team;
 			selectedEntityTeam = selectedEntityTeamComponent && selectedEntityTeamComponent.name;
 	
 			(0, _each2.default)(entities, function (entity) {
-				let entityTeamComponent = entity.getComponent('team');
+				let entityTeamComponent = entity.team;
 				let team = entityTeamComponent && entityTeamComponent.name;
 	
 				if (entity.entityType === selectedEntity.entityType && selectedEntityTeam === team && entity.inCamera) {
-					entity.addComponent('selected');
+					this.ecsManager.addComponent(entity.id, 'selected');
 				} else {
-					entity.removeComponent('selected');
+					this.ecsManager.removeComponent(entity.id, 'selected');
 				}
 			});
 		},
@@ -39701,8 +39706,8 @@
 			let entities = this.ecsManager.getEntities(['selectable', 'team']);
 			let selectedEntity = this.getTopEntityAt(entities, position);
 	
-			(0, _each2.default)(entities, function (entity) {
-				entity.toggleComponent('selected', entity === selectedEntity);
+			(0, _each2.default)(entities, entity => {
+				this.ecsManager.toggleComponent(entity.id, 'selected', entity === selectedEntity);
 			});
 		},
 	
@@ -39739,11 +39744,11 @@
 					// this.uiViewModel.awaitTarget(false);
 	
 					(0, _each2.default)(entities, function (entity) {
-						entity.removeComponent('selected');
+						ecsManager.removeComponent(entity.id, 'selected');
 					});
 				} else {
 				(0, _each2.default)(entities, function (entity) {
-					entity.addComponent('order', {
+					ecsManager.addComponent(entity.id, 'order', {
 						x: position.x,
 						y: position.y
 					});
@@ -39756,7 +39761,7 @@
 	
 			(0, _each2.default)(entities, function (entity) {
 				// TODO Make a "getComponents"?
-				if (entity.getComponent('team').name === 'player' && (!topEntity || topEntity.z < entity.z) && entity.getComponent('sprite').getBounds().contains(position.x, position.y)) {
+				if (entity.team.name === 'player' && (!topEntity || topEntity.z < entity.z) && entity.sprite.getBounds().contains(position.x, position.y)) {
 					topEntity = entity;
 				}
 			});

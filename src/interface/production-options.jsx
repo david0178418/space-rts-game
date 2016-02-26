@@ -29,7 +29,7 @@ function handleSelectBlueprint(key, label) {
 	let entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 
 	_.each(entities, function(entity) {
-		entity.getComponent('entity-spawn-queue').queue.push({
+		entity['entity-spawn-queue'].queue.push({
 			label: label,
 			blueprint: key,
 			elapsedBuildTime: 0,
