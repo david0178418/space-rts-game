@@ -83,7 +83,7 @@ export default {
 			'entity-spawner': {
 				availableBlueprints: {
 					fighter: {
-						baseBuildTime: 4000,
+						baseBuildTime: 400,
 						cost: 0,
 						label: 'Fighter',
 						prefab: fighterPrefab('green'),

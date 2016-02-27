@@ -2,10 +2,15 @@ import {
 	each,
 	isUndefined,
 	keys,
-	map,
 	uniqueId,
 	values,
 } from 'lodash';
+
+class Entity {
+	constructor() {
+		this.id = id;
+	}
+}
 
 // Util function to copy getter definitions as well as properties.
 const extend = function(obj) {
@@ -174,6 +179,10 @@ class ECSManager {
 	registerComponent(name, defaultData) {
 		this._components[name] = defaultData;
 
+		// Initialize potential component names for all components to ensure
+		// the hidden classes are uniform between all entities
+		Entity.prototype[name] = null;
+
 		return this;
 	}
 
@@ -206,7 +215,7 @@ class ECSManager {
 		}
 
 		this.getComponentCleanup(componentName)(component, entity);
-		delete entity[componentName];
+		entity[componentName] = null;
 	}
 
 	removeComponents(entityId) {

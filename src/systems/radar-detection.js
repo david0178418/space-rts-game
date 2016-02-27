@@ -22,10 +22,12 @@ extend(RadarDetectionSystem, {
 		this.ui = instanceManager.get('ui');
 		this.quadtree = instanceManager.get('quadtree');
 		this.ecsManager = instanceManager.get('ecs-manager');
+
+		this.runOne = bind(this.runOne, this);
 	},
 
 	// TODO Optimize with quadtree
-	runOne: bind(function(entity) {
+	runOne(entity) {
 		let gun = entity.gun;
 		let sprite = entity.sprite;
 		let radar = entity.radar;
@@ -73,7 +75,7 @@ extend(RadarDetectionSystem, {
 		} else if(entity.breaks) {
 			this.ecsManager.removeComponent(entity.id, 'breaks');
 		}
-	}, RadarDetectionSystem),
+	},
 
 	// TODO Consider target width?
 	calculateTargetDistance(position, targetEntityPosition) {

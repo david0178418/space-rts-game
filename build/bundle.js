@@ -739,6 +739,12 @@
 	
 	var _lodash = __webpack_require__(22);
 	
+	class Entity {
+		constructor() {
+			this.id = id;
+		}
+	}
+	
 	// Util function to copy getter definitions as well as properties.
 	const extend = function (obj) {
 		Array.prototype.slice.call(arguments, 1).forEach(function (source) {
@@ -764,6 +770,7 @@
 			this._entityIndex = [];
 			this._initSystems = {};
 			this._runSystems = {};
+			this._runSystemsIndex = [];
 		}
 	
 		addComponent(entityId, component, props) {
@@ -833,9 +840,13 @@
 		}
 	
 		entityDoesNotHaveComponents(entityId, componentNames) {
-			return (0, _lodash.every)(componentNames, componentName => {
-				return this.entityDoesNotHaveComponent(entityId, componentName);
-			});
+			for (let x = 0; x < componentNames.length; x++) {
+				if (this._entities[entityId][componentNames[x]]) {
+					return false;
+				}
+			}
+	
+			return true;
 		}
 	
 		getComponent(entityId, componentName) {
@@ -870,7 +881,7 @@
 			for (let x = 0; x < this._entityIndex.length; x++) {
 				let entityId = this._entityIndex[x];
 	
-				if (this.hasComponents(entityId, withComponents) && this.entityDoesNotHaveComponents(entityId, withoutComponents)) {
+				if ((!withComponents || this.hasComponents(entityId, withComponents)) && (!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))) {
 					matchedEntities.push(this._entities[entityId]);
 				}
 			}
@@ -882,16 +893,24 @@
 			return !!this._entities[entityId][componentName];
 		}
 	
-		hasComponents(entityId, componentNamess) {
-			return (0, _lodash.every)(componentNamess, componentName => {
-				return this._entities[entityId][componentName];
-			});
+		hasComponents(entityId, componentNames) {
+			for (let x = 0; x < componentNames.length; x++) {
+				if (!this._entities[entityId][componentNames[x]]) {
+					return false;
+				}
+			}
+	
+			return true;
 		}
 	
 		// @param {string} name
 		// @param {object} [defaultData={}] - provide an optional baseline for a component
 		registerComponent(name, defaultData) {
 			this._components[name] = defaultData;
+	
+			// Initialize potential component names for all components to ensure
+			// the hidden classes are uniform between all entities
+			Entity.prototype[name] = null;
 	
 			return this;
 		}
@@ -908,6 +927,7 @@
 	
 			if (system.run || system.runOne) {
 				this._runSystems[name] = system;
+				this._runSystemsIndex.push(name);
 			}
 	
 			return this;
@@ -924,13 +944,15 @@
 			}
 	
 			this.getComponentCleanup(componentName)(component, entity);
-			delete entity[componentName];
+			entity[componentName] = null;
 		}
 	
 		removeComponents(entityId) {
-			(0, _lodash.each)(this.getEntityComponents(entityId), componentName => {
-				this.removeComponent(entityId, componentName);
-			});
+			let componentNames = this.getEntityComponents(entityId);
+	
+			for (let x = 0; x < componentNames.length; x++) {
+				this.removeComponent(entityId, componentNames[x]);
+			}
 		}
 	
 		runSystemInits() {
@@ -940,18 +962,29 @@
 		}
 	
 		runSystems() {
-			(0, _lodash.each)(this._runSystems, system => {
+			let system = null;
+	
+			for (let x = 0; x < this._runSystemsIndex.length; x++) {
+				system = this._runSystems[this._runSystemsIndex[x]];
+	
 				if (system.components) {
 					let matchedEntities = this.getEntities(system.components.with, system.components.without);
 	
 					if (matchedEntities.length) {
-						system.run && system.run(matchedEntities);
-						system.runOne && (0, _lodash.map)(matchedEntities, system.runOne);
+						if (system.run) {
+							system.run(matchedEntities);
+						}
+	
+						if (system.runOne) {
+							for (let x = 0; x < matchedEntities.length; x++) {
+								system.runOne(matchedEntities[x]);
+							}
+						}
 					}
 				} else {
 					system.run();
 				}
-			});
+			}
 		}
 	
 		toggleComponent(entityId, componentName, addComponent, props) {
@@ -36299,7 +36332,7 @@
 				'entity-spawner': {
 					availableBlueprints: {
 						fighter: {
-							baseBuildTime: 4000,
+							baseBuildTime: 400,
 							cost: 0,
 							label: 'Fighter',
 							prefab: (0, _fighter2.default)('green')
@@ -39331,10 +39364,12 @@
 			this.ui = _instanceManager2.default.get('ui');
 			this.quadtree = _instanceManager2.default.get('quadtree');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
+	
+			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		// TODO Optimize with quadtree
-		runOne: (0, _lodash.bind)(function (entity) {
+		runOne(entity) {
 			let gun = entity.gun;
 			let sprite = entity.sprite;
 			let radar = entity.radar;
@@ -39371,7 +39406,7 @@
 			} else if (entity.breaks) {
 				this.ecsManager.removeComponent(entity.id, 'breaks');
 			}
-		}, RadarDetectionSystem),
+		},
 	
 		// TODO Consider target width?
 		calculateTargetDistance(position, targetEntityPosition) {
@@ -39516,7 +39551,16 @@
 		},
 		update() {
 			_mouseControls2.default.update();
+	
+			if (window.LOG_FRAME) {
+				console.profile('start');
+			}
 			ecsManager.runSystems();
+	
+			if (window.LOG_FRAME) {
+				window.LOG_FRAME = false;
+				console.profileEnd('start');
+			}
 		},
 	
 		paused() {}
