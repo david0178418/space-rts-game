@@ -1,7 +1,6 @@
-import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let WeaponDetonation = {
 	components: {
 		with: [
 			'detonation-fuse',
@@ -17,15 +16,13 @@ export default {
 	init() {
 		this.ecsManager = instanceManager.get('ecs-manager');
 		this.game = instanceManager.get('game');
-
-		this.runOne = bind(this.runOne, this);
 	},
 
 	runOne(entity) {
 		let detonationFuse = entity['detonation-fuse'];
 		let targetHealth = detonationFuse.target.health;
 
-		this.ecsManager.destroyEntity(entity.id);
+		WeaponDetonation.ecsManager.destroyEntity(entity.id);
 
 		// Check if it's dead already
 		if(!targetHealth) {
@@ -36,7 +33,9 @@ export default {
 
 		// TODO some sort of death system
 		if(targetHealth.current <= 0) {
-			this.ecsManager.destroyEntity(detonationFuse.target.id);
+			WeaponDetonation.ecsManager.destroyEntity(detonationFuse.target.id);
 		}
 	},
 };
+
+export default WeaponDetonation;

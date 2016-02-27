@@ -1,16 +1,11 @@
 import {
+	defaults,
 	each,
 	isUndefined,
 	keys,
 	uniqueId,
 	values,
 } from 'lodash';
-
-class Entity {
-	constructor() {
-		this.id = id;
-	}
-}
 
 // Util function to copy getter definitions as well as properties.
 const extend = function(obj) {
@@ -35,6 +30,7 @@ class ECSManager {
 	constructor() {
 		this._components = {};
 		this._entities = {};
+		this._entityTemplate = {};
 		this._entityIndex = [];
 		this._initSystems = {};
 		this._runSystems = {};
@@ -62,14 +58,19 @@ class ECSManager {
 	}
 
 	createEntity() {
-		let id = uniqueId('entity-');
+		let newEntity = defaults({
+			id: uniqueId('entity-'),
+		}, this._entityTemplate);
 
-		this._entities[id] = {
-			id,
-		};
-		this._entityIndex.push(id);
+		this._entities[newEntity.id] = newEntity;
 
-		return this._entities[id];
+		for(let x = 0; x < this._components.length; x++) {
+			newEntity[this._components[x]] = null;
+		}
+
+		this._entityIndex.push(newEntity.id);
+
+		return newEntity;
 	}
 
 	// @param {string} name - component name.  If component with matching name doesn't
@@ -177,11 +178,19 @@ class ECSManager {
 	// @param {string} name
 	// @param {object} [defaultData={}] - provide an optional baseline for a component
 	registerComponent(name, defaultData) {
+		if(this._components[name]) {
+			return;
+		}
+
 		this._components[name] = defaultData;
 
 		// Initialize potential component names for all components to ensure
 		// the hidden classes are uniform between all entities
-		Entity.prototype[name] = null;
+		this._entityTemplate[name] = null;
+
+		for(let x = 0; x < this._entities.length; x++) {
+			this._entities[name] = null;
+		}
 
 		return this;
 	}

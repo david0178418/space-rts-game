@@ -1,7 +1,6 @@
-import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let Breaking = {
 	components: {
 		with: [
 			'movable',
@@ -15,14 +14,12 @@ export default {
 	init() {
 		this.game = instanceManager.get('game');
 		this.ecsManager = instanceManager.get('ecs-manager');
-
-		this.runOne = bind(this.runOne, this);
 	},
 
 	runOne(entity) {
 		if(entity.waypoint) {
 			entity['waypoint-queue'].queue.unshift(entity.waypoint);
-			this.ecsManager.removeComponent(entity.id, 'waypoint');
+			Breaking.ecsManager.removeComponent(entity.id, 'waypoint');
 		}
 
 		let movable = entity.movable;
@@ -33,13 +30,15 @@ export default {
 
 		let sprite = entity.sprite;
 
-		movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
+		movable.currentSpeed -= movable.acceleration * Breaking.game.time.physicsElapsed;
 
 		if(movable.currentSpeed <= 0) {
 			movable.currentSpeed = 0;
 		} else {
-			sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * this.game.time.physicsElapsed;
-			sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * this.game.time.physicsElapsed;
+			sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * Breaking.game.time.physicsElapsed;
+			sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * Breaking.game.time.physicsElapsed;
 		}
 	},
 };
+
+export default Breaking

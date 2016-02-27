@@ -1,7 +1,6 @@
-import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let EntitySpawnDequeue = {
 	components: {
 		with: [
 			'entity-spawner',
@@ -15,7 +14,6 @@ export default {
 	init() {
 		this.worldEntities = instanceManager.get('world-entities');
 		this.game = instanceManager.get('game');
-		this.runOne = bind(this.runOne, this);
 	},
 
 	// TODO make spawn and waypoint queue/dequeue logic more consistent if
@@ -31,7 +29,7 @@ export default {
 		let activeConstruction = entitySpawnQueue[0];
 		let spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 
-		activeConstruction.elapsedBuildTime += this.game.time.elapsed;
+		activeConstruction.elapsedBuildTime += EntitySpawnDequeue.game.time.elapsed;
 
 		if(activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 			let newEntity;
@@ -52,3 +50,5 @@ export default {
 		}
 	},
 };
+
+export default EntitySpawnDequeue;

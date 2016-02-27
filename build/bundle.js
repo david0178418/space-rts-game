@@ -739,12 +739,6 @@
 	
 	var _lodash = __webpack_require__(22);
 	
-	class Entity {
-		constructor() {
-			this.id = id;
-		}
-	}
-	
 	// Util function to copy getter definitions as well as properties.
 	const extend = function (obj) {
 		Array.prototype.slice.call(arguments, 1).forEach(function (source) {
@@ -767,6 +761,7 @@
 		constructor() {
 			this._components = {};
 			this._entities = {};
+			this._entityTemplate = {};
 			this._entityIndex = [];
 			this._initSystems = {};
 			this._runSystems = {};
@@ -794,14 +789,19 @@
 		}
 	
 		createEntity() {
-			let id = (0, _lodash.uniqueId)('entity-');
+			let newEntity = (0, _lodash.defaults)({
+				id: (0, _lodash.uniqueId)('entity-')
+			}, this._entityTemplate);
 	
-			this._entities[id] = {
-				id
-			};
-			this._entityIndex.push(id);
+			this._entities[newEntity.id] = newEntity;
 	
-			return this._entities[id];
+			for (let x = 0; x < this._components.length; x++) {
+				newEntity[this._components[x]] = null;
+			}
+	
+			this._entityIndex.push(newEntity.id);
+	
+			return newEntity;
 		}
 	
 		// @param {string} name - component name.  If component with matching name doesn't
@@ -906,11 +906,19 @@
 		// @param {string} name
 		// @param {object} [defaultData={}] - provide an optional baseline for a component
 		registerComponent(name, defaultData) {
+			if (this._components[name]) {
+				return;
+			}
+	
 			this._components[name] = defaultData;
 	
 			// Initialize potential component names for all components to ensure
 			// the hidden classes are uniform between all entities
-			Entity.prototype[name] = null;
+			this._entityTemplate[name] = null;
+	
+			for (let x = 0; x < this._entities.length; x++) {
+				this._entities[name] = null;
+			}
 	
 			return this;
 		}
@@ -36994,15 +37002,13 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let Breaking = {
 		components: {
 			with: ['movable', 'breaks']
 		},
@@ -37013,14 +37019,12 @@
 		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-	
-			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne(entity) {
 			if (entity.waypoint) {
 				entity['waypoint-queue'].queue.unshift(entity.waypoint);
-				this.ecsManager.removeComponent(entity.id, 'waypoint');
+				Breaking.ecsManager.removeComponent(entity.id, 'waypoint');
 			}
 	
 			let movable = entity.movable;
@@ -37031,16 +37035,18 @@
 	
 			let sprite = entity.sprite;
 	
-			movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
+			movable.currentSpeed -= movable.acceleration * Breaking.game.time.physicsElapsed;
 	
 			if (movable.currentSpeed <= 0) {
 				movable.currentSpeed = 0;
 			} else {
-				sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * this.game.time.physicsElapsed;
-				sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * this.game.time.physicsElapsed;
+				sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * Breaking.game.time.physicsElapsed;
+				sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * Breaking.game.time.physicsElapsed;
 			}
 		}
 	};
+	
+	exports.default = Breaking;
 
 /***/ },
 /* 225 */
@@ -37131,15 +37137,13 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let EntitySpawnDequeue = {
 		components: {
 			with: ['entity-spawner', 'entity-spawn-queue']
 		},
@@ -37150,7 +37154,6 @@
 		init() {
 			this.worldEntities = _instanceManager2.default.get('world-entities');
 			this.game = _instanceManager2.default.get('game');
-			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		// TODO make spawn and waypoint queue/dequeue logic more consistent if
@@ -37166,7 +37169,7 @@
 			let activeConstruction = entitySpawnQueue[0];
 			let spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 	
-			activeConstruction.elapsedBuildTime += this.game.time.elapsed;
+			activeConstruction.elapsedBuildTime += EntitySpawnDequeue.game.time.elapsed;
 	
 			if (activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 				let newEntity;
@@ -37187,6 +37190,8 @@
 			}
 		}
 	};
+	
+	exports.default = EntitySpawnDequeue;
 
 /***/ },
 /* 227 */
@@ -37306,8 +37311,6 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
@@ -37318,7 +37321,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let Movement = {
 		components: {
 			with: ['movable', 'waypoint'],
 			without: ['breaks']
@@ -37332,8 +37335,6 @@
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 			this.game = _instanceManager2.default.get('game');
 			this.worldEntities = _instanceManager2.default.get('world-entities');
-	
-			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne(entity) {
@@ -37348,17 +37349,17 @@
 			distance = _utils2.default.distanceBetween(sprite, waypoint);
 	
 			if (distance <= breakingDistance) {
-				movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
+				movable.currentSpeed -= movable.acceleration * Movement.game.time.physicsElapsed;
 	
-				if (distance < 1 || movable.currentSpeed * this.game.time.physicsElapsed >= distance) {
+				if (distance < 1 || movable.currentSpeed * Movement.game.time.physicsElapsed >= distance) {
 					movable.currentSpeed = 0;
 					sprite.position.x = waypoint.x;
 					sprite.position.y = waypoint.y;
-					this.ecsManager.removeComponent(entity.id, 'waypoint');
+					Movement.ecsManager.removeComponent(entity.id, 'waypoint');
 					return;
 				}
 			} else if (movable.currentSpeed < movable.topSpeed) {
-				movable.currentSpeed += movable.acceleration * this.game.time.physicsElapsed;
+				movable.currentSpeed += movable.acceleration * Movement.game.time.physicsElapsed;
 	
 				if (movable.currentSpeed > movable.topSpeed) {
 					movable.currentSpeed = movable.topSpeed;
@@ -37369,11 +37370,13 @@
 			angle = _utils2.default.angleBetween(sprite.position, waypoint);
 	
 			sprite.rotation = angle; // TODO Animate angle change
-			sprite.position.x += Math.cos(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
-			sprite.position.y += Math.sin(angle) * movable.currentSpeed * this.game.time.physicsElapsed;
+			sprite.position.x += Math.cos(angle) * movable.currentSpeed * Movement.game.time.physicsElapsed;
+			sprite.position.y += Math.sin(angle) * movable.currentSpeed * Movement.game.time.physicsElapsed;
 		}
 	};
-
+	
+	exports.default = Movement;
+	
 	// TODO Refactor systems and others that need larger references for performance
 	// See the following jsperf: https://jsperf.com/closure-vs-property/12
 	// Determine how to best store references to libraries and global instances
@@ -39212,15 +39215,13 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let WaypointDequeue = {
 		components: {
 			with: ['waypoint-queue'],
 			without: ['waypoint']
@@ -39232,8 +39233,6 @@
 		init() {
 			this.game = _instanceManager2.default.get('game');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-	
-			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne(entity) {
@@ -39244,9 +39243,11 @@
 	
 			let waypointQueue = entity['waypoint-queue'];
 	
-			this.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
+			WaypointDequeue.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
 		}
 	};
+	
+	exports.default = WaypointDequeue;
 
 /***/ },
 /* 273 */
@@ -39340,16 +39341,13 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let RadarDetectionSystem = {};
-	(0, _lodash.extend)(RadarDetectionSystem, {
+	let RadarDetectionSystem = {
 		components: {
 			with: ['sprite', 'radar', 'team', 'gun']
 		},
@@ -39364,8 +39362,6 @@
 			this.ui = _instanceManager2.default.get('ui');
 			this.quadtree = _instanceManager2.default.get('quadtree');
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-	
-			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		// TODO Optimize with quadtree
@@ -39376,17 +39372,17 @@
 			let currentTarget;
 			let currentTargetDistance;
 	
-			gun.remainingCooldown = Math.max(gun.remainingCooldown - this.game.time.physicsElapsedMS, 0);
+			gun.remainingCooldown = Math.max(gun.remainingCooldown - RadarDetectionSystem.game.time.physicsElapsedMS, 0);
 	
 			if (gun.remainingCooldown) {
 				return;
 			}
 	
-			let potentialTargets = this.ecsManager.getEntities(['team', 'sprite', 'health']);
+			let potentialTargets = RadarDetectionSystem.ecsManager.getEntities(['team', 'sprite', 'health']);
 	
 			for (let x = 0; x < potentialTargets.length; x++) {
 				if (potentialTargets[x].team.name !== entity.team.name) {
-					let targetDistance = this.calculateTargetDistance(sprite.position, potentialTargets[x].sprite.position);
+					let targetDistance = RadarDetectionSystem.calculateTargetDistance(sprite.position, potentialTargets[x].sprite.position);
 	
 					if (targetDistance <= radar.range) {
 						if (!currentTarget || targetDistance < currentTargetDistance) {
@@ -39399,22 +39395,22 @@
 	
 			if (currentTarget) {
 				if (entity.movable && entity.movable.currentSpeed === 0) {
-					this.fire(sprite, gun, currentTarget);
+					RadarDetectionSystem.fire(sprite, gun, currentTarget);
 				} else if (!entity.breaks) {
-					this.ecsManager.addComponent(entity.id, 'breaks');
+					RadarDetectionSystem.ecsManager.addComponent(entity.id, 'breaks');
 				}
 			} else if (entity.breaks) {
-				this.ecsManager.removeComponent(entity.id, 'breaks');
+				RadarDetectionSystem.ecsManager.removeComponent(entity.id, 'breaks');
 			}
 		},
 	
 		// TODO Consider target width?
 		calculateTargetDistance(position, targetEntityPosition) {
-			return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
+			return RadarDetectionSystem.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 		},
 	
 		fire(firingSprite, gun, target) {
-			let angle = this.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
+			let angle = RadarDetectionSystem.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
 	
 			firingSprite.rotation = angle;
 	
@@ -39428,7 +39424,7 @@
 	
 			gun.sound.play();
 		}
-	});
+	};
 	
 	exports.default = RadarDetectionSystem;
 
@@ -39440,15 +39436,13 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
 	var _instanceManager = __webpack_require__(9);
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let WeaponDetonation = {
 		components: {
 			with: ['detonation-fuse'],
 			without: ['waypoint']
@@ -39460,15 +39454,13 @@
 		init() {
 			this.ecsManager = _instanceManager2.default.get('ecs-manager');
 			this.game = _instanceManager2.default.get('game');
-	
-			this.runOne = (0, _lodash.bind)(this.runOne, this);
 		},
 	
 		runOne(entity) {
 			let detonationFuse = entity['detonation-fuse'];
 			let targetHealth = detonationFuse.target.health;
 	
-			this.ecsManager.destroyEntity(entity.id);
+			WeaponDetonation.ecsManager.destroyEntity(entity.id);
 	
 			// Check if it's dead already
 			if (!targetHealth) {
@@ -39479,10 +39471,12 @@
 	
 			// TODO some sort of death system
 			if (targetHealth.current <= 0) {
-				this.ecsManager.destroyEntity(detonationFuse.target.id);
+				WeaponDetonation.ecsManager.destroyEntity(detonationFuse.target.id);
 			}
 		}
 	};
+	
+	exports.default = WeaponDetonation;
 
 /***/ },
 /* 277 */

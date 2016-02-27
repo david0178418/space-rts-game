@@ -1,7 +1,6 @@
-import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let WaypointDequeue = {
 	components: {
 		with: [
 			'waypoint-queue',
@@ -17,8 +16,6 @@ export default {
 	init() {
 		this.game = instanceManager.get('game');
 		this.ecsManager = instanceManager.get('ecs-manager');
-
-		this.runOne = bind(this.runOne, this);
 	},
 
 	runOne(entity) {
@@ -29,6 +26,8 @@ export default {
 
 		let waypointQueue = entity['waypoint-queue'];
 
-		this.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
+		WaypointDequeue.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
 	},
 };
+
+export default WaypointDequeue;
