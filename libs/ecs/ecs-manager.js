@@ -1,7 +1,5 @@
 import {
 	each,
-	every,
-	filter,
 	isUndefined,
 	keys,
 	map,
@@ -35,6 +33,7 @@ class ECSManager {
 		this._entityIndex = [];
 		this._initSystems = {};
 		this._runSystems = {};
+		this._runSystemsIndex = [];
 	}
 
 	addComponent(entityId, component, props) {
@@ -104,9 +103,13 @@ class ECSManager {
 	}
 
 	entityDoesNotHaveComponents(entityId, componentNames) {
-		return every(componentNames, (componentName) => {
-			return this.entityDoesNotHaveComponent(entityId, componentName);
-		});
+		for(let x = 0; x < componentNames.length; x++) {
+			if(this._entities[entityId][componentNames[x]]) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	getComponent(entityId, componentName) {
@@ -141,7 +144,10 @@ class ECSManager {
 		for(let x = 0; x < this._entityIndex.length; x++) {
 			let entityId = this._entityIndex[x];
 
-			if(this.hasComponents(entityId, withComponents) && this.entityDoesNotHaveComponents(entityId, withoutComponents)) {
+			if(
+				(!withComponents || this.hasComponents(entityId, withComponents)) &&
+				(!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))
+			) {
 				matchedEntities.push(this._entities[entityId]);
 			}
 		}
@@ -153,10 +159,14 @@ class ECSManager {
 		return !!this._entities[entityId][componentName];
 	}
 
-	hasComponents(entityId, componentNamess) {
-		return every(componentNamess, (componentName) => {
-			return this._entities[entityId][componentName];
-		});
+	hasComponents(entityId, componentNames) {
+		for(let x = 0; x < componentNames.length; x++) {
+			if(!this._entities[entityId][componentNames[x]]) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	// @param {string} name
@@ -179,6 +189,7 @@ class ECSManager {
 
 		if(system.run || system.runOne) {
 			this._runSystems[name] = system;
+			this._runSystemsIndex.push(name);
 		}
 
 		return this;
@@ -199,9 +210,11 @@ class ECSManager {
 	}
 
 	removeComponents(entityId) {
-		each(this.getEntityComponents(entityId), (componentName) => {
-			this.removeComponent(entityId, componentName);
-		});
+		let componentNames = this.getEntityComponents(entityId);
+
+		for(let x = 0; x < componentNames.length; x++) {
+			this.removeComponent(entityId, componentNames[x]);
+		}
 	}
 
 	runSystemInits() {
@@ -211,18 +224,29 @@ class ECSManager {
 	}
 
 	runSystems() {
-		each(this._runSystems, (system) => {
+		let system = null;
+
+		for(let x = 0; x < this._runSystemsIndex.length; x++) {
+			system = this._runSystems[this._runSystemsIndex[x]];
+
 			if(system.components) {
 				let matchedEntities = this.getEntities(system.components.with, system.components.without);
 
 				if(matchedEntities.length) {
-					system.run && system.run(matchedEntities);
-					system.runOne && map(matchedEntities, system.runOne);
+					if(system.run) {
+						system.run(matchedEntities);
+					}
+
+					if(system.runOne) {
+						for(let x = 0; x < matchedEntities.length; x++) {
+							system.runOne(matchedEntities[x]);
+						}
+					}
 				}
 			} else {
 				system.run();
 			}
-		});
+		}
 	}
 
 	toggleComponent(entityId, componentName, addComponent, props) {
