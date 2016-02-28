@@ -1,7 +1,7 @@
 import {filter, throttle} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let RenderProductionOptionsSystem = {
 	components: {
 		with: [
 			'entity-spawner',
@@ -12,8 +12,8 @@ export default {
 	ui: null,
 
 	init() {
-		this.game = instanceManager.get('game');
-		this.ui = instanceManager.get('ui');
+		RenderProductionOptionsSystem.game = instanceManager.get('game');
+		RenderProductionOptionsSystem.ui = instanceManager.get('ui');
 	},
 
 	run: throttle(function(entities) {
@@ -22,9 +22,11 @@ export default {
 		});
 
 		if(selectedEntities.length) {
-			this.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
+			RenderProductionOptionsSystem.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
 		} else {
-			this.ui.setProductionOptions(null);
+			RenderProductionOptionsSystem.ui.setProductionOptions(null);
 		}
 	}, 100),
 };
+
+export default RenderProductionOptionsSystem;

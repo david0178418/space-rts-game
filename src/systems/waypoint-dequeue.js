@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-let WaypointDequeue = {
+let WaypointDequeueSystem = {
 	components: {
 		with: [
 			'waypoint-queue',
@@ -14,8 +14,8 @@ let WaypointDequeue = {
 	game: null,
 
 	init() {
-		this.game = instanceManager.get('game');
-		this.ecsManager = instanceManager.get('ecs-manager');
+		WaypointDequeueSystem.game = instanceManager.get('game');
+		WaypointDequeueSystem.ecsManager = instanceManager.get('ecs-manager');
 	},
 
 	runOne(entity) {
@@ -26,8 +26,8 @@ let WaypointDequeue = {
 
 		let waypointQueue = entity['waypoint-queue'];
 
-		WaypointDequeue.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
+		WaypointDequeueSystem.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
 	},
 };
 
-export default WaypointDequeue;
+export default WaypointDequeueSystem;

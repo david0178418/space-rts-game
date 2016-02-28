@@ -8,7 +8,7 @@ import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 import planetFactory from 'prefabs/planet';
 
-export default {
+let UniverseCreationSystem = {
 
 	ecsManager: null,
 	worldEntities: null,
@@ -16,8 +16,8 @@ export default {
 	init() {
 		let planets = [];
 
-		this.ecsManager = instanceManager.get('ecs-manager');
-		this.worldEntities = instanceManager.get('world-entities');
+		UniverseCreationSystem.ecsManager = instanceManager.get('ecs-manager');
+		UniverseCreationSystem.worldEntities = instanceManager.get('world-entities');
 
 		// planets acting as markers to edges and center
 		planetFactory({ x: 0, y: Config.stage.height / 2 });
@@ -39,7 +39,7 @@ export default {
 			planets.push(newPlanet);
 		}
 
-		this.assignTeams(planets);
+		UniverseCreationSystem.assignTeams(planets);
 	},
 
 	assignTeams(planets) {
@@ -47,11 +47,11 @@ export default {
 		let playerPlanetSpriteComponent = playerPlanet.sprite;
 		let enemyPlanet = planets[planets.length - 1];
 
-		this.worldEntities.x = -playerPlanetSpriteComponent.x + Config.screen.width / 2;
-		this.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
+		UniverseCreationSystem.worldEntities.x = -playerPlanetSpriteComponent.x + Config.screen.width / 2;
+		UniverseCreationSystem.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
 
-		this.ecsManager.removeComponent(playerPlanet.id, 'colonizable');
-		this.ecsManager.addComponents(playerPlanet.id, {
+		UniverseCreationSystem.ecsManager.removeComponent(playerPlanet.id, 'colonizable');
+		UniverseCreationSystem.ecsManager.addComponents(playerPlanet.id, {
 			team: {
 				name: 'player',
 			},
@@ -102,8 +102,8 @@ export default {
 			},
 		});
 
-		this.ecsManager.removeComponent(enemyPlanet.id, 'colonizable');
-		this.ecsManager.addComponents(enemyPlanet.id, {
+		UniverseCreationSystem.ecsManager.removeComponent(enemyPlanet.id, 'colonizable');
+		UniverseCreationSystem.ecsManager.addComponents(enemyPlanet.id, {
 			'team': {
 				name: 'ai1',
 			},
@@ -194,3 +194,5 @@ export default {
 		window.enemyPlanet = enemyPlanet;
 	},
 };
+
+export default UniverseCreationSystem;

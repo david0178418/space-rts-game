@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-let RadarDetectionSystem = {
+let RadarDetectionSystemSystem = {
 	components: {
 		with: [
 			'sprite',
@@ -16,10 +16,10 @@ let RadarDetectionSystem = {
 	quadtree: null,
 
 	init() {
-		this.game = instanceManager.get('game');
-		this.ui = instanceManager.get('ui');
-		this.quadtree = instanceManager.get('quadtree');
-		this.ecsManager = instanceManager.get('ecs-manager');
+		RadarDetectionSystemSystem.game = instanceManager.get('game');
+		RadarDetectionSystemSystem.ui = instanceManager.get('ui');
+		RadarDetectionSystemSystem.quadtree = instanceManager.get('quadtree');
+		RadarDetectionSystemSystem.ecsManager = instanceManager.get('ecs-manager');
 	},
 
 	// TODO Optimize with quadtree
@@ -31,7 +31,7 @@ let RadarDetectionSystem = {
 		let currentTargetDistance;
 
 		gun.remainingCooldown = Math.max(
-			gun.remainingCooldown - RadarDetectionSystem.game.time.physicsElapsedMS,
+			gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS,
 			0
 		);
 
@@ -39,7 +39,7 @@ let RadarDetectionSystem = {
 			return;
 		}
 
-		let potentialTargets = RadarDetectionSystem.ecsManager.getEntities([
+		let potentialTargets = RadarDetectionSystemSystem.ecsManager.getEntities([
 			'team',
 			'sprite',
 			'health',
@@ -48,7 +48,7 @@ let RadarDetectionSystem = {
 		for(let x = 0; x < potentialTargets.length; x++) {
 			if(potentialTargets[x].team.name !== entity.team.name) {
 				let targetDistance =
-					RadarDetectionSystem.calculateTargetDistance(
+					RadarDetectionSystemSystem.calculateTargetDistance(
 						sprite.position,
 						potentialTargets[x].sprite.position
 					);
@@ -64,22 +64,22 @@ let RadarDetectionSystem = {
 
 		if(currentTarget) {
 			if(entity.movable && entity.movable.currentSpeed === 0) {
-				RadarDetectionSystem.fire(sprite, gun, currentTarget);
+				RadarDetectionSystemSystem.fire(sprite, gun, currentTarget);
 			} else if(!entity.breaks) {
-				RadarDetectionSystem.ecsManager.addComponent(entity.id, 'breaks');
+				RadarDetectionSystemSystem.ecsManager.addComponent(entity.id, 'breaks');
 			}
 		} else if(entity.breaks) {
-			RadarDetectionSystem.ecsManager.removeComponent(entity.id, 'breaks');
+			RadarDetectionSystemSystem.ecsManager.removeComponent(entity.id, 'breaks');
 		}
 	},
 
 	// TODO Consider target width?
 	calculateTargetDistance(position, targetEntityPosition) {
-		return RadarDetectionSystem.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
+		return RadarDetectionSystemSystem.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 	},
 
 	fire(firingSprite, gun, target) {
-		let angle = RadarDetectionSystem.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
+		let angle = RadarDetectionSystemSystem.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
 
 		firingSprite.rotation = angle;
 
@@ -95,4 +95,4 @@ let RadarDetectionSystem = {
 	},
 };
 
-export default RadarDetectionSystem;
+export default RadarDetectionSystemSystem;

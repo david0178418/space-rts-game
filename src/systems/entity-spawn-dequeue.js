@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-let EntitySpawnDequeue = {
+let EntitySpawnDequeueSystem = {
 	components: {
 		with: [
 			'entity-spawner',
@@ -12,8 +12,8 @@ let EntitySpawnDequeue = {
 	worldEntities: null,
 
 	init() {
-		this.worldEntities = instanceManager.get('world-entities');
-		this.game = instanceManager.get('game');
+		EntitySpawnDequeueSystem.worldEntities = instanceManager.get('world-entities');
+		EntitySpawnDequeueSystem.game = instanceManager.get('game');
 	},
 
 	// TODO make spawn and waypoint queue/dequeue logic more consistent if
@@ -29,7 +29,7 @@ let EntitySpawnDequeue = {
 		let activeConstruction = entitySpawnQueue[0];
 		let spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 
-		activeConstruction.elapsedBuildTime += EntitySpawnDequeue.game.time.elapsed;
+		activeConstruction.elapsedBuildTime += EntitySpawnDequeueSystem.game.time.elapsed;
 
 		if(activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 			let newEntity;
@@ -51,4 +51,4 @@ let EntitySpawnDequeue = {
 	},
 };
 
-export default EntitySpawnDequeue;
+export default EntitySpawnDequeueSystem;

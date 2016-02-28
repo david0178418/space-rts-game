@@ -1,7 +1,7 @@
 import {filter, throttle} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let RenderBuildingQueueSystem = {
 	components: {
 		with: [
 			'entity-spawn-queue',
@@ -12,8 +12,8 @@ export default {
 	ui: null,
 
 	init() {
-		this.game = instanceManager.get('game');
-		this.ui = instanceManager.get('ui');
+		RenderBuildingQueueSystem.game = instanceManager.get('game');
+		RenderBuildingQueueSystem.ui = instanceManager.get('ui');
 	},
 
 	run: throttle(function(entities) {
@@ -22,9 +22,11 @@ export default {
 		});
 
 		if(selectedEntities.length === 1) {
-			this.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
+			RenderBuildingQueueSystem.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
 		} else {
-			this.ui.setBuildQueue(null);
+			RenderBuildingQueueSystem.ui.setBuildQueue(null);
 		}
 	}, 100),
 };
+
+export default RenderBuildingQueueSystem;

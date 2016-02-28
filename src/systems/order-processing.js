@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-export default {
+let OrdersProcessingSystem = {
 	components: {
 		with: [
 			'order',
@@ -13,10 +13,10 @@ export default {
 	worldEntities: null,
 
 	init() {
-		this.ecsManager = instanceManager.get('ecs-manager');
-		this.game = instanceManager.get('game');
-		this.moveOrderSound = this.game.add.audio('move-order');
-		this.worldEntities = instanceManager.get('world-entities');
+		OrdersProcessingSystem.ecsManager = instanceManager.get('ecs-manager');
+		OrdersProcessingSystem.game = instanceManager.get('game');
+		OrdersProcessingSystem.moveOrderSound = OrdersProcessingSystem.game.add.audio('move-order');
+		OrdersProcessingSystem.worldEntities = instanceManager.get('world-entities');
 	},
 
 	run(entities) {
@@ -106,3 +106,5 @@ export default {
 		return false;
 	},
 };
+
+export default OrdersProcessingSystem;

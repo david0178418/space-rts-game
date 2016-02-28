@@ -3,7 +3,7 @@ import instanceManager from 'instance-manager';
 import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 
-export default {
+let ColonizeSystem = {
 	components:{
 		with: [
 			'colonize',
@@ -15,10 +15,10 @@ export default {
 	teamColors: null,
 
 	init() {
-		this.game = instanceManager.get('game');
-		this.ecsManager = instanceManager.get('ecs-manager');
-		this.runOne = this.runOne.bind(this);
-		this.teamColors = instanceManager.get('team-colors');
+		ColonizeSystem.game = instanceManager.get('game');
+		ColonizeSystem.ecsManager = instanceManager.get('ecs-manager');
+		ColonizeSystem.runOne = ColonizeSystem.runOne.bind(this);
+		ColonizeSystem.teamColors = instanceManager.get('team-colors');
 	},
 
 	runOne(entity) {
@@ -27,15 +27,13 @@ export default {
 		let entitySprite = entity.sprite;
 		let teamName = entity.team.name;
 
-		if(!this.game.physics.arcade.intersects(entitySprite, colonizeTargetSprite)) {
+		if(!ColonizeSystem.game.physics.arcade.intersects(entitySprite, colonizeTargetSprite)) {
 			return;
 		}
 
-
-
 		// TODO Figure out how to handle colonization and blueprints
-		this.ecsManager.removeComponent(colonizeTarget.id, 'colonizable');
-		this.ecsManager.addComponent(colonizeTarget.id, {
+		ColonizeSystem.ecsManager.removeComponent(colonizeTarget.id, 'colonizable');
+		ColonizeSystem.ecsManager.addComponent(colonizeTarget.id, {
 			team: {
 				name: teamName,
 			},
@@ -46,7 +44,7 @@ export default {
 						baseBuildTime: 4000,
 						cost: 0,
 						label: 'Fighter',
-						prefab: fighterPrefab(this.teamColors[teamName]),
+						prefab: fighterPrefab(ColonizeSystem.teamColors[teamName]),
 					},
 					'colony-ship': {
 						baseBuildTime: 8000,
@@ -62,6 +60,8 @@ export default {
 			},
 		});
 
-		this.ecsManager.destroyEntity(entity.id);
+		ColonizeSystem.ecsManager.destroyEntity(entity.id);
 	},
 };
+
+export default ColonizeSystem;

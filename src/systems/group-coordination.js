@@ -1,7 +1,7 @@
 import {each} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let GroupCoordinationSystem = {
 	components:{
 		with: [
 			'group-movement',
@@ -14,10 +14,10 @@ export default {
 	worldEntities: null,
 
 	init() {
-		this.ecsManager = instanceManager.get('ecs-manager');
-		this.game = instanceManager.get('game');
-		this.worldEntities = instanceManager.get('world-entities');
-		this.moveOrderSound = this.game.add.audio('move-order');
+		GroupCoordinationSystem.ecsManager = instanceManager.get('ecs-manager');
+		GroupCoordinationSystem.game = instanceManager.get('game');
+		GroupCoordinationSystem.worldEntities = instanceManager.get('world-entities');
+		GroupCoordinationSystem.moveOrderSound = GroupCoordinationSystem.game.add.audio('move-order');
 	},
 
 	run(entities) {
@@ -30,8 +30,8 @@ export default {
 		// together.  If multiple group commands are issued simultaniously,
 		// this may need to be changed.
 		let groupMovementComponent = entities[0]['group-movement'];
-		let maxX = this.game.world.height * 10;
-		let maxY = this.game.world.width * 10;
+		let maxX = GroupCoordinationSystem.game.world.height * 10;
+		let maxY = GroupCoordinationSystem.game.world.width * 10;
 		let minX = -1;
 		let minY = -1;
 		let movableSelectedCount = 0;
@@ -78,7 +78,7 @@ export default {
 					hyperspace: groupMovementComponent.hyperspace,
 				});
 			} else {
-				this.ecsManager.addComponent(entity.id, 'waypoint', {
+				GroupCoordinationSystem.ecsManager.addComponent(entity.id, 'waypoint', {
 					x: formationPositionX,
 					y: formationPositionY,
 				});
@@ -88,11 +88,13 @@ export default {
 				}
 			}
 
-			this.ecsManager.removeComponent(entity.id, 'group-movement');
+			GroupCoordinationSystem.ecsManager.removeComponent(entity.id, 'group-movement');
 		});
 
-		if(!this.moveOrderSound.isPlaying) {
-			this.moveOrderSound.play();
+		if(!GroupCoordinationSystem.moveOrderSound.isPlaying) {
+			GroupCoordinationSystem.moveOrderSound.play();
 		}
 	},
 };
+
+export default GroupCoordinationSystem;

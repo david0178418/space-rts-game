@@ -3,6 +3,7 @@ import {
 	each,
 	isUndefined,
 	keys,
+	memoize,
 	uniqueId,
 	values,
 } from 'lodash';
@@ -35,6 +36,29 @@ class ECSManager {
 		this._initSystems = {};
 		this._runSystems = {};
 		this._runSystemsIndex = [];
+		this._keyComponentDelimiter = ',';	// TODO configurable?
+
+		this._getEntitiesMemoized = memoize(this._getEntitiesMemoized);
+	}
+
+	_getEntitiesMemoized(entitySearchString) {
+		let matchedEntities = [];
+		let splitSearchString = entitySearchString.split('+');
+		let withComponents = splitSearchString[0].split(this._keyComponentDelimiter);
+		let withoutComponents = splitSearchString[1] ? splitSearchString[1].split(this._keyComponentDelimiter) : '';
+
+		for(let x = 0; x < this._entityIndex.length; x++) {
+			let entityId = this._entityIndex[x];
+
+			if(
+				(!withComponents || this.hasComponents(entityId, withComponents)) &&
+				(!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))
+			) {
+				matchedEntities.push(this._entities[entityId]);
+			}
+		}
+
+		return matchedEntities;
 	}
 
 	addComponent(entityId, component, props) {
@@ -45,6 +69,8 @@ class ECSManager {
 		}
 
 		entity[component] = this.createComponent(component, props, entity);
+
+		this._getEntitiesMemoized.cache.clear();
 	}
 
 	addComponents(entityId, components) {
@@ -69,6 +95,8 @@ class ECSManager {
 		}
 
 		this._entityIndex.push(newEntity.id);
+
+		this._getEntitiesMemoized.cache.clear();
 
 		return newEntity;
 	}
@@ -102,6 +130,8 @@ class ECSManager {
 		if(entityIndexPosition !== -1) {
 			this._entityIndex.splice(this._entityIndex.indexOf(entityId), 1);
 		}
+
+		this._getEntitiesMemoized.cache.clear();
 	}
 
 	entityDoesNotHaveComponent(entityId, componentName) {
@@ -116,6 +146,10 @@ class ECSManager {
 		}
 
 		return true;
+	}
+
+	generateEntityCacheKey(componentNames) {
+		return componentNames.join(this._keyComponentDelimiter);
 	}
 
 	getComponent(entityId, componentName) {
@@ -139,26 +173,31 @@ class ECSManager {
 	}
 
 	getEntities(withComponents, withoutComponents) {
-		let matchedEntities;
+		let entitySearchString = '';
 
 		if(!(withComponents || withoutComponents)) {
 			return this._entities.slice(0);
 		}
 
-		matchedEntities = [];
-
-		for(let x = 0; x < this._entityIndex.length; x++) {
-			let entityId = this._entityIndex[x];
-
-			if(
-				(!withComponents || this.hasComponents(entityId, withComponents)) &&
-				(!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))
-			) {
-				matchedEntities.push(this._entities[entityId]);
+		if(withComponents) {
+			if(withComponents.constructor === Array) {
+				entitySearchString += withComponents.join(',');
+			} else {
+				entitySearchString += withComponents;
 			}
 		}
 
-		return matchedEntities;
+		if(withoutComponents) {
+			entitySearchString += '+';
+
+			if(withoutComponents.constructor === Array) {
+				entitySearchString += withoutComponents.join(',');
+			} else {
+				entitySearchString += withoutComponents;
+			}
+		}
+
+		return this._getEntitiesMemoized(entitySearchString);
 	}
 
 	hasComponent(entityId, componentName) {
@@ -192,6 +231,8 @@ class ECSManager {
 			this._entities[name] = null;
 		}
 
+		this._getEntitiesMemoized.cache.clear();
+
 		return this;
 	}
 
@@ -201,8 +242,25 @@ class ECSManager {
 	// @param {function} system.run - system tick logic.  Receives array of all matching entities.
 	// @param {function} system.init - system initialization.
 	registerSystem(name, system) {
+		let newSystem = Object.assign({}, system);
+
+		if(newSystem.components) {
+			let withString = '';
+			let withoutString = '';
+
+			if(newSystem.components.with) {
+				withString = this.generateEntityCacheKey(newSystem.components.with.sort());
+			}
+
+			if(newSystem.components.without) {
+				withoutString = this.generateEntityCacheKey(newSystem.components.without.sort());
+			}
+
+			newSystem.cacheKey = `${withString}/${withoutString}`;
+		}
+
 		if(system.init) {
-			this._initSystems[name] = system;
+			this._initSystems[name] = newSystem;
 		}
 
 		if(system.run || system.runOne) {
@@ -225,6 +283,8 @@ class ECSManager {
 
 		this.getComponentCleanup(componentName)(component, entity);
 		entity[componentName] = null;
+
+		this._getEntitiesMemoized.cache.clear();
 	}
 
 	removeComponents(entityId) {

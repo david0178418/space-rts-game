@@ -766,6 +766,26 @@
 			this._initSystems = {};
 			this._runSystems = {};
 			this._runSystemsIndex = [];
+			this._keyComponentDelimiter = ','; // TODO configurable?
+	
+			this._getEntitiesMemoized = (0, _lodash.memoize)(this._getEntitiesMemoized);
+		}
+	
+		_getEntitiesMemoized(entitySearchString) {
+			let matchedEntities = [];
+			let splitSearchString = entitySearchString.split('+');
+			let withComponents = splitSearchString[0].split(this._keyComponentDelimiter);
+			let withoutComponents = splitSearchString[1] ? splitSearchString[1].split(this._keyComponentDelimiter) : '';
+	
+			for (let x = 0; x < this._entityIndex.length; x++) {
+				let entityId = this._entityIndex[x];
+	
+				if ((!withComponents || this.hasComponents(entityId, withComponents)) && (!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))) {
+					matchedEntities.push(this._entities[entityId]);
+				}
+			}
+	
+			return matchedEntities;
 		}
 	
 		addComponent(entityId, component, props) {
@@ -776,6 +796,8 @@
 			}
 	
 			entity[component] = this.createComponent(component, props, entity);
+	
+			this._getEntitiesMemoized.cache.clear();
 		}
 	
 		addComponents(entityId, components) {
@@ -800,6 +822,8 @@
 			}
 	
 			this._entityIndex.push(newEntity.id);
+	
+			this._getEntitiesMemoized.cache.clear();
 	
 			return newEntity;
 		}
@@ -833,6 +857,8 @@
 			if (entityIndexPosition !== -1) {
 				this._entityIndex.splice(this._entityIndex.indexOf(entityId), 1);
 			}
+	
+			this._getEntitiesMemoized.cache.clear();
 		}
 	
 		entityDoesNotHaveComponent(entityId, componentName) {
@@ -847,6 +873,10 @@
 			}
 	
 			return true;
+		}
+	
+		generateEntityCacheKey(componentNames) {
+			return componentNames.join(this._keyComponentDelimiter);
 		}
 	
 		getComponent(entityId, componentName) {
@@ -870,23 +900,31 @@
 		}
 	
 		getEntities(withComponents, withoutComponents) {
-			let matchedEntities;
+			let entitySearchString = '';
 	
 			if (!(withComponents || withoutComponents)) {
 				return this._entities.slice(0);
 			}
 	
-			matchedEntities = [];
-	
-			for (let x = 0; x < this._entityIndex.length; x++) {
-				let entityId = this._entityIndex[x];
-	
-				if ((!withComponents || this.hasComponents(entityId, withComponents)) && (!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))) {
-					matchedEntities.push(this._entities[entityId]);
+			if (withComponents) {
+				if (withComponents.constructor === Array) {
+					entitySearchString += withComponents.join(',');
+				} else {
+					entitySearchString += withComponents;
 				}
 			}
 	
-			return matchedEntities;
+			if (withoutComponents) {
+				entitySearchString += '+';
+	
+				if (withoutComponents.constructor === Array) {
+					entitySearchString += withoutComponents.join(',');
+				} else {
+					entitySearchString += withoutComponents;
+				}
+			}
+	
+			return this._getEntitiesMemoized(entitySearchString);
 		}
 	
 		hasComponent(entityId, componentName) {
@@ -920,6 +958,8 @@
 				this._entities[name] = null;
 			}
 	
+			this._getEntitiesMemoized.cache.clear();
+	
 			return this;
 		}
 	
@@ -929,8 +969,25 @@
 		// @param {function} system.run - system tick logic.  Receives array of all matching entities.
 		// @param {function} system.init - system initialization.
 		registerSystem(name, system) {
+			let newSystem = Object.assign({}, system);
+	
+			if (newSystem.components) {
+				let withString = '';
+				let withoutString = '';
+	
+				if (newSystem.components.with) {
+					withString = this.generateEntityCacheKey(newSystem.components.with.sort());
+				}
+	
+				if (newSystem.components.without) {
+					withoutString = this.generateEntityCacheKey(newSystem.components.without.sort());
+				}
+	
+				newSystem.cacheKey = `${ withString }/${ withoutString }`;
+			}
+	
 			if (system.init) {
-				this._initSystems[name] = system;
+				this._initSystems[name] = newSystem;
 			}
 	
 			if (system.run || system.runOne) {
@@ -953,6 +1010,8 @@
 	
 			this.getComponentCleanup(componentName)(component, entity);
 			entity[componentName] = null;
+	
+			this._getEntitiesMemoized.cache.clear();
 		}
 	
 		removeComponents(entityId) {
@@ -36267,7 +36326,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let UniverseCreationSystem = {
 	
 		ecsManager: null,
 		worldEntities: null,
@@ -36275,8 +36334,8 @@
 		init() {
 			let planets = [];
 	
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
+			UniverseCreationSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			UniverseCreationSystem.worldEntities = _instanceManager2.default.get('world-entities');
 	
 			// planets acting as markers to edges and center
 			(0, _planet2.default)({ x: 0, y: _config2.default.stage.height / 2 });
@@ -36298,7 +36357,7 @@
 				planets.push(newPlanet);
 			}
 	
-			this.assignTeams(planets);
+			UniverseCreationSystem.assignTeams(planets);
 		},
 	
 		assignTeams(planets) {
@@ -36306,11 +36365,11 @@
 			let playerPlanetSpriteComponent = playerPlanet.sprite;
 			let enemyPlanet = planets[planets.length - 1];
 	
-			this.worldEntities.x = -playerPlanetSpriteComponent.x + _config2.default.screen.width / 2;
-			this.worldEntities.y = -playerPlanetSpriteComponent.y + _config2.default.screen.height / 2;
+			UniverseCreationSystem.worldEntities.x = -playerPlanetSpriteComponent.x + _config2.default.screen.width / 2;
+			UniverseCreationSystem.worldEntities.y = -playerPlanetSpriteComponent.y + _config2.default.screen.height / 2;
 	
-			this.ecsManager.removeComponent(playerPlanet.id, 'colonizable');
-			this.ecsManager.addComponents(playerPlanet.id, {
+			UniverseCreationSystem.ecsManager.removeComponent(playerPlanet.id, 'colonizable');
+			UniverseCreationSystem.ecsManager.addComponents(playerPlanet.id, {
 				team: {
 					name: 'player'
 				},
@@ -36359,8 +36418,8 @@
 				}
 			});
 	
-			this.ecsManager.removeComponent(enemyPlanet.id, 'colonizable');
-			this.ecsManager.addComponents(enemyPlanet.id, {
+			UniverseCreationSystem.ecsManager.removeComponent(enemyPlanet.id, 'colonizable');
+			UniverseCreationSystem.ecsManager.addComponents(enemyPlanet.id, {
 				'team': {
 					name: 'ai1'
 				},
@@ -36449,6 +36508,8 @@
 			window.enemyPlanet = enemyPlanet;
 		}
 	};
+	
+	exports.default = UniverseCreationSystem;
 
 /***/ },
 /* 211 */
@@ -36872,10 +36933,6 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
-	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
 	var _config = __webpack_require__(13);
 	
 	var _config2 = _interopRequireDefault(_config);
@@ -36886,7 +36943,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let CameraSystem = {
 		background1layer2: null,
 		dirtyBackground: true,
 		game: null,
@@ -36901,98 +36958,100 @@
 		zoomTarget: 100, // %
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.keyboardControls = _instanceManager2.default.get('keyboard-controls');
-			this.world = this.game.world;
-			this.worldEntities = _instanceManager2.default.get('world-entities');
+			CameraSystem.game = _instanceManager2.default.get('game');
+			CameraSystem.keyboardControls = _instanceManager2.default.get('keyboard-controls');
+			CameraSystem.world = CameraSystem.game.world;
+			CameraSystem.worldEntities = _instanceManager2.default.get('world-entities');
 	
-			// this.background1layer1 = this.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
-			this.background1layer2 = this.game.add.tileSprite(_config2.default.screen.width * -0.5, _config2.default.screen.width * -0.5, _config2.default.screen.width * 1.5, _config2.default.screen.width * 1.5, 'background1-layer2');
+			// CameraSystem.background1layer1 = CameraSystem.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
+			CameraSystem.background1layer2 = CameraSystem.game.add.tileSprite(_config2.default.screen.width * -0.5, _config2.default.screen.width * -0.5, _config2.default.screen.width * 1.5, _config2.default.screen.width * 1.5, 'background1-layer2');
 	
 			window.addEventListener('mousewheel', e => {
-				this.updateZoomTarget(e.wheelDelta);
+				CameraSystem.updateZoomTarget(e.wheelDelta);
 			});
 		},
 	
 		run() {
 			// Vertial pan
-			if (this.keyboardControls.panUp.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.y += this.panSpeed;
-			} else if (this.keyboardControls.panDown.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.y -= this.panSpeed;
+			if (CameraSystem.keyboardControls.panUp.isDown) {
+				CameraSystem.dirtyBackground = true;
+				CameraSystem.worldEntities.y += CameraSystem.panSpeed;
+			} else if (CameraSystem.keyboardControls.panDown.isDown) {
+				CameraSystem.dirtyBackground = true;
+				CameraSystem.worldEntities.y -= CameraSystem.panSpeed;
 			}
 	
 			// Horizontal pa
-			if (this.keyboardControls.panRight.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.x -= this.panSpeed;
-			} else if (this.keyboardControls.panLeft.isDown) {
-				this.dirtyBackground = true;
-				this.worldEntities.x += this.panSpeed;
+			if (CameraSystem.keyboardControls.panRight.isDown) {
+				CameraSystem.dirtyBackground = true;
+				CameraSystem.worldEntities.x -= CameraSystem.panSpeed;
+			} else if (CameraSystem.keyboardControls.panLeft.isDown) {
+				CameraSystem.dirtyBackground = true;
+				CameraSystem.worldEntities.x += CameraSystem.panSpeed;
 			}
 	
-			if (!this.dirtyBackground) {
+			if (!CameraSystem.dirtyBackground) {
 				return;
 			}
 	
-			this.updateBackground();
-			this.updateZoom();
-			this.limitView();
+			CameraSystem.updateBackground();
+			CameraSystem.updateZoom();
+			CameraSystem.limitView();
 	
-			this.dirtyBackground = false;
+			CameraSystem.dirtyBackground = false;
 		},
 		limitView() {
 			// Limit view
 			// Run check each tick to account for
 			// other position mutators such as zooming
-			if (this.worldEntities.y > 0) {
-				this.worldEntities.y = 0;
-			} else if (this.worldEntities.y < -(this.world.height * this.worldEntities.scale.y - this.game.camera.height)) {
-				this.worldEntities.y = -(this.world.height * this.worldEntities.scale.y - this.game.camera.height);
+			if (CameraSystem.worldEntities.y > 0) {
+				CameraSystem.worldEntities.y = 0;
+			} else if (CameraSystem.worldEntities.y < -(CameraSystem.world.height * CameraSystem.worldEntities.scale.y - CameraSystem.game.camera.height)) {
+				CameraSystem.worldEntities.y = -(CameraSystem.world.height * CameraSystem.worldEntities.scale.y - CameraSystem.game.camera.height);
 			}
 	
-			if (this.worldEntities.x < -(this.world.width * this.worldEntities.scale.x - this.game.camera.width)) {
-				this.worldEntities.x = -(this.world.width * this.worldEntities.scale.x - this.game.camera.width);
-			} else if (this.worldEntities.x > 0) {
-				this.worldEntities.x = 0;
+			if (CameraSystem.worldEntities.x < -(CameraSystem.world.width * CameraSystem.worldEntities.scale.x - CameraSystem.game.camera.width)) {
+				CameraSystem.worldEntities.x = -(CameraSystem.world.width * CameraSystem.worldEntities.scale.x - CameraSystem.game.camera.width);
+			} else if (CameraSystem.worldEntities.x > 0) {
+				CameraSystem.worldEntities.x = 0;
 			}
 		},
 	
 		updateBackground() {
-			// this.background1layer1.position.x = this.background1layer1.width * 0.005  * this.worldEntities.x / this.game.width;
-			// this.background1layer1.position.y = this.background1layer1.height * 0.005 * this.worldEntities.y / this.game.height;
-			this.background1layer2.position.x = this.background1layer2.width * 0.01 * this.worldEntities.x / this.game.width;
-			this.background1layer2.position.y = this.background1layer2.height * 0.01 * this.worldEntities.y / this.game.height;
+			// CameraSystem.background1layer1.position.x = CameraSystem.background1layer1.width * 0.005  * CameraSystem.worldEntities.x / CameraSystem.game.width;
+			// CameraSystem.background1layer1.position.y = CameraSystem.background1layer1.height * 0.005 * CameraSystem.worldEntities.y / CameraSystem.game.height;
+			CameraSystem.background1layer2.position.x = CameraSystem.background1layer2.width * 0.01 * CameraSystem.worldEntities.x / CameraSystem.game.width;
+			CameraSystem.background1layer2.position.y = CameraSystem.background1layer2.height * 0.01 * CameraSystem.worldEntities.y / CameraSystem.game.height;
 		},
 	
 		updateZoom() {
-			let zoom = this.zoomTarget / 100;
-			let localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+			let zoom = CameraSystem.zoomTarget / 100;
+			let localPosition = CameraSystem.game.input.getLocalPosition(CameraSystem.worldEntities, CameraSystem.game.input.mousePointer);
 	
-			this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
-			this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
-			this.worldEntities.scale.setTo(zoom);
+			CameraSystem.worldEntities.position.x += localPosition.x * (CameraSystem.worldEntities.scale.x - zoom);
+			CameraSystem.worldEntities.position.y += localPosition.y * (CameraSystem.worldEntities.scale.y - zoom);
+			CameraSystem.worldEntities.scale.setTo(zoom);
 		},
 	
 		updateZoomTarget(delta) {
-			if (this.game.paused) {
+			if (CameraSystem.game.paused) {
 				return;
 			}
 	
-			this.zoomTarget += this.zoomIncrement * (delta > 0 ? 1 : -1);
+			CameraSystem.zoomTarget += CameraSystem.zoomIncrement * (delta > 0 ? 1 : -1);
 	
-			if (this.zoomTarget >= this.zoomMin && this.zoomTarget <= this.zoomMax) {
-				this.updateZoom();
+			if (CameraSystem.zoomTarget >= CameraSystem.zoomMin && CameraSystem.zoomTarget <= CameraSystem.zoomMax) {
+				CameraSystem.updateZoom();
 			} else {
-				this.zoomTarget = delta > 0 ? this.zoomMax : this.zoomMin;
+				CameraSystem.zoomTarget = delta > 0 ? CameraSystem.zoomMax : CameraSystem.zoomMin;
 			}
 	
-			this.limitView();
-			this.updateBackground();
+			CameraSystem.limitView();
+			CameraSystem.updateBackground();
 		}
 	};
+	
+	exports.default = CameraSystem;
 
 /***/ },
 /* 224 */
@@ -37008,7 +37067,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let Breaking = {
+	let BreakingSystem = {
 		components: {
 			with: ['movable', 'breaks']
 		},
@@ -37017,14 +37076,14 @@
 		ecsManager: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
+			BreakingSystem.game = _instanceManager2.default.get('game');
+			BreakingSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
 		},
 	
 		runOne(entity) {
 			if (entity.waypoint) {
 				entity['waypoint-queue'].queue.unshift(entity.waypoint);
-				Breaking.ecsManager.removeComponent(entity.id, 'waypoint');
+				BreakingSystem.ecsManager.removeComponent(entity.id, 'waypoint');
 			}
 	
 			let movable = entity.movable;
@@ -37035,18 +37094,18 @@
 	
 			let sprite = entity.sprite;
 	
-			movable.currentSpeed -= movable.acceleration * Breaking.game.time.physicsElapsed;
+			movable.currentSpeed -= movable.acceleration * BreakingSystem.game.time.physicsElapsed;
 	
 			if (movable.currentSpeed <= 0) {
 				movable.currentSpeed = 0;
 			} else {
-				sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * Breaking.game.time.physicsElapsed;
-				sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * Breaking.game.time.physicsElapsed;
+				sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * BreakingSystem.game.time.physicsElapsed;
+				sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * BreakingSystem.game.time.physicsElapsed;
 			}
 		}
 	};
 	
-	exports.default = Breaking;
+	exports.default = BreakingSystem;
 
 /***/ },
 /* 225 */
@@ -37070,7 +37129,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let ColonizeSystem = {
 		components: {
 			with: ['colonize']
 		},
@@ -37080,10 +37139,10 @@
 		teamColors: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-			this.runOne = this.runOne.bind(this);
-			this.teamColors = _instanceManager2.default.get('team-colors');
+			ColonizeSystem.game = _instanceManager2.default.get('game');
+			ColonizeSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			ColonizeSystem.runOne = ColonizeSystem.runOne.bind(this);
+			ColonizeSystem.teamColors = _instanceManager2.default.get('team-colors');
 		},
 	
 		runOne(entity) {
@@ -37092,13 +37151,13 @@
 			let entitySprite = entity.sprite;
 			let teamName = entity.team.name;
 	
-			if (!this.game.physics.arcade.intersects(entitySprite, colonizeTargetSprite)) {
+			if (!ColonizeSystem.game.physics.arcade.intersects(entitySprite, colonizeTargetSprite)) {
 				return;
 			}
 	
 			// TODO Figure out how to handle colonization and blueprints
-			this.ecsManager.removeComponent(colonizeTarget.id, 'colonizable');
-			this.ecsManager.addComponent(colonizeTarget.id, {
+			ColonizeSystem.ecsManager.removeComponent(colonizeTarget.id, 'colonizable');
+			ColonizeSystem.ecsManager.addComponent(colonizeTarget.id, {
 				team: {
 					name: teamName
 				},
@@ -37109,7 +37168,7 @@
 							baseBuildTime: 4000,
 							cost: 0,
 							label: 'Fighter',
-							prefab: (0, _fighter2.default)(this.teamColors[teamName])
+							prefab: (0, _fighter2.default)(ColonizeSystem.teamColors[teamName])
 						},
 						'colony-ship': {
 							baseBuildTime: 8000,
@@ -37125,9 +37184,11 @@
 				}
 			});
 	
-			this.ecsManager.destroyEntity(entity.id);
+			ColonizeSystem.ecsManager.destroyEntity(entity.id);
 		}
 	};
+	
+	exports.default = ColonizeSystem;
 
 /***/ },
 /* 226 */
@@ -37143,7 +37204,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let EntitySpawnDequeue = {
+	let EntitySpawnDequeueSystem = {
 		components: {
 			with: ['entity-spawner', 'entity-spawn-queue']
 		},
@@ -37152,8 +37213,8 @@
 		worldEntities: null,
 	
 		init() {
-			this.worldEntities = _instanceManager2.default.get('world-entities');
-			this.game = _instanceManager2.default.get('game');
+			EntitySpawnDequeueSystem.worldEntities = _instanceManager2.default.get('world-entities');
+			EntitySpawnDequeueSystem.game = _instanceManager2.default.get('game');
 		},
 	
 		// TODO make spawn and waypoint queue/dequeue logic more consistent if
@@ -37169,7 +37230,7 @@
 			let activeConstruction = entitySpawnQueue[0];
 			let spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 	
-			activeConstruction.elapsedBuildTime += EntitySpawnDequeue.game.time.elapsed;
+			activeConstruction.elapsedBuildTime += EntitySpawnDequeueSystem.game.time.elapsed;
 	
 			if (activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 				let newEntity;
@@ -37191,7 +37252,7 @@
 		}
 	};
 	
-	exports.default = EntitySpawnDequeue;
+	exports.default = EntitySpawnDequeueSystem;
 
 /***/ },
 /* 227 */
@@ -37209,7 +37270,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let GroupCoordinationSystem = {
 		components: {
 			with: ['group-movement']
 		},
@@ -37220,10 +37281,10 @@
 		worldEntities: null,
 	
 		init() {
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-			this.game = _instanceManager2.default.get('game');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
-			this.moveOrderSound = this.game.add.audio('move-order');
+			GroupCoordinationSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			GroupCoordinationSystem.game = _instanceManager2.default.get('game');
+			GroupCoordinationSystem.worldEntities = _instanceManager2.default.get('world-entities');
+			GroupCoordinationSystem.moveOrderSound = GroupCoordinationSystem.game.add.audio('move-order');
 		},
 	
 		run(entities) {
@@ -37236,8 +37297,8 @@
 			// together.  If multiple group commands are issued simultaniously,
 			// this may need to be changed.
 			let groupMovementComponent = entities[0]['group-movement'];
-			let maxX = this.game.world.height * 10;
-			let maxY = this.game.world.width * 10;
+			let maxX = GroupCoordinationSystem.game.world.height * 10;
+			let maxY = GroupCoordinationSystem.game.world.width * 10;
 			let minX = -1;
 			let minY = -1;
 			let movableSelectedCount = 0;
@@ -37284,7 +37345,7 @@
 						hyperspace: groupMovementComponent.hyperspace
 					});
 				} else {
-					this.ecsManager.addComponent(entity.id, 'waypoint', {
+					GroupCoordinationSystem.ecsManager.addComponent(entity.id, 'waypoint', {
 						x: formationPositionX,
 						y: formationPositionY
 					});
@@ -37294,14 +37355,16 @@
 					}
 				}
 	
-				this.ecsManager.removeComponent(entity.id, 'group-movement');
+				GroupCoordinationSystem.ecsManager.removeComponent(entity.id, 'group-movement');
 			});
 	
-			if (!this.moveOrderSound.isPlaying) {
-				this.moveOrderSound.play();
+			if (!GroupCoordinationSystem.moveOrderSound.isPlaying) {
+				GroupCoordinationSystem.moveOrderSound.play();
 			}
 		}
 	};
+	
+	exports.default = GroupCoordinationSystem;
 
 /***/ },
 /* 228 */
@@ -37321,7 +37384,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let Movement = {
+	let MovementSystem = {
 		components: {
 			with: ['movable', 'waypoint'],
 			without: ['breaks']
@@ -37332,9 +37395,9 @@
 		worldEntities: null,
 	
 		init() {
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-			this.game = _instanceManager2.default.get('game');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
+			MovementSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			MovementSystem.game = _instanceManager2.default.get('game');
+			MovementSystem.worldEntities = _instanceManager2.default.get('world-entities');
 		},
 	
 		runOne(entity) {
@@ -37349,17 +37412,17 @@
 			distance = _utils2.default.distanceBetween(sprite, waypoint);
 	
 			if (distance <= breakingDistance) {
-				movable.currentSpeed -= movable.acceleration * Movement.game.time.physicsElapsed;
+				movable.currentSpeed -= movable.acceleration * MovementSystem.game.time.physicsElapsed;
 	
-				if (distance < 1 || movable.currentSpeed * Movement.game.time.physicsElapsed >= distance) {
+				if (distance < 1 || movable.currentSpeed * MovementSystem.game.time.physicsElapsed >= distance) {
 					movable.currentSpeed = 0;
 					sprite.position.x = waypoint.x;
 					sprite.position.y = waypoint.y;
-					Movement.ecsManager.removeComponent(entity.id, 'waypoint');
+					MovementSystem.ecsManager.removeComponent(entity.id, 'waypoint');
 					return;
 				}
 			} else if (movable.currentSpeed < movable.topSpeed) {
-				movable.currentSpeed += movable.acceleration * Movement.game.time.physicsElapsed;
+				movable.currentSpeed += movable.acceleration * MovementSystem.game.time.physicsElapsed;
 	
 				if (movable.currentSpeed > movable.topSpeed) {
 					movable.currentSpeed = movable.topSpeed;
@@ -37370,12 +37433,12 @@
 			angle = _utils2.default.angleBetween(sprite.position, waypoint);
 	
 			sprite.rotation = angle; // TODO Animate angle change
-			sprite.position.x += Math.cos(angle) * movable.currentSpeed * Movement.game.time.physicsElapsed;
-			sprite.position.y += Math.sin(angle) * movable.currentSpeed * Movement.game.time.physicsElapsed;
+			sprite.position.x += Math.cos(angle) * movable.currentSpeed * MovementSystem.game.time.physicsElapsed;
+			sprite.position.y += Math.sin(angle) * movable.currentSpeed * MovementSystem.game.time.physicsElapsed;
 		}
 	};
 	
-	exports.default = Movement;
+	exports.default = MovementSystem;
 	
 	// TODO Refactor systems and others that need larger references for performance
 	// See the following jsperf: https://jsperf.com/closure-vs-property/12
@@ -37420,7 +37483,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let OrdersProcessingSystem = {
 		components: {
 			with: ['order']
 		},
@@ -37431,10 +37494,10 @@
 		worldEntities: null,
 	
 		init() {
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-			this.game = _instanceManager2.default.get('game');
-			this.moveOrderSound = this.game.add.audio('move-order');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
+			OrdersProcessingSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			OrdersProcessingSystem.game = _instanceManager2.default.get('game');
+			OrdersProcessingSystem.moveOrderSound = OrdersProcessingSystem.game.add.audio('move-order');
+			OrdersProcessingSystem.worldEntities = _instanceManager2.default.get('world-entities');
 		},
 	
 		run(entities) {
@@ -37524,6 +37587,8 @@
 			return false;
 		}
 	};
+	
+	exports.default = OrdersProcessingSystem;
 
 /***/ },
 /* 231 */
@@ -37551,7 +37616,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let SelectionSystem = {
 		SELECTION_PADDING: 30,
 	
 		components: {
@@ -37563,52 +37628,54 @@
 		worldEntities: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.worldEntities = _instanceManager2.default.get('world-entities');
-			this.selectionChanged = false;
+			SelectionSystem.game = _instanceManager2.default.get('game');
+			SelectionSystem.worldEntities = _instanceManager2.default.get('world-entities');
+			SelectionSystem.selectionChanged = false;
 	
-			this.checkSelection = (0, _bind2.default)(this.checkSelection, this);
+			SelectionSystem.checkSelectionSystem = (0, _bind2.default)(SelectionSystem.checkSelectionSystem, this);
 		},
 	
 		// TODO Refactor this since it's using the old paradigm
 		run(entities) {
-			(0, _each2.default)(entities, this.checkSelection, this);
+			(0, _each2.default)(entities, SelectionSystem.checkSelectionSystem, this);
 	
-			if (this.selectionChanged) {
-				this.selectionChanged = false;
+			if (SelectionSystem.selectionChanged) {
+				SelectionSystem.selectionChanged = false;
 			}
 		},
 	
-		checkSelection(entity) {
+		checkSelectionSystem(entity) {
 			let selectableComponent = entity.selectable;
 			let sprite = entity.sprite;
 			let graphic;
 	
 			if (entity.selected) {
 				if (!selectableComponent.graphic) {
-					graphic = new _phaser2.default.Sprite(this.game, 0, 0, 'selection');
+					graphic = new _phaser2.default.Sprite(SelectionSystem.game, 0, 0, 'selection');
 					graphic.anchor.setTo(0.5, 0.5);
 					// Set the height and width to the greater of the two plus padding
-					graphic.width = graphic.height = (sprite.width > sprite.height ? sprite.width : sprite.height) + this.SELECTION_PADDING;
-					this.worldEntities.addChild(graphic);
+					graphic.width = graphic.height = (sprite.width > sprite.height ? sprite.width : sprite.height) + SelectionSystem.SELECTION_PADDING;
+					SelectionSystem.worldEntities.addChild(graphic);
 					selectableComponent.graphic = graphic;
-					this.selectionChanged = true;
+					SelectionSystem.selectionChanged = true;
 	
 					sprite.events.onDestroy.addOnce(graphic.kill, graphic);
-					// sprite.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
+					// sprite.events.onDestroy.addOnce(SelectionSystem.uiViewModel.update, SelectionSystem.uiViewModel);
 				} else if (!selectableComponent.graphic.visible) {
 						selectableComponent.graphic.visible = true;
-						this.selectionChanged = true;
+						SelectionSystem.selectionChanged = true;
 					}
 	
 				selectableComponent.graphic.position.x = sprite.position.x;
 				selectableComponent.graphic.position.y = sprite.position.y;
 			} else if (selectableComponent.graphic && selectableComponent.graphic.visible) {
-				this.selectionChanged = true;
+				SelectionSystem.selectionChanged = true;
 				selectableComponent.graphic.visible = false;
 			}
 		}
 	};
+	
+	exports.default = SelectionSystem;
 
 /***/ },
 /* 232 */
@@ -39221,7 +39288,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let WaypointDequeue = {
+	let WaypointDequeueSystem = {
 		components: {
 			with: ['waypoint-queue'],
 			without: ['waypoint']
@@ -39231,8 +39298,8 @@
 		game: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
+			WaypointDequeueSystem.game = _instanceManager2.default.get('game');
+			WaypointDequeueSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
 		},
 	
 		runOne(entity) {
@@ -39243,11 +39310,11 @@
 	
 			let waypointQueue = entity['waypoint-queue'];
 	
-			WaypointDequeue.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
+			WaypointDequeueSystem.ecsManager.addComponent(entity.id, 'waypoint', waypointQueue.queue.shift());
 		}
 	};
 	
-	exports.default = WaypointDequeue;
+	exports.default = WaypointDequeueSystem;
 
 /***/ },
 /* 273 */
@@ -39265,7 +39332,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let RenderProductionOptionsSystem = {
 		components: {
 			with: ['entity-spawner']
 		},
@@ -39274,8 +39341,8 @@
 		ui: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.ui = _instanceManager2.default.get('ui');
+			RenderProductionOptionsSystem.game = _instanceManager2.default.get('game');
+			RenderProductionOptionsSystem.ui = _instanceManager2.default.get('ui');
 		},
 	
 		run: (0, _lodash.throttle)(function (entities) {
@@ -39284,12 +39351,14 @@
 			});
 	
 			if (selectedEntities.length) {
-				this.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
+				RenderProductionOptionsSystem.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
 			} else {
-				this.ui.setProductionOptions(null);
+				RenderProductionOptionsSystem.ui.setProductionOptions(null);
 			}
 		}, 100)
 	};
+	
+	exports.default = RenderProductionOptionsSystem;
 
 /***/ },
 /* 274 */
@@ -39307,7 +39376,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	exports.default = {
+	let RenderBuildingQueueSystem = {
 		components: {
 			with: ['entity-spawn-queue']
 		},
@@ -39316,8 +39385,8 @@
 		ui: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.ui = _instanceManager2.default.get('ui');
+			RenderBuildingQueueSystem.game = _instanceManager2.default.get('game');
+			RenderBuildingQueueSystem.ui = _instanceManager2.default.get('ui');
 		},
 	
 		run: (0, _lodash.throttle)(function (entities) {
@@ -39326,12 +39395,14 @@
 			});
 	
 			if (selectedEntities.length === 1) {
-				this.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
+				RenderBuildingQueueSystem.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
 			} else {
-				this.ui.setBuildQueue(null);
+				RenderBuildingQueueSystem.ui.setBuildQueue(null);
 			}
 		}, 100)
 	};
+	
+	exports.default = RenderBuildingQueueSystem;
 
 /***/ },
 /* 275 */
@@ -39347,7 +39418,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let RadarDetectionSystem = {
+	let RadarDetectionSystemSystem = {
 		components: {
 			with: ['sprite', 'radar', 'team', 'gun']
 		},
@@ -39358,10 +39429,10 @@
 		quadtree: null,
 	
 		init() {
-			this.game = _instanceManager2.default.get('game');
-			this.ui = _instanceManager2.default.get('ui');
-			this.quadtree = _instanceManager2.default.get('quadtree');
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
+			RadarDetectionSystemSystem.game = _instanceManager2.default.get('game');
+			RadarDetectionSystemSystem.ui = _instanceManager2.default.get('ui');
+			RadarDetectionSystemSystem.quadtree = _instanceManager2.default.get('quadtree');
+			RadarDetectionSystemSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
 		},
 	
 		// TODO Optimize with quadtree
@@ -39372,17 +39443,17 @@
 			let currentTarget;
 			let currentTargetDistance;
 	
-			gun.remainingCooldown = Math.max(gun.remainingCooldown - RadarDetectionSystem.game.time.physicsElapsedMS, 0);
+			gun.remainingCooldown = Math.max(gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS, 0);
 	
 			if (gun.remainingCooldown) {
 				return;
 			}
 	
-			let potentialTargets = RadarDetectionSystem.ecsManager.getEntities(['team', 'sprite', 'health']);
+			let potentialTargets = RadarDetectionSystemSystem.ecsManager.getEntities(['team', 'sprite', 'health']);
 	
 			for (let x = 0; x < potentialTargets.length; x++) {
 				if (potentialTargets[x].team.name !== entity.team.name) {
-					let targetDistance = RadarDetectionSystem.calculateTargetDistance(sprite.position, potentialTargets[x].sprite.position);
+					let targetDistance = RadarDetectionSystemSystem.calculateTargetDistance(sprite.position, potentialTargets[x].sprite.position);
 	
 					if (targetDistance <= radar.range) {
 						if (!currentTarget || targetDistance < currentTargetDistance) {
@@ -39395,22 +39466,22 @@
 	
 			if (currentTarget) {
 				if (entity.movable && entity.movable.currentSpeed === 0) {
-					RadarDetectionSystem.fire(sprite, gun, currentTarget);
+					RadarDetectionSystemSystem.fire(sprite, gun, currentTarget);
 				} else if (!entity.breaks) {
-					RadarDetectionSystem.ecsManager.addComponent(entity.id, 'breaks');
+					RadarDetectionSystemSystem.ecsManager.addComponent(entity.id, 'breaks');
 				}
 			} else if (entity.breaks) {
-				RadarDetectionSystem.ecsManager.removeComponent(entity.id, 'breaks');
+				RadarDetectionSystemSystem.ecsManager.removeComponent(entity.id, 'breaks');
 			}
 		},
 	
 		// TODO Consider target width?
 		calculateTargetDistance(position, targetEntityPosition) {
-			return RadarDetectionSystem.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
+			return RadarDetectionSystemSystem.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 		},
 	
 		fire(firingSprite, gun, target) {
-			let angle = RadarDetectionSystem.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
+			let angle = RadarDetectionSystemSystem.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
 	
 			firingSprite.rotation = angle;
 	
@@ -39426,7 +39497,7 @@
 		}
 	};
 	
-	exports.default = RadarDetectionSystem;
+	exports.default = RadarDetectionSystemSystem;
 
 /***/ },
 /* 276 */
@@ -39442,7 +39513,7 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	let WeaponDetonation = {
+	let WeaponDetonationSystem = {
 		components: {
 			with: ['detonation-fuse'],
 			without: ['waypoint']
@@ -39452,15 +39523,15 @@
 		game: null,
 	
 		init() {
-			this.ecsManager = _instanceManager2.default.get('ecs-manager');
-			this.game = _instanceManager2.default.get('game');
+			WeaponDetonationSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			WeaponDetonationSystem.game = _instanceManager2.default.get('game');
 		},
 	
 		runOne(entity) {
 			let detonationFuse = entity['detonation-fuse'];
 			let targetHealth = detonationFuse.target.health;
 	
-			WeaponDetonation.ecsManager.destroyEntity(entity.id);
+			WeaponDetonationSystem.ecsManager.destroyEntity(entity.id);
 	
 			// Check if it's dead already
 			if (!targetHealth) {
@@ -39471,12 +39542,12 @@
 	
 			// TODO some sort of death system
 			if (targetHealth.current <= 0) {
-				WeaponDetonation.ecsManager.destroyEntity(detonationFuse.target.id);
+				WeaponDetonationSystem.ecsManager.destroyEntity(detonationFuse.target.id);
 			}
 		}
 	};
 	
-	exports.default = WeaponDetonation;
+	exports.default = WeaponDetonationSystem;
 
 /***/ },
 /* 277 */
