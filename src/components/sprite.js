@@ -8,23 +8,21 @@ const defaultParams = {
 	graphic: '',
 };
 
-instanceManager
-	.get('ecs-manager')
-	.registerComponent('sprite', {
-		factory(params) {
-			let sprite;
+export default {
+	factory(params) {
+		let sprite;
 
-			params = params || defaultParams;
+		params = params || defaultParams;
 
-			sprite = new Phaser.Sprite(game, params.x, params.y, params.graphic);
-			sprite.anchor.setTo(0.5, 0.5);
-			sprite.smoothed = false;
+		sprite = new Phaser.Sprite(game, params.x, params.y, params.graphic);
+		sprite.anchor.setTo(0.5, 0.5);
+		sprite.smoothed = false;
 
-			instanceManager.get('world-entities').add(sprite);
+		instanceManager.get('world-entities').add(sprite);
 
-			return sprite;
-		},
-		onRemove(sprite) {
-			sprite.destroy();
-		},
-	});
+		return sprite;
+	},
+	onRemove(sprite) {
+		sprite.destroy();
+	},
+};

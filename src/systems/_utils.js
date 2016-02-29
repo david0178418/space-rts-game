@@ -8,9 +8,9 @@ export default {
 		return (currentSpeed * currentSpeed) / (2 * acceleration);
 	},
 
-	distanceBetween(objA, objB) {
-		let dx = objA.x - objB.x;
-		let dy = objA.y - objB.y;
+	distanceBetween(posA, posB) {
+		let dx = posA.x - posB.x;
+		let dy = posA.y - posB.y;
 
 		return Math.sqrt(dx * dx + dy * dy);
 	},

@@ -1,27 +1,38 @@
-import _ from 'lodash';
+import {throttle} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let RenderBuildingQueueSystem = {
 	components: {
 		with: [
 			'entity-spawn-queue',
 		],
 	},
 
+	game: null,
+	ui: null,
+
 	init() {
-		this.game = instanceManager.get('game');
-		this.ui = instanceManager.get('ui');
+		RenderBuildingQueueSystem.game = instanceManager.get('game');
+		RenderBuildingQueueSystem.ui = instanceManager.get('ui');
+
+		RenderBuildingQueueSystem.run = throttle(RenderBuildingQueueSystem.run, 150);
 	},
 
-	run: _.throttle(function(entities) {
-		let selectedEntities = _.filter(entities, function(entity) {
-			return entity.hasComponent('selected');
-		});
+	run(entities) {
+		let selectedEntities = [];
+
+		for(let x = 0; x < entities.length; x++) {
+			if(entities[x].selected) {
+				selectedEntities[selectedEntities.length] = entities[x];
+			}
+		}
 
 		if(selectedEntities.length === 1) {
-			this.ui.setBuildQueue(selectedEntities[0].getComponent('entity-spawn-queue').queue);
+			RenderBuildingQueueSystem.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
 		} else {
-			this.ui.setBuildQueue(null);
+			RenderBuildingQueueSystem.ui.setBuildQueue(null);
 		}
-	}, 100),
+	},
 };
+
+export default RenderBuildingQueueSystem;

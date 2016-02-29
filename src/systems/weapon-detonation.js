@@ -1,6 +1,6 @@
 import instanceManager from 'instance-manager';
 
-export default {
+let WeaponDetonationSystem = {
 	components: {
 		with: [
 			'detonation-fuse',
@@ -10,16 +10,19 @@ export default {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+
 	init() {
-		this.game = instanceManager.get('game');
-		this.worldEntities = instanceManager.get('world-entities');
+		WeaponDetonationSystem.ecsManager = instanceManager.get('ecs-manager');
+		WeaponDetonationSystem.game = instanceManager.get('game');
 	},
 
 	runOne(entity) {
-		let detonationFuse = entity.getComponent('detonation-fuse');
-		let targetHealth = detonationFuse.target.getComponent('health');
+		let detonationFuse = entity['detonation-fuse'];
+		let targetHealth = detonationFuse.target.health;
 
-		entity.destroy();
+		WeaponDetonationSystem.ecsManager.destroyEntity(entity.id);
 
 		// Check if it's dead already
 		if(!targetHealth) {
@@ -30,7 +33,9 @@ export default {
 
 		// TODO some sort of death system
 		if(targetHealth.current <= 0) {
-			detonationFuse.target.destroy();
+			WeaponDetonationSystem.ecsManager.destroyEntity(detonationFuse.target.id);
 		}
 	},
 };
+
+export default WeaponDetonationSystem;

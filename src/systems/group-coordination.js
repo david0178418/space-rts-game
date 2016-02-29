@@ -1,17 +1,23 @@
-import _ from 'lodash';
+import {each} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let GroupCoordinationSystem = {
 	components:{
 		with: [
 			'group-movement',
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+	moveOrderSound: null,
+	worldEntities: null,
+
 	init() {
-		this.game = instanceManager.get('game');
-		this.worldEntities = instanceManager.get('world-entities');
-		this.moveOrderSound = this.game.add.audio('move-order');
+		GroupCoordinationSystem.ecsManager = instanceManager.get('ecs-manager');
+		GroupCoordinationSystem.game = instanceManager.get('game');
+		GroupCoordinationSystem.worldEntities = instanceManager.get('world-entities');
+		GroupCoordinationSystem.moveOrderSound = GroupCoordinationSystem.game.add.audio('move-order');
 	},
 
 	run(entities) {
@@ -23,9 +29,9 @@ export default {
 		// Theortically, only one is needed since all groups are processed
 		// together.  If multiple group commands are issued simultaniously,
 		// this may need to be changed.
-		let groupMovementComponent = entities[0].getComponent('group-movement');
-		let maxX = this.game.world.height * 10;
-		let maxY = this.game.world.width * 10;
+		let groupMovementComponent = entities[0]['group-movement'];
+		let maxX = GroupCoordinationSystem.game.world.height * 10;
+		let maxY = GroupCoordinationSystem.game.world.width * 10;
 		let minX = -1;
 		let minY = -1;
 		let movableSelectedCount = 0;
@@ -34,8 +40,8 @@ export default {
 		let xTotal = 0;
 		let yTotal = 0;
 
-		_.each(entities, function(entity) {
-			let sprite = entity.getComponent('sprite');
+		each(entities, function(entity) {
+			let sprite = entity.sprite;
 
 			movableSelectedCount++;
 			xTotal += sprite.x;
@@ -59,20 +65,20 @@ export default {
 		formationCenterOffsetX = (slotWidth * (rowCount - 1)) / 2;
 		formationCenterOffsetY = (slotWidth * (colCount - 1)) / 2;
 
-		_.each(entities, function(entity, i) {
-			let waypointQueue = entity.getComponent('waypoint-queue');
+		for(let x = 0; x < entities.length; x++) {
+			let waypointQueue = entities[x]['waypoint-queue'];
 
-			formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
-			formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * ((i / rowCount) | 0) - formationCenterOffsetY;
+			formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (x % rowCount) - formationCenterOffsetX;
+			formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * ((x / rowCount) | 0) - formationCenterOffsetY;
 
 			if(groupMovementComponent.queue && waypointQueue) {
-				waypointQueue.queue.push({
+				waypointQueue.queue[waypointQueue.queue.length]({
 					x: formationPositionX,
 					y: formationPositionY,
 					hyperspace: groupMovementComponent.hyperspace,
 				});
 			} else {
-				entity.addComponent('waypoint', {
+				GroupCoordinationSystem.ecsManager.addComponent(entities[x].id, 'waypoint', {
 					x: formationPositionX,
 					y: formationPositionY,
 				});
@@ -82,11 +88,13 @@ export default {
 				}
 			}
 
-			entity.removeComponent('group-movement');
-		});
+			GroupCoordinationSystem.ecsManager.removeComponent(entities[x].id, 'group-movement');
+		}
 
-		if(!this.moveOrderSound.isPlaying) {
-			this.moveOrderSound.play();
+		if(!GroupCoordinationSystem.moveOrderSound.isPlaying) {
+			GroupCoordinationSystem.moveOrderSound.play();
 		}
 	},
 };
+
+export default GroupCoordinationSystem;

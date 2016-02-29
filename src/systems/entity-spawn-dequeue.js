@@ -1,7 +1,6 @@
-import _ from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let EntitySpawnDequeueSystem = {
 	components: {
 		with: [
 			'entity-spawner',
@@ -9,43 +8,42 @@ export default {
 		],
 	},
 
+	game: null,
+	worldEntities: null,
+
 	init() {
-		this.worldEntities = instanceManager.get('world-entities');
-		this.game = instanceManager.get('game');
-		this.runOne = _.bind(this.runOne, this);
+		EntitySpawnDequeueSystem.worldEntities = instanceManager.get('world-entities');
+		EntitySpawnDequeueSystem.game = instanceManager.get('game');
 	},
 
 	// TODO make spawn and waypoint queue/dequeue logic more consistent if
 	// possible
 	runOne(entity) {
-		let entitySpawnQueue = entity.getComponent('entity-spawn-queue').queue;
+		let entitySpawnQueue = entity['entity-spawn-queue'].queue;
 
 		if(!entitySpawnQueue.length) {
 			return;
 		}
 
-		let entitySpawner = entity.getComponent('entity-spawner');
+		let entitySpawner = entity['entity-spawner'];
 		let activeConstruction = entitySpawnQueue[0];
 		let spawnerBlueprint = entitySpawner.availableBlueprints[activeConstruction.blueprint];
 
-		activeConstruction.elapsedBuildTime += this.game.time.elapsed;
+		activeConstruction.elapsedBuildTime += EntitySpawnDequeueSystem.game.time.elapsed;
 
 		if(activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 			let newEntity;
-			let spawnerSprite = entity.getComponent('sprite');
-			let waypoint = entity.getComponent('waypoint');
 
 			entitySpawnQueue.shift();
 
 			newEntity = spawnerBlueprint.prefab({
-				x: spawnerSprite.x,
-				y: spawnerSprite.y,
+				x: entity.sprite.x,
+				y: entity.sprite.y,
 			});
-			newEntity.getComponent('team').name = entity.getComponent('team').name;
-			newEntity.getComponent('waypoint-queue').queue.push({
-				x: waypoint.x,
-				y: waypoint.y,
-			});
+			newEntity.team.name = entity.team.name;
+			newEntity['waypoint-queue'].queue.push(entity.waypoint);
 		}
 	},
 };
+
+export default EntitySpawnDequeueSystem;

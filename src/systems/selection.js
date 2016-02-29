@@ -3,7 +3,7 @@ import each from 'lodash/each';
 import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
 
-export default {
+let SelectionSystem = {
 	SELECTION_PADDING: 30,
 
 	components: {
@@ -12,52 +12,58 @@ export default {
 		],
 	},
 
-	init() {
-		this.game = instanceManager.get('game');
-		this.worldEntities = instanceManager.get('world-entities');
-		this.ecsManager = instanceManager.get('ecs-manager');
-		this.selectionChanged = false;
+	game: null,
+	selectionChanged: false,
+	worldEntities: null,
 
-		this.checkSelection = bind(this.checkSelection, this);
+	init() {
+		SelectionSystem.game = instanceManager.get('game');
+		SelectionSystem.worldEntities = instanceManager.get('world-entities');
+		SelectionSystem.selectionChanged = false;
+
+		SelectionSystem.checkSelectionSystem = bind(SelectionSystem.checkSelectionSystem, this);
 	},
 
+	// TODO Refactor this since it's using the old paradigm
 	run(entities) {
-		each(entities, this.checkSelection, this);
+		each(entities, SelectionSystem.checkSelectionSystem, this);
 
-		if(this.selectionChanged) {
-			this.selectionChanged = false;
+		if(SelectionSystem.selectionChanged) {
+			SelectionSystem.selectionChanged = false;
 		}
 	},
 
-	checkSelection(entity) {
-		let selectableComponent = entity.getComponent('selectable');
-		let sprite = entity.getComponent('sprite');
+	checkSelectionSystem(entity) {
+		let selectableComponent = entity.selectable;
+		let sprite = entity.sprite;
 		let graphic;
 
-		if(entity.hasComponent('selected')) {
+		if(entity.selected) {
 			if(!selectableComponent.graphic) {
-				graphic = new Phaser.Sprite(this.game, 0, 0, 'selection');
+				graphic = new Phaser.Sprite(SelectionSystem.game, 0, 0, 'selection');
 				graphic.anchor.setTo(0.5, 0.5);
 				// Set the height and width to the greater of the two plus padding
 				graphic.width = graphic.height =
 					(sprite.width > sprite.height ? sprite.width : sprite.height)
-					+ this.SELECTION_PADDING;
-				this.worldEntities.addChild(graphic);
+					+ SelectionSystem.SELECTION_PADDING;
+				SelectionSystem.worldEntities.addChild(graphic);
 				selectableComponent.graphic = graphic;
-				this.selectionChanged = true;
+				SelectionSystem.selectionChanged = true;
 
 				sprite.events.onDestroy.addOnce(graphic.kill, graphic);
-				// sprite.events.onDestroy.addOnce(this.uiViewModel.update, this.uiViewModel);
+				// sprite.events.onDestroy.addOnce(SelectionSystem.uiViewModel.update, SelectionSystem.uiViewModel);
 			} else if(!selectableComponent.graphic.visible) {
 				selectableComponent.graphic.visible = true;
-				this.selectionChanged = true;
+				SelectionSystem.selectionChanged = true;
 			}
 
 			selectableComponent.graphic.position.x = sprite.position.x;
 			selectableComponent.graphic.position.y = sprite.position.y;
 		} else if(selectableComponent.graphic && selectableComponent.graphic.visible) {
-			this.selectionChanged = true;
+			SelectionSystem.selectionChanged = true;
 			selectableComponent.graphic.visible = false;
 		}
 	},
 };
+
+export default SelectionSystem;

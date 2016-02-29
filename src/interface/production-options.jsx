@@ -29,7 +29,7 @@ function handleSelectBlueprint(key, label) {
 	let entities = ecsManager.getEntities(['selected', 'entity-spawn-queue']);
 
 	_.each(entities, function(entity) {
-		entity.getComponent('entity-spawn-queue').queue.push({
+		entity['entity-spawn-queue'].queue.push({
 			label: label,
 			blueprint: key,
 			elapsedBuildTime: 0,
@@ -41,18 +41,18 @@ export default
 function(props) {
 	let result = [];
 
-	forOwn(props.productionOptions, (blueprint, key) => {
-		result.push(
+	for(let blueprint in props.productionOptions) {
+		result[result.length] = (
 			<button
-				key={key}
+				key={blueprint}
 				className="icon-button"
 				style={buttonStyles}
-				onClick={_.bind(handleSelectBlueprint, null, key, blueprint.label)}
+				onClick={_.bind(handleSelectBlueprint, null, blueprint, props.productionOptions[blueprint].label)}
 			>
-				{blueprint.label}
+				{props.productionOptions[blueprint].label}
 			</button>
 		);
-	});
+	}
 
 	return (
 		<div style={styles}>

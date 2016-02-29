@@ -1,7 +1,6 @@
-import {bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let BreakingSystem = {
 	components: {
 		with: [
 			'movable',
@@ -9,33 +8,37 @@ export default {
 		],
 	},
 
-	init() {
-		this.game = instanceManager.get('game');
+	game: null,
+	ecsManager: null,
 
-		this.runOne = bind(this.runOne, this);
+	init() {
+		BreakingSystem.game = instanceManager.get('game');
+		BreakingSystem.ecsManager = instanceManager.get('ecs-manager');
 	},
 
 	runOne(entity) {
-		if(entity.hasComponent('waypoint')) {
-			entity.getComponent('waypoint-queue').queue.unshift(entity.getComponent('waypoint'));
-			entity.removeComponent('waypoint');
+		if(entity.waypoint) {
+			entity['waypoint-queue'].queue.unshift(entity.waypoint);
+			BreakingSystem.ecsManager.removeComponent(entity.id, 'waypoint');
 		}
 
-		let movable = entity.getComponent('movable');
+		let movable = entity.movable;
 
 		if(movable.currentSpeed === 0) {
 			return;
 		}
 
-		let sprite = entity.getComponent('sprite');
+		let sprite = entity.sprite;
 
-		movable.currentSpeed -= movable.acceleration * this.game.time.physicsElapsed;
+		movable.currentSpeed -= movable.acceleration * BreakingSystem.game.time.physicsElapsed;
 
 		if(movable.currentSpeed <= 0) {
 			movable.currentSpeed = 0;
 		} else {
-			sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * this.game.time.physicsElapsed;
-			sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * this.game.time.physicsElapsed;
+			sprite.position.x += Math.cos(sprite.rotation) * movable.currentSpeed * BreakingSystem.game.time.physicsElapsed;
+			sprite.position.y += Math.sin(sprite.rotation) * movable.currentSpeed * BreakingSystem.game.time.physicsElapsed;
 		}
 	},
 };
+
+export default BreakingSystem;

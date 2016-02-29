@@ -8,7 +8,6 @@ const ecsManager = instanceManager.get('ecs-manager');
 export default {
 	checkForDoubleClick: false,
 	controls: null,
-	endPoint: new Phaser.Point(),
 	game: instanceManager.get('game'),
 	graphic: null,
 	mousePointer: null,
@@ -102,19 +101,19 @@ export default {
 		this.drawDragArea(dragX, dragY);
 
 		each(ecsManager.getEntities(['selectable']), function(entity) {
-			let isSelected = entity.getComponent('selected');
-			let teamComponent = entity.getComponent('team');
+			let isSelected = entity.selected;
+			let teamComponent = entity.team;
 
 			if(teamComponent && teamComponent.name === 'player') {
 				let intersects = graphic.getBounds().intersects(
-					entity.getComponent('sprite').getBounds()
+					entity.sprite.getBounds()
 				);
 
 				if(!isSelected && intersects) {
-					entity.addComponent('selected');
+					ecsManager.addComponent(entity.id, 'selected');
 					selectedEntites.push(entity);
 				} else if(isSelected && !intersects) {
-					entity.removeComponent('selected');
+					ecsManager.removeComponent(entity.id, 'selected');
 				}
 			}
 		});
@@ -147,11 +146,11 @@ export default {
 			return;
 		}
 
-		selectedEntityTeamComponent = selectedEntity.getComponent('team');
+		selectedEntityTeamComponent = selectedEntity.team;
 		selectedEntityTeam = selectedEntityTeamComponent && selectedEntityTeamComponent.name;
 
 		each(entities, function(entity) {
-			let entityTeamComponent = entity.getComponent('team');
+			let entityTeamComponent = entity.team;
 			let team = entityTeamComponent && entityTeamComponent.name;
 
 			if(
@@ -159,9 +158,9 @@ export default {
 				selectedEntityTeam === team &&
 				entity.inCamera
 			) {
-				entity.addComponent('selected');
+				this.ecsManager.addComponent(entity.id, 'selected');
 			} else {
-				entity.removeComponent('selected');
+				this.ecsManager.removeComponent(entity.id, 'selected');
 			}
 		});
 	},
@@ -170,8 +169,8 @@ export default {
 		let entities = this.ecsManager.getEntities(['selectable', 'team']);
 		let selectedEntity = this.getTopEntityAt(entities, position);
 
-		each(entities, function(entity) {
-			entity.toggleComponent('selected', entity === selectedEntity);
+		each(entities, (entity) => {
+			this.ecsManager.toggleComponent(entity.id, 'selected', entity === selectedEntity);
 		});
 	},
 
@@ -208,11 +207,11 @@ export default {
 			// this.uiViewModel.awaitTarget(false);
 
 			each(entities, function(entity) {
-				entity.removeComponent('selected');
+				ecsManager.removeComponent(entity.id, 'selected');
 			});
 		} else {
 			each(entities, function(entity) {
-				entity.addComponent('order', {
+				ecsManager.addComponent(entity.id, 'order', {
 					x: position.x,
 					y: position.y,
 				});
@@ -226,9 +225,9 @@ export default {
 		each(entities, function(entity) {
 			// TODO Make a "getComponents"?
 			if(
-				entity.getComponent('team').name === 'player' &&
+				entity.team.name === 'player' &&
 				(!topEntity || topEntity.z < entity.z) &&
-				entity.getComponent('sprite').getBounds().contains(position.x, position.y)
+				entity.sprite.getBounds().contains(position.x, position.y)
 			) {
 				topEntity = entity;
 			}

@@ -1,8 +1,6 @@
-import {each, extend, bind} from 'lodash';
 import instanceManager from 'instance-manager';
 
-let RadarDetectionSystem = {};
-extend(RadarDetectionSystem, {
+let RadarDetectionSystemSystem = {
 	components: {
 		with: [
 			'sprite',
@@ -12,75 +10,84 @@ extend(RadarDetectionSystem, {
 		],
 	},
 
+	ecsManager: null,
+	game: null,
+	ui: null,
+	quadtree: null,
+
 	init() {
-		this.game = instanceManager.get('game');
-		this.ui = instanceManager.get('ui');
-		this.quadtree = instanceManager.get('quadtree');
-		this.ecsManager = instanceManager.get('ecs-manager');
+		RadarDetectionSystemSystem.game = instanceManager.get('game');
+		RadarDetectionSystemSystem.ui = instanceManager.get('ui');
+		RadarDetectionSystemSystem.quadtree = instanceManager.get('quadtree');
+		RadarDetectionSystemSystem.ecsManager = instanceManager.get('ecs-manager');
 	},
 
 	// TODO Optimize with quadtree
-	runOne: bind(function(entity) {
-		let gun = entity.getComponent('gun');
-		let sprite;
-		let radar;
-		let currentTarget;
-		let currentTargetDistance;
-
-		gun.remainingCooldown = Math.max(
-			gun.remainingCooldown - this.game.time.physicsElapsedMS,
+	runOne(entity) {
+		entity.gun.remainingCooldown = Math.max(
+			entity.gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS,
 			0
 		);
 
-		if(gun.remainingCooldown) {
+		if(entity.gun.remainingCooldown) {
 			return;
 		}
 
-		sprite = entity.getComponent('sprite');
-		radar = entity.getComponent('radar');
+		RadarDetectionSystemSystem.foo({
+			breaks: entity.breaks,
+			gun: entity.gun,
+			id: entity.id,
+			movable: entity.movable,
+			radar: entity.radar,
+			sprite: entity.sprite,
+			team: entity.team,
+		});
+	},
 
-		let potentialTargets = this.ecsManager.getEntities([
+	foo({sprite, radar, movable, breaks, gun, team, id}) {
+		let currentTarget;
+		let currentTargetDistance;
+		let potentialTargets = RadarDetectionSystemSystem.ecsManager.getEntities([
 			'team',
 			'sprite',
 			'health',
 		]);
-		each(potentialTargets,
-			bind(function(potentialTarget) {
-				if(potentialTarget.getComponent('team').name !== entity.getComponent('team').name) {
-					let targetDistance =
-						this.calculateTargetDistance(
-							sprite.position,
-							potentialTarget.getComponent('sprite').position
-						);
 
-					if(targetDistance <= radar.range){
-						if(!currentTarget || targetDistance < currentTargetDistance) {
-							currentTargetDistance = targetDistance;
-							currentTarget = potentialTarget;
-						}
+		for(let x = 0; x < potentialTargets.length; x++) {
+			if(potentialTargets[x].team.name !== team.name) {
+				let targetDistance =
+					RadarDetectionSystemSystem.calculateTargetDistance(
+						sprite.position,
+						potentialTargets[x].sprite.position
+					);
+
+				if(targetDistance <= radar.range){
+					if(!currentTarget || targetDistance < currentTargetDistance) {
+						currentTargetDistance = targetDistance;
+						currentTarget = potentialTargets[x];
 					}
 				}
-			}, this)
-		);
+			}
+		}
 
 		if(currentTarget) {
-			if(entity.hasComponent('movable') && entity.getComponent('movable').currentSpeed === 0) {
-				this.fire(sprite, gun, currentTarget);
-			} else if(!entity.hasComponent('breaks')) {
-				entity.addComponent('breaks');
+			if(movable && movable.currentSpeed === 0) {
+				RadarDetectionSystemSystem.fire(sprite, gun, currentTarget);
+			} else if(!breaks) {
+				RadarDetectionSystemSystem.ecsManager.addComponent(id, 'breaks');
 			}
-		} else if(entity.hasComponent('breaks')) {
-			entity.removeComponent('breaks');
+		} else if(breaks) {
+			RadarDetectionSystemSystem.ecsManager.removeComponent(id, 'breaks');
 		}
-	}, RadarDetectionSystem),
+	},
 
 	// TODO Consider target width?
 	calculateTargetDistance(position, targetEntityPosition) {
-		return this.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
+		return RadarDetectionSystemSystem.game.physics.arcade.distanceToXY(position, targetEntityPosition.x, targetEntityPosition.y);
 	},
 
 	fire(firingSprite, gun, target) {
-		let angle = this.game.math.angleBetweenPoints(firingSprite.position, target.getComponent('sprite').position);
+		let angle = RadarDetectionSystemSystem.game.math.angleBetweenPoints(firingSprite.position, target.sprite.position);
 
 		firingSprite.rotation = angle;
 
@@ -94,6 +101,6 @@ extend(RadarDetectionSystem, {
 
 		gun.sound.play();
 	},
-});
+};
 
-export default RadarDetectionSystem;
+export default RadarDetectionSystemSystem;

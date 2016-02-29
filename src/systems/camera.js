@@ -1,10 +1,14 @@
-import _ from 'lodash';
 import Config from 'config';
 import instanceManager from 'instance-manager';
 
-export default {
+let CameraSystem = {
+	background1layer2: null,
 	dirtyBackground: true,
+	game: null,
+	keyboardControls: null,
 	panSpeed: 8,
+	world: null,
+	worldEntities: null,
 	zoomIncrement: 5, // %
 	zoomMax: 100,
 	zoomMin: 15,
@@ -12,95 +16,97 @@ export default {
 	zoomTarget: 100, // %
 
 	init() {
-		this.game = instanceManager.get('game');
-		this.keyboardControls = instanceManager.get('keyboard-controls');
-		this.world = this.game.world;
-		this.worldEntities = instanceManager.get('world-entities');
+		CameraSystem.game = instanceManager.get('game');
+		CameraSystem.keyboardControls = instanceManager.get('keyboard-controls');
+		CameraSystem.world = CameraSystem.game.world;
+		CameraSystem.worldEntities = instanceManager.get('world-entities');
 
-		// this.background1layer1 = this.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
-		this.background1layer2 = this.game.add.tileSprite(Config.screen.width * -0.5, Config.screen.width * -0.5, Config.screen.width * 1.5, Config.screen.width * 1.5, 'background1-layer2');
+		// CameraSystem.background1layer1 = CameraSystem.game.add.tileSprite(Config.screen.width * -0.25, Config.screen.width * -0.25, Config.screen.width * 1.25, Config.screen.width * 1.25, 'background1-layer1');
+		CameraSystem.background1layer2 = CameraSystem.game.add.tileSprite(Config.screen.width * -0.5, Config.screen.width * -0.5, Config.screen.width * 1.5, Config.screen.width * 1.5, 'background1-layer2');
 
-		window.addEventListener('mousewheel', _.bind(function(e) {
-			this.updateZoomTarget(e.wheelDelta);
-		}, this));
+		window.addEventListener('mousewheel', (e) => {
+			CameraSystem.updateZoomTarget(e.wheelDelta);
+		});
 	},
 
 	run() {
 		// Vertial pan
-		if(this.keyboardControls.panUp.isDown) {
-			this.dirtyBackground = true;
-			this.worldEntities.y += this.panSpeed;
-		} else if(this.keyboardControls.panDown.isDown) {
-			this.dirtyBackground = true;
-			this.worldEntities.y -= this.panSpeed;
+		if(CameraSystem.keyboardControls.panUp.isDown) {
+			CameraSystem.dirtyBackground = true;
+			CameraSystem.worldEntities.y += CameraSystem.panSpeed;
+		} else if(CameraSystem.keyboardControls.panDown.isDown) {
+			CameraSystem.dirtyBackground = true;
+			CameraSystem.worldEntities.y -= CameraSystem.panSpeed;
 		}
 
 		// Horizontal pa
-		if(this.keyboardControls.panRight.isDown) {
-			this.dirtyBackground = true;
-			this.worldEntities.x -= this.panSpeed;
-		} else if(this.keyboardControls.panLeft.isDown) {
-			this.dirtyBackground = true;
-			this.worldEntities.x += this.panSpeed;
+		if(CameraSystem.keyboardControls.panRight.isDown) {
+			CameraSystem.dirtyBackground = true;
+			CameraSystem.worldEntities.x -= CameraSystem.panSpeed;
+		} else if(CameraSystem.keyboardControls.panLeft.isDown) {
+			CameraSystem.dirtyBackground = true;
+			CameraSystem.worldEntities.x += CameraSystem.panSpeed;
 		}
 
-		if(!this.dirtyBackground) {
+		if(!CameraSystem.dirtyBackground) {
 			return;
 		}
 
-		this.updateBackground();
-		this.updateZoom();
-		this.limitView();
+		CameraSystem.updateBackground();
+		CameraSystem.updateZoom();
+		CameraSystem.limitView();
 
-		this.dirtyBackground = false;
+		CameraSystem.dirtyBackground = false;
 	},
 	limitView() {
 		// Limit view
 		// Run check each tick to account for
 		// other position mutators such as zooming
-		if(this.worldEntities.y > 0) {
-			this.worldEntities.y = 0;
-		} else if(this.worldEntities.y < -(this.world.height * this.worldEntities.scale.y - this.game.camera.height)) {
-			this.worldEntities.y = -(this.world.height * this.worldEntities.scale.y - this.game.camera.height);
+		if(CameraSystem.worldEntities.y > 0) {
+			CameraSystem.worldEntities.y = 0;
+		} else if(CameraSystem.worldEntities.y < -(CameraSystem.world.height * CameraSystem.worldEntities.scale.y - CameraSystem.game.camera.height)) {
+			CameraSystem.worldEntities.y = -(CameraSystem.world.height * CameraSystem.worldEntities.scale.y - CameraSystem.game.camera.height);
 		}
 
-		if(this.worldEntities.x < -(this.world.width * this.worldEntities.scale.x - this.game.camera.width)) {
-			this.worldEntities.x = -(this.world.width * this.worldEntities.scale.x - this.game.camera.width);
-		} else if(this.worldEntities.x > 0) {
-			this.worldEntities.x = 0;
+		if(CameraSystem.worldEntities.x < -(CameraSystem.world.width * CameraSystem.worldEntities.scale.x - CameraSystem.game.camera.width)) {
+			CameraSystem.worldEntities.x = -(CameraSystem.world.width * CameraSystem.worldEntities.scale.x - CameraSystem.game.camera.width);
+		} else if(CameraSystem.worldEntities.x > 0) {
+			CameraSystem.worldEntities.x = 0;
 		}
 	},
 
 	updateBackground() {
-		// this.background1layer1.position.x = this.background1layer1.width * 0.005  * this.worldEntities.x / this.game.width;
-		// this.background1layer1.position.y = this.background1layer1.height * 0.005 * this.worldEntities.y / this.game.height;
-		this.background1layer2.position.x = this.background1layer2.width * 0.01 * this.worldEntities.x / this.game.width;
-		this.background1layer2.position.y = this.background1layer2.height * 0.01* this.worldEntities.y / this.game.height;
+		// CameraSystem.background1layer1.position.x = CameraSystem.background1layer1.width * 0.005  * CameraSystem.worldEntities.x / CameraSystem.game.width;
+		// CameraSystem.background1layer1.position.y = CameraSystem.background1layer1.height * 0.005 * CameraSystem.worldEntities.y / CameraSystem.game.height;
+		CameraSystem.background1layer2.position.x = CameraSystem.background1layer2.width * 0.01 * CameraSystem.worldEntities.x / CameraSystem.game.width;
+		CameraSystem.background1layer2.position.y = CameraSystem.background1layer2.height * 0.01* CameraSystem.worldEntities.y / CameraSystem.game.height;
 	},
 
 	updateZoom() {
-		let zoom = this.zoomTarget / 100;
-		let localPosition = this.game.input.getLocalPosition(this.worldEntities, this.game.input.mousePointer);
+		let zoom = CameraSystem.zoomTarget / 100;
+		let localPosition = CameraSystem.game.input.getLocalPosition(CameraSystem.worldEntities, CameraSystem.game.input.mousePointer);
 
-		this.worldEntities.position.x += localPosition.x * (this.worldEntities.scale.x - zoom);
-		this.worldEntities.position.y += localPosition.y * (this.worldEntities.scale.y - zoom);
-		this.worldEntities.scale.setTo(zoom);
+		CameraSystem.worldEntities.position.x += localPosition.x * (CameraSystem.worldEntities.scale.x - zoom);
+		CameraSystem.worldEntities.position.y += localPosition.y * (CameraSystem.worldEntities.scale.y - zoom);
+		CameraSystem.worldEntities.scale.setTo(zoom);
 	},
 
 	updateZoomTarget(delta) {
-		if(this.game.paused) {
+		if(CameraSystem.game.paused) {
 			return;
 		}
 
-		this.zoomTarget += this.zoomIncrement * (delta > 0 ? 1 : -1);
+		CameraSystem.zoomTarget += CameraSystem.zoomIncrement * (delta > 0 ? 1 : -1);
 
-		if(this.zoomTarget >= this.zoomMin && this.zoomTarget <= this.zoomMax) {
-			this.updateZoom();
+		if(CameraSystem.zoomTarget >= CameraSystem.zoomMin && CameraSystem.zoomTarget <= CameraSystem.zoomMax) {
+			CameraSystem.updateZoom();
 		} else {
-			this.zoomTarget = delta > 0 ? this.zoomMax : this.zoomMin;
+			CameraSystem.zoomTarget = delta > 0 ? CameraSystem.zoomMax : CameraSystem.zoomMin;
 		}
 
-		this.limitView();
-		this.updateBackground();
+		CameraSystem.limitView();
+		CameraSystem.updateBackground();
 	},
 };
+
+export default CameraSystem;

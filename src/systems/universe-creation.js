@@ -1,18 +1,21 @@
-import _ from 'lodash';
+import {random} from 'lodash';
 import Config from 'config';
 import instanceManager from 'instance-manager';
-
-import 'components/entity-spawn-queue';
 
 import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
 import planetFactory from 'prefabs/planet';
 
-export default {
+let UniverseCreationSystem = {
+
+	ecsManager: null,
+	worldEntities: null,
+
 	init() {
 		let planets = [];
 
-		this.worldEntities = instanceManager.get('world-entities');
+		UniverseCreationSystem.ecsManager = instanceManager.get('ecs-manager');
+		UniverseCreationSystem.worldEntities = instanceManager.get('world-entities');
 
 		// planets acting as markers to edges and center
 		planetFactory({ x: 0, y: Config.stage.height / 2 });
@@ -27,55 +30,43 @@ export default {
 
 		for(let i = 0; i < Config.universeSize; i++) {
 			let newPlanet = planetFactory({
-				x: _.random(100, Config.stage.width - 100),
-				y: _.random(100, Config.stage.height - 100),
+				x: random(100, Config.stage.width - 100),
+				y: random(100, Config.stage.height - 100),
 			});
 
 			planets.push(newPlanet);
 		}
 
-		this.assignTeams(planets);
+		UniverseCreationSystem.assignTeams(planets);
 	},
 
 	assignTeams(planets) {
 		let playerPlanet = planets[0];
-		let playerPlanetSpriteComponent = playerPlanet.getComponent('sprite');
+		let playerPlanetSpriteComponent = playerPlanet.sprite;
 		let enemyPlanet = planets[planets.length - 1];
 
-		this.worldEntities.x = -playerPlanetSpriteComponent.x + Config.screen.width / 2;
-		this.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
+		UniverseCreationSystem.worldEntities.x = -playerPlanetSpriteComponent.x + Config.screen.width / 2;
+		UniverseCreationSystem.worldEntities.y = -playerPlanetSpriteComponent.y + Config.screen.height / 2;
 
-		playerPlanet.addComponent('team', {name: 'player'});
-		enemyPlanet.addComponent('team', {name: 'ai1'});
-
-		playerPlanet
-			.removeComponent('colonizable')
-			.addComponent('entity-spawn-queue', {
-				queue: [
-					{
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'Colony Ship',
-						blueprint: 'colony-ship',
-						elapsedBuildTime: 0,
-					},
-				],
-			})
-			.addComponent('entity-spawner', {
+		UniverseCreationSystem.ecsManager.removeComponent(playerPlanet.id, 'colonizable');
+		UniverseCreationSystem.ecsManager.addComponents(playerPlanet.id, {
+			team: {
+				name: 'player',
+			},
+			'entity-spawn-queue': {
+				queue: (() => {
+					let fighters = [];
+					for(let x = 0; x < 10; x++) {
+						fighters.push({
+							label: 'fighter',
+							blueprint: 'fighter',
+							elapsedBuildTime: 0,
+						});
+					}
+					return fighters;
+				})(),
+			},
+			'entity-spawner': {
 				availableBlueprints: {
 					fighter: {
 						baseBuildTime: 4000,
@@ -90,15 +81,19 @@ export default {
 						prefab: colonyShipPrefab,
 					},
 				},
-			})
-			.addComponent('waypoint', {
-				x: playerPlanet.getComponent('sprite').x + 100,
-				y: playerPlanet.getComponent('sprite').y + 75,
-			});
+			},
+			waypoint: {
+				x: playerPlanet.sprite.x + 100,
+				y: playerPlanet.sprite.y + 75,
+			},
+		});
 
-		enemyPlanet
-			.removeComponent('colonizable')
-			.addComponent('entity-spawn-queue', {
+		UniverseCreationSystem.ecsManager.removeComponent(enemyPlanet.id, 'colonizable');
+		UniverseCreationSystem.ecsManager.addComponents(enemyPlanet.id, {
+			'team': {
+				name: 'ai1',
+			},
+			'entity-spawn-queue': {
 				queue: [
 					{
 						label: 'fighter',
@@ -158,8 +153,8 @@ export default {
 						elapsedBuildTime: 0,
 					},
 				],
-			})
-			.addComponent('entity-spawner', {
+			},
+			'entity-spawner': {
 				availableBlueprints: {
 					fighter: {
 						baseBuildTime: 4000,
@@ -174,13 +169,16 @@ export default {
 						prefab: colonyShipPrefab,
 					},
 				},
-			})
-			.addComponent('waypoint', {
-				x: playerPlanet.getComponent('sprite').x + 100,
-				y: playerPlanet.getComponent('sprite').y + 75,
-			});
+			},
+			waypoint: {
+				x: playerPlanet.sprite.x + 100,
+				y: playerPlanet.sprite.y + 75,
+			},
+		});
 
 		// TODO Remove debug
 		window.enemyPlanet = enemyPlanet;
 	},
 };
+
+export default UniverseCreationSystem;

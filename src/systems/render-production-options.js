@@ -1,27 +1,38 @@
-import _ from 'lodash';
+import {throttle} from 'lodash';
 import instanceManager from 'instance-manager';
 
-export default {
+let RenderProductionOptionsSystem = {
 	components: {
 		with: [
 			'entity-spawner',
 		],
 	},
 
+	game: null,
+	ui: null,
+
 	init() {
-		this.game = instanceManager.get('game');
-		this.ui = instanceManager.get('ui');
+		RenderProductionOptionsSystem.game = instanceManager.get('game');
+		RenderProductionOptionsSystem.ui = instanceManager.get('ui');
+
+		RenderProductionOptionsSystem.run = throttle(RenderProductionOptionsSystem.run, 150);
 	},
 
-	run: _.throttle(function(entities) {
-		let selectedEntities = _.filter(entities, function(entity) {
-			return entity.hasComponent('selected');
-		});
+	run(entities) {
+		let selectedEntities = [];
+
+		for(let x = 0; x < entities.length; x++) {
+			if(entities[x].selected) {
+				selectedEntities[selectedEntities.length] = entities[x];
+			}
+		}
 
 		if(selectedEntities.length) {
-			this.ui.setProductionOptions(selectedEntities[0].getComponent('entity-spawner').availableBlueprints);
+			RenderProductionOptionsSystem.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
 		} else {
-			this.ui.setProductionOptions(null);
+			RenderProductionOptionsSystem.ui.setProductionOptions(null);
 		}
-	}, 100),
+	},
 };
+
+export default RenderProductionOptionsSystem;

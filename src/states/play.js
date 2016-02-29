@@ -46,7 +46,16 @@ game.state.add('play', {
 	},
 	update() {
 		MouseControls.update();
+
+		if(window.LOG_FRAME) {
+			console.profile('start');
+		}
 		ecsManager.runSystems();
+
+		if(window.LOG_FRAME) {
+			window.LOG_FRAME = false;
+			console.profileEnd('start');
+		}
 	},
 
 	paused() {

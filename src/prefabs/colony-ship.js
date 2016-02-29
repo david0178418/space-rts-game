@@ -1,44 +1,41 @@
-import _ from 'lodash';
+import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
-
-import 'components/entity-spawner';
-import 'components/entity-spawn-queue';
-import 'components/physics';
-import 'components/sprite';
-import 'components/team';
 
 export default
 function(position) {
-	return instanceManager.get('ecs-manager')
-		.createEntity()
-		.addComponent('sprite', _.extend({graphic: 'colony-ship'}, position))
-		.addComponent('physics')
-		.addComponent('selectable')
-		.addComponent('team')
-		.addComponent('waypoint-queue')
-		.addComponent('colonizer')
-		.addComponent('health', {
+	let ecsManager = instanceManager.get('ecs-manager');
+	let colonyShip = ecsManager.createEntity();
+
+	return ecsManager.addComponents(colonyShip.id, {
+		sprite: extend({graphic: 'colony-ship'}, position),
+		physics: {},
+		selectable: {},
+		team: {},
+		'waypoint-queue': {},
+		colonizer: {},
+		health: {
 			max: 500,
 			current: 500,
-		})
-		.addComponent('gun', {
+		},
+		gun: {
 			power: 70,
 			cooldown: 500,
 			remainingCooldown: 0,
-		})
-		.addComponent('environment', {
+		},
+		environment: {
 			type: '',
 			habitability: 0,
 			resources: {},
-		})
-		.addComponent('population', {
+		},
+		population: {
 			fertility: 0,
 			longevity: 0,
 			count: 0,
-		})
-		.addComponent('movable', {
+		},
+		movable: {
 			acceleration: 75,
 			currentSpeed: 0,
 			topSpeed: 25,
-		});
+		},
+	});
 }

@@ -12,28 +12,27 @@
   "bugs": {},
   "homepage": "",
   "devDependencies": {
-    "babel-core": "^6.4.0",
+    "babel-core": "latest",
     "babel-eslint": "^5.0.0",
     "babel-loader": "^6.2.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.5.2",
     "babel-plugin-transform-es2015-object-super": "^6.5.0",
     "babel-plugin-transform-es2015-spread": "^6.5.2",
     "babel-preset-react": "^6.3.13",
-    "electron-prebuilt": "^0.36.0",
+    "electron-prebuilt": "latest",
     "eslint": "^2.1.0",
     "eslint-plugin-no-console-log": "^1.0.0",
     "eslint-plugin-react": "^3.15.0",
     "gulp": "^3.9.1",
     "gulp-util": "^3.0.7",
     "gulp-webserver": "^0.9.1",
-    "phaser": "^2.4.6",
-    "webpack": "^1.12.13"
+    "webpack": "latest"
   },
   "dependencies": {
     "ensy": "^1.0.0",
-    "lodash": "^4.0.0",
-    "phaser": "^2.4.4",
-    "react": "^0.14.6",
-    "react-dom": "^0.14.6"
+    "lodash": "latest",
+    "phaser": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   }
 }
