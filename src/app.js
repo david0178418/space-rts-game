@@ -3,6 +3,7 @@ import instanceManager from 'instance-manager';
 import Phaser from 'phaser';
 
 import 'resources/_registry';
+import 'components/_registry';
 import 'systems/_registry';
 
 import 'states/play';

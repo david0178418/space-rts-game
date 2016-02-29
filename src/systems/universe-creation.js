@@ -1,8 +1,6 @@
-import _ from 'lodash';
+import {random} from 'lodash';
 import Config from 'config';
 import instanceManager from 'instance-manager';
-
-import 'components/entity-spawn-queue';
 
 import colonyShipPrefab from 'prefabs/colony-ship';
 import fighterPrefab from 'prefabs/fighter';
@@ -32,8 +30,8 @@ let UniverseCreationSystem = {
 
 		for(let i = 0; i < Config.universeSize; i++) {
 			let newPlanet = planetFactory({
-				x: _.random(100, Config.stage.width - 100),
-				y: _.random(100, Config.stage.height - 100),
+				x: random(100, Config.stage.width - 100),
+				y: random(100, Config.stage.height - 100),
 			});
 
 			planets.push(newPlanet);
@@ -56,34 +54,22 @@ let UniverseCreationSystem = {
 				name: 'player',
 			},
 			'entity-spawn-queue': {
-				queue: [
-					{
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0,
-					}, {
-						label: 'Colony Ship',
-						blueprint: 'colony-ship',
-						elapsedBuildTime: 0,
-					},
-				],
+				queue: (() => {
+					let fighters = [];
+					for(let x = 0; x < 10; x++) {
+						fighters.push({
+							label: 'fighter',
+							blueprint: 'fighter',
+							elapsedBuildTime: 0,
+						});
+					}
+					return fighters;
+				})(),
 			},
 			'entity-spawner': {
 				availableBlueprints: {
 					fighter: {
-						baseBuildTime: 400,
+						baseBuildTime: 4000,
 						cost: 0,
 						label: 'Fighter',
 						prefab: fighterPrefab('green'),

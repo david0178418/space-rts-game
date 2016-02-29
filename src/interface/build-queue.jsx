@@ -37,19 +37,20 @@ function dequeueBuildItem(index) {
 export default
 function(props) {
 	let buildQueueButtons = [];
+	let buildQueue = props.buildQueue;
 
-	_.each(props.buildQueue, (queuedItem, index) => {
-		buildQueueButtons.push(
+	for(let x = 0; x < buildQueue.length; x++) {
+		buildQueueButtons[buildQueueButtons.length] = (
 			<button
-				key={queuedItem.label + index}
+				key={buildQueue[x].label + x}
 				className="icon-button"
 				style={buttonStyles}
-				onClick={_.bind(dequeueBuildItem, null, index)}
+				onClick={_.bind(dequeueBuildItem, null, x)}
 			>
-				{queuedItem.label}
+				{buildQueue[x].label}
 			</button>
 		);
-	});
+	}
 
 	return (
 		<div style={styles}>

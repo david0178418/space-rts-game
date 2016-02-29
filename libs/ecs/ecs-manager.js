@@ -1,4 +1,5 @@
 import {
+	assign,
 	defaults,
 	each,
 	isUndefined,
@@ -7,24 +8,6 @@ import {
 	uniqueId,
 	values,
 } from 'lodash';
-
-// Util function to copy getter definitions as well as properties.
-const extend = function(obj) {
-	Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-		let descriptor;
-		let prop;
-
-		if(source) {
-			for (prop in source) {
-				descriptor = Object.getOwnPropertyDescriptor(source, prop);
-				Object.defineProperty(obj, prop, descriptor);
-			}
-		}
-	});
-
-	return obj;
-};
-// END Util function to copy getter definitions as well as properties.
 
 export default
 class ECSManager {
@@ -54,7 +37,7 @@ class ECSManager {
 				(!withComponents || this.hasComponents(entityId, withComponents)) &&
 				(!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))
 			) {
-				matchedEntities.push(this._entities[entityId]);
+				matchedEntities[matchedEntities.length] = this._entities[entityId];
 			}
 		}
 
@@ -94,7 +77,7 @@ class ECSManager {
 			newEntity[this._components[x]] = null;
 		}
 
-		this._entityIndex.push(newEntity.id);
+		this._entityIndex[this._entityIndex.length] = newEntity.id;
 
 		this._getEntitiesMemoized.cache.clear();
 
@@ -111,12 +94,11 @@ class ECSManager {
 		let component = this._components[name];
 
 		if(!component) {
-			this.registerComponent(name, {state});
-			return state;
+			console.error(`No component of name "${name}" defined.`, state);
 		} else if(component.factory) {
 			return component.factory.call(entityContext, state);
 		} else {
-			return extend({}, component.state, state);
+			return assign({}, component.state, state);
 		}
 	}
 
@@ -181,19 +163,19 @@ class ECSManager {
 
 		if(withComponents) {
 			if(withComponents.constructor === Array) {
-				entitySearchString += withComponents.join(',');
+				entitySearchString = entitySearchString + withComponents.join(',');
 			} else {
-				entitySearchString += withComponents;
+				entitySearchString = entitySearchString + withComponents;
 			}
 		}
 
 		if(withoutComponents) {
-			entitySearchString += '+';
+			entitySearchString = entitySearchString + '+';
 
 			if(withoutComponents.constructor === Array) {
-				entitySearchString += withoutComponents.join(',');
+				entitySearchString = entitySearchString + withoutComponents.join(',');
 			} else {
-				entitySearchString += withoutComponents;
+				entitySearchString = entitySearchString + withoutComponents;
 			}
 		}
 
@@ -216,7 +198,7 @@ class ECSManager {
 
 	// @param {string} name
 	// @param {object} [defaultData={}] - provide an optional baseline for a component
-	registerComponent(name, defaultData) {
+	registerComponent(name, defaultData = {state:{}}) {
 		if(this._components[name]) {
 			return;
 		}

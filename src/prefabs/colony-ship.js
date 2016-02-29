@@ -1,12 +1,6 @@
 import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
-import 'components/entity-spawner';
-import 'components/entity-spawn-queue';
-import 'components/physics';
-import 'components/sprite';
-import 'components/team';
-
 export default
 function(position) {
 	let ecsManager = instanceManager.get('ecs-manager');

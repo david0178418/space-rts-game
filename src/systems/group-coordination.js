@@ -65,20 +65,20 @@ let GroupCoordinationSystem = {
 		formationCenterOffsetX = (slotWidth * (rowCount - 1)) / 2;
 		formationCenterOffsetY = (slotWidth * (colCount - 1)) / 2;
 
-		each(entities, (entity, i) => {
-			let waypointQueue = entity['waypoint-queue'];
+		for(let x = 0; x < entities.length; x++) {
+			let waypointQueue = entities[x]['waypoint-queue'];
 
-			formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
-			formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * ((i / rowCount) | 0) - formationCenterOffsetY;
+			formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (x % rowCount) - formationCenterOffsetX;
+			formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * ((x / rowCount) | 0) - formationCenterOffsetY;
 
 			if(groupMovementComponent.queue && waypointQueue) {
-				waypointQueue.queue.push({
+				waypointQueue.queue[waypointQueue.queue.length]({
 					x: formationPositionX,
 					y: formationPositionY,
 					hyperspace: groupMovementComponent.hyperspace,
 				});
 			} else {
-				GroupCoordinationSystem.ecsManager.addComponent(entity.id, 'waypoint', {
+				GroupCoordinationSystem.ecsManager.addComponent(entities[x].id, 'waypoint', {
 					x: formationPositionX,
 					y: formationPositionY,
 				});
@@ -88,8 +88,8 @@ let GroupCoordinationSystem = {
 				}
 			}
 
-			GroupCoordinationSystem.ecsManager.removeComponent(entity.id, 'group-movement');
-		});
+			GroupCoordinationSystem.ecsManager.removeComponent(entities[x].id, 'group-movement');
+		}
 
 		if(!GroupCoordinationSystem.moveOrderSound.isPlaying) {
 			GroupCoordinationSystem.moveOrderSound.play();

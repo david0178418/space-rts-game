@@ -31,7 +31,10 @@ let MovementSystem = {
 		let waypoint = entity.waypoint;
 
 		breakingDistance = Utils.breakingDistance(movable.currentSpeed, movable.acceleration);
-		distance = Utils.distanceBetween(sprite, waypoint);
+		distance = Utils.distanceBetween({
+			x: sprite.x,
+			y: sprite.y,
+		}, waypoint);
 
 		if(distance <= breakingDistance) {
 			movable.currentSpeed -= movable.acceleration * MovementSystem.game.time.physicsElapsed;
@@ -52,7 +55,10 @@ let MovementSystem = {
 		}
 
 		// TODO Cache angle
-		angle = Utils.angleBetween(sprite.position, waypoint);
+		angle = Utils.angleBetween({
+			x: sprite.position.x,
+			y: sprite.position.y,
+		}, waypoint);
 
 		sprite.rotation = angle; // TODO Animate angle change
 		sprite.position.x += Math.cos(angle) * movable.currentSpeed * MovementSystem.game.time.physicsElapsed;

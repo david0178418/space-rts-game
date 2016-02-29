@@ -24,21 +24,29 @@ let RadarDetectionSystemSystem = {
 
 	// TODO Optimize with quadtree
 	runOne(entity) {
-		let gun = entity.gun;
-		let sprite = entity.sprite;
-		let radar = entity.radar;
-		let currentTarget;
-		let currentTargetDistance;
-
-		gun.remainingCooldown = Math.max(
-			gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS,
+		entity.gun.remainingCooldown = Math.max(
+			entity.gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS,
 			0
 		);
 
-		if(gun.remainingCooldown) {
+		if(entity.gun.remainingCooldown) {
 			return;
 		}
 
+		RadarDetectionSystemSystem.foo({
+			breaks: entity.breaks,
+			gun: entity.gun,
+			id: entity.id,
+			movable: entity.movable,
+			radar: entity.radar,
+			sprite: entity.sprite,
+			team: entity.team,
+		});
+	},
+
+	foo({sprite, radar, movable, breaks, gun, team, id}) {
+		let currentTarget;
+		let currentTargetDistance;
 		let potentialTargets = RadarDetectionSystemSystem.ecsManager.getEntities([
 			'team',
 			'sprite',
@@ -46,7 +54,7 @@ let RadarDetectionSystemSystem = {
 		]);
 
 		for(let x = 0; x < potentialTargets.length; x++) {
-			if(potentialTargets[x].team.name !== entity.team.name) {
+			if(potentialTargets[x].team.name !== team.name) {
 				let targetDistance =
 					RadarDetectionSystemSystem.calculateTargetDistance(
 						sprite.position,
@@ -63,13 +71,13 @@ let RadarDetectionSystemSystem = {
 		}
 
 		if(currentTarget) {
-			if(entity.movable && entity.movable.currentSpeed === 0) {
+			if(movable && movable.currentSpeed === 0) {
 				RadarDetectionSystemSystem.fire(sprite, gun, currentTarget);
-			} else if(!entity.breaks) {
-				RadarDetectionSystemSystem.ecsManager.addComponent(entity.id, 'breaks');
+			} else if(!breaks) {
+				RadarDetectionSystemSystem.ecsManager.addComponent(id, 'breaks');
 			}
-		} else if(entity.breaks) {
-			RadarDetectionSystemSystem.ecsManager.removeComponent(entity.id, 'breaks');
+		} else if(breaks) {
+			RadarDetectionSystemSystem.ecsManager.removeComponent(id, 'breaks');
 		}
 	},
 

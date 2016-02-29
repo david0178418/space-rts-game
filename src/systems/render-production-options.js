@@ -1,4 +1,4 @@
-import {filter, throttle} from 'lodash';
+import {throttle} from 'lodash';
 import instanceManager from 'instance-manager';
 
 let RenderProductionOptionsSystem = {
@@ -14,19 +14,25 @@ let RenderProductionOptionsSystem = {
 	init() {
 		RenderProductionOptionsSystem.game = instanceManager.get('game');
 		RenderProductionOptionsSystem.ui = instanceManager.get('ui');
+
+		RenderProductionOptionsSystem.run = throttle(RenderProductionOptionsSystem.run, 150);
 	},
 
-	run: throttle(function(entities) {
-		let selectedEntities = filter(entities, function(entity) {
-			return entity.selected;
-		});
+	run(entities) {
+		let selectedEntities = [];
+
+		for(let x = 0; x < entities.length; x++) {
+			if(entities[x].selected) {
+				selectedEntities[selectedEntities.length] = entities[x];
+			}
+		}
 
 		if(selectedEntities.length) {
 			RenderProductionOptionsSystem.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
 		} else {
 			RenderProductionOptionsSystem.ui.setProductionOptions(null);
 		}
-	}, 100),
+	},
 };
 
 export default RenderProductionOptionsSystem;

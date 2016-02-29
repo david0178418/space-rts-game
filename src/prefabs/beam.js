@@ -1,8 +1,6 @@
 import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
-import 'components/sprite';
-
 export default
 function({position, target, damage}) {
 	let beam;

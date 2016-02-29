@@ -62,7 +62,9 @@
 	
 	__webpack_require__(209);
 	
-	__webpack_require__(277);
+	__webpack_require__(211);
+	
+	__webpack_require__(273);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -127,7 +129,7 @@
 	 * @private
 	 * @param {Function} func The function to delay.
 	 * @param {number} wait The number of milliseconds to delay invocation.
-	 * @param {Object} args The arguments provide to `func`.
+	 * @param {Object} args The arguments to provide to `func`.
 	 * @returns {number} Returns the timer id.
 	 */
 	function baseDelay(func, wait, args) {
@@ -739,24 +741,6 @@
 	
 	var _lodash = __webpack_require__(22);
 	
-	// Util function to copy getter definitions as well as properties.
-	const extend = function (obj) {
-		Array.prototype.slice.call(arguments, 1).forEach(function (source) {
-			let descriptor;
-			let prop;
-	
-			if (source) {
-				for (prop in source) {
-					descriptor = Object.getOwnPropertyDescriptor(source, prop);
-					Object.defineProperty(obj, prop, descriptor);
-				}
-			}
-		});
-	
-		return obj;
-	};
-	// END Util function to copy getter definitions as well as properties.
-	
 	class ECSManager {
 		constructor() {
 			this._components = {};
@@ -781,7 +765,7 @@
 				let entityId = this._entityIndex[x];
 	
 				if ((!withComponents || this.hasComponents(entityId, withComponents)) && (!withoutComponents || this.entityDoesNotHaveComponents(entityId, withoutComponents))) {
-					matchedEntities.push(this._entities[entityId]);
+					matchedEntities[matchedEntities.length] = this._entities[entityId];
 				}
 			}
 	
@@ -821,7 +805,7 @@
 				newEntity[this._components[x]] = null;
 			}
 	
-			this._entityIndex.push(newEntity.id);
+			this._entityIndex[this._entityIndex.length] = newEntity.id;
 	
 			this._getEntitiesMemoized.cache.clear();
 	
@@ -838,12 +822,11 @@
 			let component = this._components[name];
 	
 			if (!component) {
-				this.registerComponent(name, { state });
-				return state;
+				console.error(`No component of name "${ name }" defined.`, state);
 			} else if (component.factory) {
 				return component.factory.call(entityContext, state);
 			} else {
-				return extend({}, component.state, state);
+				return (0, _lodash.assign)({}, component.state, state);
 			}
 		}
 	
@@ -908,19 +891,19 @@
 	
 			if (withComponents) {
 				if (withComponents.constructor === Array) {
-					entitySearchString += withComponents.join(',');
+					entitySearchString = entitySearchString + withComponents.join(',');
 				} else {
-					entitySearchString += withComponents;
+					entitySearchString = entitySearchString + withComponents;
 				}
 			}
 	
 			if (withoutComponents) {
-				entitySearchString += '+';
+				entitySearchString = entitySearchString + '+';
 	
 				if (withoutComponents.constructor === Array) {
-					entitySearchString += withoutComponents.join(',');
+					entitySearchString = entitySearchString + withoutComponents.join(',');
 				} else {
-					entitySearchString += withoutComponents;
+					entitySearchString = entitySearchString + withoutComponents;
 				}
 			}
 	
@@ -943,7 +926,7 @@
 	
 		// @param {string} name
 		// @param {object} [defaultData={}] - provide an optional baseline for a component
-		registerComponent(name, defaultData) {
+		registerComponent(name, defaultData = { state: {} }) {
 			if (this._components[name]) {
 				return;
 			}
@@ -1068,7 +1051,7 @@
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/**
 	 * @license
-	 * lodash 4.2.1 (Custom Build) <https://lodash.com/>
+	 * lodash 4.5.1 (Custom Build) <https://lodash.com/>
 	 * Build: `lodash -d -o ./foo/lodash.js`
 	 * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
 	 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -1081,7 +1064,7 @@
 	  var undefined;
 	
 	  /** Used as the semantic version number. */
-	  var VERSION = '4.2.1';
+	  var VERSION = '4.5.1';
 	
 	  /** Used to compose bitmasks for wrapper metadata. */
 	  var BIND_FLAG = 1,
@@ -1150,7 +1133,8 @@
 	      setTag = '[object Set]',
 	      stringTag = '[object String]',
 	      symbolTag = '[object Symbol]',
-	      weakMapTag = '[object WeakMap]';
+	      weakMapTag = '[object WeakMap]',
+	      weakSetTag = '[object WeakSet]';
 	
 	  var arrayBufferTag = '[object ArrayBuffer]',
 	      float32Tag = '[object Float32Array]',
@@ -1299,8 +1283,8 @@
 	
 	  /** Used to assign default `context` object properties. */
 	  var contextProps = [
-	    'Array', 'Date', 'Error', 'Float32Array', 'Float64Array', 'Function',
-	    'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
+	    'Array', 'Buffer', 'Date', 'Error', 'Float32Array', 'Float64Array',
+	    'Function', 'Int8Array', 'Int16Array', 'Int32Array', 'Map', 'Math', 'Object',
 	    'Reflect', 'RegExp', 'Set', 'String', 'Symbol', 'TypeError', 'Uint8Array',
 	    'Uint8ClampedArray', 'Uint16Array', 'Uint32Array', 'WeakMap', '_',
 	    'clearTimeout', 'isFinite', 'parseInt', 'setTimeout'
@@ -1402,10 +1386,19 @@
 	      freeParseInt = parseInt;
 	
 	  /** Detect free variable `exports`. */
-	  var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType) ? exports : null;
+	  var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType)
+	    ? exports
+	    : undefined;
 	
 	  /** Detect free variable `module`. */
-	  var freeModule = (objectTypes[typeof module] && module && !module.nodeType) ? module : null;
+	  var freeModule = (objectTypes[typeof module] && module && !module.nodeType)
+	    ? module
+	    : undefined;
+	
+	  /** Detect the popular CommonJS extension `module.exports`. */
+	  var moduleExports = (freeModule && freeModule.exports === freeExports)
+	    ? freeExports
+	    : undefined;
 	
 	  /** Detect free variable `global` from Node.js. */
 	  var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
@@ -1416,9 +1409,6 @@
 	  /** Detect free variable `window`. */
 	  var freeWindow = checkGlobal(objectTypes[typeof window] && window);
 	
-	  /** Detect the popular CommonJS extension `module.exports`. */
-	  var moduleExports = (freeModule && freeModule.exports === freeExports) ? freeExports : null;
-	
 	  /** Detect `this` as the global object. */
 	  var thisGlobal = checkGlobal(objectTypes[typeof this] && this);
 	
@@ -1428,7 +1418,9 @@
 	   * The `this` value is used if it's the global object to avoid Greasemonkey's
 	   * restricted `window` object, otherwise the `window` object is used.
 	   */
-	  var root = freeGlobal || ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) || freeSelf || thisGlobal || Function('return this')();
+	  var root = freeGlobal ||
+	    ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
+	      freeSelf || thisGlobal || Function('return this')();
 	
 	  /*--------------------------------------------------------------------------*/
 	
@@ -2093,6 +2085,26 @@
 	  }
 	
 	  /**
+	   * Gets the number of `placeholder` occurrences in `array`.
+	   *
+	   * @private
+	   * @param {Array} array The array to inspect.
+	   * @param {*} placeholder The placeholder to search for.
+	   * @returns {number} Returns the placeholder count.
+	   */
+	  function countHolders(array, placeholder) {
+	    var length = array.length,
+	        result = 0;
+	
+	    while (length--) {
+	      if (array[length] === placeholder) {
+	        result++;
+	      }
+	    }
+	    return result;
+	  }
+	
+	  /**
 	   * Used by `_.deburr` to convert latin-1 supplementary letters to basic latin letters.
 	   *
 	   * @private
@@ -2230,7 +2242,8 @@
 	        result = [];
 	
 	    while (++index < length) {
-	      if (array[index] === placeholder) {
+	      var value = array[index];
+	      if (value === placeholder || value === PLACEHOLDER) {
 	        array[index] = PLACEHOLDER;
 	        result[++resIndex] = index;
 	      }
@@ -2374,7 +2387,8 @@
 	    );
 	
 	    /** Built-in value references. */
-	    var Reflect = context.Reflect,
+	    var Buffer = moduleExports ? context.Buffer : undefined,
+	        Reflect = context.Reflect,
 	        Symbol = context.Symbol,
 	        Uint8Array = context.Uint8Array,
 	        clearTimeout = context.clearTimeout,
@@ -2382,6 +2396,7 @@
 	        getPrototypeOf = Object.getPrototypeOf,
 	        getOwnPropertySymbols = Object.getOwnPropertySymbols,
 	        iteratorSymbol = typeof (iteratorSymbol = Symbol && Symbol.iterator) == 'symbol' ? iteratorSymbol : undefined,
+	        objectCreate = Object.create,
 	        propertyIsEnumerable = objectProto.propertyIsEnumerable,
 	        setTimeout = context.setTimeout,
 	        splice = arrayProto.splice;
@@ -2407,9 +2422,10 @@
 	    /** Used to store function metadata. */
 	    var metaMap = WeakMap && new WeakMap;
 	
-	    /** Used to detect maps and sets. */
+	    /** Used to detect maps, sets, and weakmaps. */
 	    var mapCtorString = Map ? funcToString.call(Map) : '',
-	        setCtorString = Set ? funcToString.call(Set) : '';
+	        setCtorString = Set ? funcToString.call(Set) : '',
+	        weakMapCtorString = WeakMap ? funcToString.call(WeakMap) : '';
 	
 	    /** Used to convert symbols to primitives and strings. */
 	    var symbolProto = Symbol ? Symbol.prototype : undefined,
@@ -2460,51 +2476,52 @@
 	     * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, and `toArray`
 	     *
 	     * The chainable wrapper methods are:
-	     * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`,
-	     * `at`, `before`, `bind`, `bindAll`, `bindKey`, `chain`, `chunk`, `commit`,
-	     * `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`, `curry`,
-	     * `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
+	     * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`, `at`,
+	     * `before`, `bind`, `bindAll`, `bindKey`, `castArray`, `chain`, `chunk`,
+	     * `commit`, `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`,
+	     * `curry`, `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
 	     * `differenceBy`, `differenceWith`, `drop`, `dropRight`, `dropRightWhile`,
-	     * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flip`, `flow`,
-	     * `flowRight`, `fromPairs`, `functions`, `functionsIn`, `groupBy`, `initial`,
-	     * `intersection`, `intersectionBy`, `intersectionWith`, `invert`, `invertBy`,
-	     * `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`, `map`, `mapKeys`,
-	     * `mapValues`, `matches`, `matchesProperty`, `memoize`, `merge`, `mergeWith`,
-	     * `method`, `methodOf`, `mixin`, `negate`, `nthArg`, `omit`, `omitBy`, `once`,
-	     * `orderBy`, `over`, `overArgs`, `overEvery`, `overSome`, `partial`,
-	     * `partialRight`, `partition`, `pick`, `pickBy`, `plant`, `property`,
-	     * `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`, `range`,
-	     * `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`, `sampleSize`,
-	     * `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`, `splice`, `spread`,
-	     * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`,
-	     * `thru`, `toArray`, `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`,
-	     * `transform`, `unary`, `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`,
-	     * `uniqWith`, `unset`, `unshift`, `unzip`, `unzipWith`, `values`, `valuesIn`,
-	     * `without`, `wrap`, `xor`, `xorBy`, `xorWith`, `zip`, `zipObject`,
-	     * `zipObjectDeep`, and `zipWith`
+	     * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flattenDepth`,
+	     * `flip`, `flow`, `flowRight`, `fromPairs`, `functions`, `functionsIn`,
+	     * `groupBy`, `initial`, `intersection`, `intersectionBy`, `intersectionWith`,
+	     * `invert`, `invertBy`, `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`,
+	     * `map`, `mapKeys`, `mapValues`, `matches`, `matchesProperty`, `memoize`,
+	     * `merge`, `mergeWith`, `method`, `methodOf`, `mixin`, `negate`, `nthArg`,
+	     * `omit`, `omitBy`, `once`, `orderBy`, `over`, `overArgs`, `overEvery`,
+	     * `overSome`, `partial`, `partialRight`, `partition`, `pick`, `pickBy`, `plant`,
+	     * `property`, `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`,
+	     * `range`, `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`,
+	     * `sampleSize`, `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`,
+	     * `splice`, `spread`, `tail`, `take`, `takeRight`, `takeRightWhile`,
+	     * `takeWhile`, `tap`, `throttle`, `thru`, `toArray`, `toPairs`, `toPairsIn`,
+	     * `toPath`, `toPlainObject`, `transform`, `unary`, `union`, `unionBy`,
+	     * `unionWith`, `uniq`, `uniqBy`, `uniqWith`, `unset`, `unshift`, `unzip`,
+	     * `unzipWith`, `values`, `valuesIn`, `without`, `wrap`, `xor`, `xorBy`,
+	     * `xorWith`, `zip`, `zipObject`, `zipObjectDeep`, and `zipWith`
 	     *
 	     * The wrapper methods that are **not** chainable by default are:
 	     * `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,
 	     * `cloneDeep`, `cloneDeepWith`, `cloneWith`, `deburr`, `endsWith`, `eq`,
-	     * `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`,
-	     * `findLast`, `findLastIndex`, `findLastKey`, `floor`, `forEach`, `forEachRight`,
-	     * `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`,
-	     * `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`,
-	     * `isArguments`, `isArray`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
-	     * `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`, `isError`,
-	     * `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMatch`, `isMatchWith`,
-	     * `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`, `isObject`, `isObjectLike`,
-	     * `isPlainObject`, `isRegExp`, `isSafeInteger`, `isString`, `isUndefined`,
-	     * `isTypedArray`, `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`,
-	     * `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `min`, `minBy`,
-	     * `noConflict`, `noop`, `now`, `pad`, `padEnd`, `padStart`, `parseInt`,
-	     * `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`, `round`,
-	     * `runInContext`, `sample`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
-	     * `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`, `startCase`,
-	     * `startsWith`, `subtract`, `sum`, `sumBy`, `template`, `times`, `toLower`,
-	     * `toInteger`, `toLength`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`,
-	     * `trim`, `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`,
-	     * `upperCase`, `upperFirst`, `value`, and `words`
+	     * `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`, `findLast`,
+	     * `findLastIndex`, `findLastKey`, `floor`, `forEach`, `forEachRight`, `forIn`,
+	     * `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`, `hasIn`,
+	     * `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`, `isArguments`,
+	     * `isArray`, `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
+	     * `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`,
+	     * `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMap`,
+	     * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`,
+	     * `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`, `isSafeInteger`,
+	     * `isSet`, `isString`, `isUndefined`, `isTypedArray`, `isWeakMap`, `isWeakSet`,
+	     * `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`, `lowerFirst`,
+	     * `lt`, `lte`, `max`, `maxBy`, `mean`, `min`, `minBy`, `noConflict`, `noop`,
+	     * `now`, `pad`, `padEnd`, `padStart`, `parseInt`, `pop`, `random`, `reduce`,
+	     * `reduceRight`, `repeat`, `result`, `round`, `runInContext`, `sample`,
+	     * `shift`, `size`, `snakeCase`, `some`, `sortedIndex`, `sortedIndexBy`,
+	     * `sortedLastIndex`, `sortedLastIndexBy`, `startCase`, `startsWith`, `subtract`,
+	     * `sum`, `sumBy`, `template`, `times`, `toLower`, `toInteger`, `toLength`,
+	     * `toNumber`, `toSafeInteger`, `toString`, `toUpper`, `trim`, `trimEnd`,
+	     * `trimStart`, `truncate`, `unescape`, `uniqueId`, `upperCase`, `upperFirst`,
+	     * `value`, and `words`
 	     *
 	     * @name _
 	     * @constructor
@@ -2575,7 +2592,7 @@
 	     *
 	     * @static
 	     * @memberOf _
-	     * @type Object
+	     * @type {Object}
 	     */
 	    lodash.templateSettings = {
 	
@@ -2583,7 +2600,7 @@
 	       * Used to detect `data` property values to be HTML-escaped.
 	       *
 	       * @memberOf _.templateSettings
-	       * @type RegExp
+	       * @type {RegExp}
 	       */
 	      'escape': reEscape,
 	
@@ -2591,7 +2608,7 @@
 	       * Used to detect code to be evaluated.
 	       *
 	       * @memberOf _.templateSettings
-	       * @type RegExp
+	       * @type {RegExp}
 	       */
 	      'evaluate': reEvaluate,
 	
@@ -2599,7 +2616,7 @@
 	       * Used to detect `data` property values to inject.
 	       *
 	       * @memberOf _.templateSettings
-	       * @type RegExp
+	       * @type {RegExp}
 	       */
 	      'interpolate': reInterpolate,
 	
@@ -2607,7 +2624,7 @@
 	       * Used to reference the data object in the template text.
 	       *
 	       * @memberOf _.templateSettings
-	       * @type string
+	       * @type {string}
 	       */
 	      'variable': '',
 	
@@ -2615,7 +2632,7 @@
 	       * Used to import variables into the compiled template.
 	       *
 	       * @memberOf _.templateSettings
-	       * @type Object
+	       * @type {Object}
 	       */
 	      'imports': {
 	
@@ -2623,7 +2640,7 @@
 	         * A reference to the `lodash` function.
 	         *
 	         * @memberOf _.templateSettings.imports
-	         * @type Function
+	         * @type {Function}
 	         */
 	        '_': lodash
 	      }
@@ -2635,6 +2652,7 @@
 	     * Creates a lazy wrapper object which wraps `value` to enable lazy evaluation.
 	     *
 	     * @private
+	     * @constructor
 	     * @param {*} value The value to wrap.
 	     */
 	    function LazyWrapper(value) {
@@ -2710,7 +2728,8 @@
 	          resIndex = 0,
 	          takeCount = nativeMin(length, this.__takeCount__);
 	
-	      if (!isArr || arrLength < LARGE_ARRAY_SIZE || (arrLength == length && takeCount == length)) {
+	      if (!isArr || arrLength < LARGE_ARRAY_SIZE ||
+	          (arrLength == length && takeCount == length)) {
 	        return baseWrapperValue(array, this.__actions__);
 	      }
 	      var result = [];
@@ -2749,6 +2768,7 @@
 	     * Creates an hash object.
 	     *
 	     * @private
+	     * @constructor
 	     * @returns {Object} Returns the new hash object.
 	     */
 	    function Hash() {}
@@ -2811,6 +2831,7 @@
 	     * Creates a map cache object to store key-value pairs.
 	     *
 	     * @private
+	     * @constructor
 	     * @param {Array} [values] The values to cache.
 	     */
 	    function MapCache(values) {
@@ -2832,7 +2853,11 @@
 	     * @memberOf MapCache
 	     */
 	    function mapClear() {
-	      this.__data__ = { 'hash': new Hash, 'map': Map ? new Map : [], 'string': new Hash };
+	      this.__data__ = {
+	        'hash': new Hash,
+	        'map': Map ? new Map : [],
+	        'string': new Hash
+	      };
 	    }
 	
 	    /**
@@ -2915,6 +2940,7 @@
 	     * Creates a set cache object to store unique values.
 	     *
 	     * @private
+	     * @constructor
 	     * @param {Array} [values] The values to cache.
 	     */
 	    function SetCache(values) {
@@ -2973,6 +2999,7 @@
 	     * Creates a stack cache object to store key-value pairs.
 	     *
 	     * @private
+	     * @constructor
 	     * @param {Array} [values] The values to cache.
 	     */
 	    function Stack(values) {
@@ -3206,8 +3233,7 @@
 	     */
 	    function assignValue(object, key, value) {
 	      var objValue = object[key];
-	      if ((!eq(objValue, value) ||
-	            (eq(objValue, objectProto[key]) && !hasOwnProperty.call(object, key))) ||
+	      if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
 	          (value === undefined && !(key in object))) {
 	        object[key] = value;
 	      }
@@ -3265,6 +3291,39 @@
 	    }
 	
 	    /**
+	     * Casts `value` to an empty array if it's not an array like object.
+	     *
+	     * @private
+	     * @param {*} value The value to inspect.
+	     * @returns {Array} Returns the array-like object.
+	     */
+	    function baseCastArrayLikeObject(value) {
+	      return isArrayLikeObject(value) ? value : [];
+	    }
+	
+	    /**
+	     * Casts `value` to `identity` if it's not a function.
+	     *
+	     * @private
+	     * @param {*} value The value to inspect.
+	     * @returns {Array} Returns the array-like object.
+	     */
+	    function baseCastFunction(value) {
+	      return typeof value == 'function' ? value : identity;
+	    }
+	
+	    /**
+	     * Casts `value` to a path array if it's not one.
+	     *
+	     * @private
+	     * @param {*} value The value to inspect.
+	     * @returns {Array} Returns the cast property path array.
+	     */
+	    function baseCastPath(value) {
+	      return isArray(value) ? value : stringToPath(value);
+	    }
+	
+	    /**
 	     * The base implementation of `_.clamp` which doesn't coerce arguments to numbers.
 	     *
 	     * @private
@@ -3319,6 +3378,9 @@
 	        var tag = getTag(value),
 	            isFunc = tag == funcTag || tag == genTag;
 	
+	        if (isBuffer(value)) {
+	          return cloneBuffer(value, isDeep);
+	        }
 	        if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
 	          if (isHostObject(value)) {
 	            return object ? value : {};
@@ -3328,9 +3390,10 @@
 	            return copySymbols(value, baseAssign(result, value));
 	          }
 	        } else {
-	          return cloneableTags[tag]
-	            ? initCloneByTag(value, tag, isDeep)
-	            : (object ? value : {});
+	          if (!cloneableTags[tag]) {
+	            return object ? value : {};
+	          }
+	          result = initCloneByTag(value, tag, isDeep);
 	        }
 	      }
 	      // Check for circular references and return its corresponding clone.
@@ -3385,17 +3448,9 @@
 	     * @param {Object} prototype The object to inherit from.
 	     * @returns {Object} Returns the new object.
 	     */
-	    var baseCreate = (function() {
-	      function object() {}
-	      return function(prototype) {
-	        if (isObject(prototype)) {
-	          object.prototype = prototype;
-	          var result = new object;
-	          object.prototype = undefined;
-	        }
-	        return result || {};
-	      };
-	    }());
+	    function baseCreate(proto) {
+	      return isObject(proto) ? objectCreate(proto) : {};
+	    }
 	
 	    /**
 	     * The base implementation of `_.delay` and `_.defer` which accepts an array
@@ -3404,7 +3459,7 @@
 	     * @private
 	     * @param {Function} func The function to delay.
 	     * @param {number} wait The number of milliseconds to delay invocation.
-	     * @param {Object} args The arguments provide to `func`.
+	     * @param {Object} args The arguments to provide to `func`.
 	     * @returns {number} Returns the timer id.
 	     */
 	    function baseDelay(func, wait, args) {
@@ -3557,12 +3612,12 @@
 	     *
 	     * @private
 	     * @param {Array} array The array to flatten.
-	     * @param {boolean} [isDeep] Specify a deep flatten.
+	     * @param {number} depth The maximum recursion depth.
 	     * @param {boolean} [isStrict] Restrict flattening to arrays-like objects.
 	     * @param {Array} [result=[]] The initial result value.
 	     * @returns {Array} Returns the new flattened array.
 	     */
-	    function baseFlatten(array, isDeep, isStrict, result) {
+	    function baseFlatten(array, depth, isStrict, result) {
 	      result || (result = []);
 	
 	      var index = -1,
@@ -3570,11 +3625,11 @@
 	
 	      while (++index < length) {
 	        var value = array[index];
-	        if (isArrayLikeObject(value) &&
+	        if (depth > 0 && isArrayLikeObject(value) &&
 	            (isStrict || isArray(value) || isArguments(value))) {
-	          if (isDeep) {
+	          if (depth > 1) {
 	            // Recursively flatten arrays (susceptible to call stack limits).
-	            baseFlatten(value, isDeep, isStrict, result);
+	            baseFlatten(value, depth - 1, isStrict, result);
 	          } else {
 	            arrayPush(result, value);
 	          }
@@ -3649,7 +3704,7 @@
 	
 	    /**
 	     * The base implementation of `_.functions` which creates an array of
-	     * `object` function property names filtered from those provided.
+	     * `object` function property names filtered from `props`.
 	     *
 	     * @private
 	     * @param {Object} object The object to inspect.
@@ -3671,7 +3726,7 @@
 	     * @returns {*} Returns the resolved value.
 	     */
 	    function baseGet(object, path) {
-	      path = isKey(path, object) ? [path + ''] : baseToPath(path);
+	      path = isKey(path, object) ? [path + ''] : baseCastPath(path);
 	
 	      var index = 0,
 	          length = path.length;
@@ -3760,11 +3815,17 @@
 	        var value = array[index],
 	            computed = iteratee ? iteratee(value) : value;
 	
-	        if (!(seen ? cacheHas(seen, computed) : includes(result, computed, comparator))) {
+	        if (!(seen
+	              ? cacheHas(seen, computed)
+	              : includes(result, computed, comparator)
+	            )) {
 	          var othIndex = othLength;
 	          while (--othIndex) {
 	            var cache = caches[othIndex];
-	            if (!(cache ? cacheHas(cache, computed) : includes(arrays[othIndex], computed, comparator))) {
+	            if (!(cache
+	                  ? cacheHas(cache, computed)
+	                  : includes(arrays[othIndex], computed, comparator))
+	                ) {
 	              continue outer;
 	            }
 	          }
@@ -3807,7 +3868,7 @@
 	     */
 	    function baseInvoke(object, path, args) {
 	      if (!isKey(path, object)) {
-	        path = baseToPath(path);
+	        path = baseCastPath(path);
 	        object = parent(object, path);
 	        path = last(path);
 	      }
@@ -3980,7 +4041,6 @@
 	     * property of prototypes or treat sparse arrays as dense.
 	     *
 	     * @private
-	     * @type Function
 	     * @param {Object} object The object to query.
 	     * @returns {Array} Returns the array of property names.
 	     */
@@ -4088,7 +4148,10 @@
 	      if (object === source) {
 	        return;
 	      }
-	      var props = (isArray(source) || isTypedArray(source)) ? undefined : keysIn(source);
+	      var props = (isArray(source) || isTypedArray(source))
+	        ? undefined
+	        : keysIn(source);
+	
 	      arrayEach(props || source, function(srcValue, key) {
 	        if (props) {
 	          key = srcValue;
@@ -4099,7 +4162,10 @@
 	          baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
 	        }
 	        else {
-	          var newValue = customizer ? customizer(object[key], srcValue, (key + ''), object, source, stack) : undefined;
+	          var newValue = customizer
+	            ? customizer(object[key], srcValue, (key + ''), object, source, stack)
+	            : undefined;
+	
 	          if (newValue === undefined) {
 	            newValue = srcValue;
 	          }
@@ -4131,21 +4197,24 @@
 	        assignMergeValue(object, key, stacked);
 	        return;
 	      }
-	      var newValue = customizer ? customizer(objValue, srcValue, (key + ''), object, source, stack) : undefined,
-	          isCommon = newValue === undefined;
+	      var newValue = customizer
+	        ? customizer(objValue, srcValue, (key + ''), object, source, stack)
+	        : undefined;
+	
+	      var isCommon = newValue === undefined;
 	
 	      if (isCommon) {
 	        newValue = srcValue;
 	        if (isArray(srcValue) || isTypedArray(srcValue)) {
 	          if (isArray(objValue)) {
-	            newValue = srcIndex ? copyArray(objValue) : objValue;
+	            newValue = objValue;
 	          }
 	          else if (isArrayLikeObject(objValue)) {
 	            newValue = copyArray(objValue);
 	          }
 	          else {
 	            isCommon = false;
-	            newValue = baseClone(srcValue);
+	            newValue = baseClone(srcValue, true);
 	          }
 	        }
 	        else if (isPlainObject(srcValue) || isArguments(srcValue)) {
@@ -4154,10 +4223,10 @@
 	          }
 	          else if (!isObject(objValue) || (srcIndex && isFunction(objValue))) {
 	            isCommon = false;
-	            newValue = baseClone(srcValue);
+	            newValue = baseClone(srcValue, true);
 	          }
 	          else {
-	            newValue = srcIndex ? baseClone(objValue) : objValue;
+	            newValue = objValue;
 	          }
 	        }
 	        else {
@@ -4331,7 +4400,7 @@
 	            splice.call(array, index, 1);
 	          }
 	          else if (!isKey(index, array)) {
-	            var path = baseToPath(index),
+	            var path = baseCastPath(index),
 	                object = parent(array, path);
 	
 	            if (object != null) {
@@ -4393,7 +4462,7 @@
 	     * @returns {Object} Returns `object`.
 	     */
 	    function baseSet(object, path, value, customizer) {
-	      path = isKey(path, object) ? [path + ''] : baseToPath(path);
+	      path = isKey(path, object) ? [path + ''] : baseCastPath(path);
 	
 	      var index = -1,
 	          length = path.length,
@@ -4408,7 +4477,9 @@
 	            var objValue = nested[key];
 	            newValue = customizer ? customizer(objValue, key, nested) : undefined;
 	            if (newValue === undefined) {
-	              newValue = objValue == null ? (isIndex(path[index + 1]) ? [] : {}) : objValue;
+	              newValue = objValue == null
+	                ? (isIndex(path[index + 1]) ? [] : {})
+	                : objValue;
 	            }
 	          }
 	          assignValue(nested, key, newValue);
@@ -4600,18 +4671,6 @@
 	    }
 	
 	    /**
-	     * The base implementation of `_.toPath` which only converts `value` to a
-	     * path if it's not one.
-	     *
-	     * @private
-	     * @param {*} value The value to process.
-	     * @returns {Array} Returns the property path array.
-	     */
-	    function baseToPath(value) {
-	      return isArray(value) ? value : stringToPath(value);
-	    }
-	
-	    /**
 	     * The base implementation of `_.uniqBy` without support for iteratee shorthands.
 	     *
 	     * @private
@@ -4680,7 +4739,7 @@
 	     * @returns {boolean} Returns `true` if the property is deleted, else `false`.
 	     */
 	    function baseUnset(object, path) {
-	      path = isKey(path, object) ? [path + ''] : baseToPath(path);
+	      path = isKey(path, object) ? [path + ''] : baseCastPath(path);
 	      object = parent(object, path);
 	      var key = last(path);
 	      return (object != null && has(object, key)) ? delete object[key] : true;
@@ -4776,18 +4835,37 @@
 	    }
 	
 	    /**
-	     * Creates a clone of `buffer`.
+	     * Creates a clone of  `buffer`.
 	     *
 	     * @private
-	     * @param {ArrayBuffer} buffer The array buffer to clone.
+	     * @param {Buffer} buffer The buffer to clone.
+	     * @param {boolean} [isDeep] Specify a deep clone.
+	     * @returns {Buffer} Returns the cloned buffer.
+	     */
+	    function cloneBuffer(buffer, isDeep) {
+	      if (isDeep) {
+	        return buffer.slice();
+	      }
+	      var Ctor = buffer.constructor,
+	          result = new Ctor(buffer.length);
+	
+	      buffer.copy(result);
+	      return result;
+	    }
+	
+	    /**
+	     * Creates a clone of `arrayBuffer`.
+	     *
+	     * @private
+	     * @param {ArrayBuffer} arrayBuffer The array buffer to clone.
 	     * @returns {ArrayBuffer} Returns the cloned array buffer.
 	     */
-	    function cloneBuffer(buffer) {
-	      var Ctor = buffer.constructor,
-	          result = new Ctor(buffer.byteLength),
+	    function cloneArrayBuffer(arrayBuffer) {
+	      var Ctor = arrayBuffer.constructor,
+	          result = new Ctor(arrayBuffer.byteLength),
 	          view = new Uint8Array(result);
 	
-	      view.set(new Uint8Array(buffer));
+	      view.set(new Uint8Array(arrayBuffer));
 	      return result;
 	    }
 	
@@ -4850,10 +4928,11 @@
 	     * @returns {Object} Returns the cloned typed array.
 	     */
 	    function cloneTypedArray(typedArray, isDeep) {
-	      var buffer = typedArray.buffer,
+	      var arrayBuffer = typedArray.buffer,
+	          buffer = isDeep ? cloneArrayBuffer(arrayBuffer) : arrayBuffer,
 	          Ctor = typedArray.constructor;
 	
-	      return new Ctor(isDeep ? cloneBuffer(buffer) : buffer, typedArray.byteOffset, typedArray.length);
+	      return new Ctor(buffer, typedArray.byteOffset, typedArray.length);
 	    }
 	
 	    /**
@@ -4864,23 +4943,28 @@
 	     * @param {Array|Object} args The provided arguments.
 	     * @param {Array} partials The arguments to prepend to those provided.
 	     * @param {Array} holders The `partials` placeholder indexes.
+	     * @params {boolean} [isCurried] Specify composing for a curried function.
 	     * @returns {Array} Returns the new array of composed arguments.
 	     */
-	    function composeArgs(args, partials, holders) {
-	      var holdersLength = holders.length,
-	          argsIndex = -1,
-	          argsLength = nativeMax(args.length - holdersLength, 0),
+	    function composeArgs(args, partials, holders, isCurried) {
+	      var argsIndex = -1,
+	          argsLength = args.length,
+	          holdersLength = holders.length,
 	          leftIndex = -1,
 	          leftLength = partials.length,
-	          result = Array(leftLength + argsLength);
+	          rangeLength = nativeMax(argsLength - holdersLength, 0),
+	          result = Array(leftLength + rangeLength),
+	          isUncurried = !isCurried;
 	
 	      while (++leftIndex < leftLength) {
 	        result[leftIndex] = partials[leftIndex];
 	      }
 	      while (++argsIndex < holdersLength) {
-	        result[holders[argsIndex]] = args[argsIndex];
+	        if (isUncurried || argsIndex < argsLength) {
+	          result[holders[argsIndex]] = args[argsIndex];
+	        }
 	      }
-	      while (argsLength--) {
+	      while (rangeLength--) {
 	        result[leftIndex++] = args[argsIndex++];
 	      }
 	      return result;
@@ -4894,18 +4978,21 @@
 	     * @param {Array|Object} args The provided arguments.
 	     * @param {Array} partials The arguments to append to those provided.
 	     * @param {Array} holders The `partials` placeholder indexes.
+	     * @params {boolean} [isCurried] Specify composing for a curried function.
 	     * @returns {Array} Returns the new array of composed arguments.
 	     */
-	    function composeArgsRight(args, partials, holders) {
-	      var holdersIndex = -1,
+	    function composeArgsRight(args, partials, holders, isCurried) {
+	      var argsIndex = -1,
+	          argsLength = args.length,
+	          holdersIndex = -1,
 	          holdersLength = holders.length,
-	          argsIndex = -1,
-	          argsLength = nativeMax(args.length - holdersLength, 0),
 	          rightIndex = -1,
 	          rightLength = partials.length,
-	          result = Array(argsLength + rightLength);
+	          rangeLength = nativeMax(argsLength - holdersLength, 0),
+	          result = Array(rangeLength + rightLength),
+	          isUncurried = !isCurried;
 	
-	      while (++argsIndex < argsLength) {
+	      while (++argsIndex < rangeLength) {
 	        result[argsIndex] = args[argsIndex];
 	      }
 	      var offset = argsIndex;
@@ -4913,7 +5000,9 @@
 	        result[offset + rightIndex] = partials[rightIndex];
 	      }
 	      while (++holdersIndex < holdersLength) {
-	        result[offset + holders[holdersIndex]] = args[argsIndex++];
+	        if (isUncurried || argsIndex < argsLength) {
+	          result[offset + holders[holdersIndex]] = args[argsIndex++];
+	        }
 	      }
 	      return result;
 	    }
@@ -4968,8 +5057,11 @@
 	          length = props.length;
 	
 	      while (++index < length) {
-	        var key = props[index],
-	            newValue = customizer ? customizer(object[key], source[key], key, object, source) : source[key];
+	        var key = props[index];
+	
+	        var newValue = customizer
+	          ? customizer(object[key], source[key], key, object, source)
+	          : source[key];
 	
 	        assignValue(object, key, newValue);
 	      }
@@ -5019,7 +5111,10 @@
 	            customizer = length > 1 ? sources[length - 1] : undefined,
 	            guard = length > 2 ? sources[2] : undefined;
 	
-	        customizer = typeof customizer == 'function' ? (length--, customizer) : undefined;
+	        customizer = typeof customizer == 'function'
+	          ? (length--, customizer)
+	          : undefined;
+	
 	        if (guard && isIterateeCall(sources[0], sources[1], guard)) {
 	          customizer = length < 3 ? undefined : customizer;
 	          length = 1;
@@ -5120,8 +5215,11 @@
 	      return function(string) {
 	        string = toString(string);
 	
-	        var strSymbols = reHasComplexSymbol.test(string) ? stringToArray(string) : undefined,
-	            chr = strSymbols ? strSymbols[0] : string.charAt(0),
+	        var strSymbols = reHasComplexSymbol.test(string)
+	          ? stringToArray(string)
+	          : undefined;
+	
+	        var chr = strSymbols ? strSymbols[0] : string.charAt(0),
 	            trailing = strSymbols ? strSymbols.slice(1).join('') : string.slice(1);
 	
 	        return chr[methodName]() + trailing;
@@ -5188,10 +5286,9 @@
 	
 	      function wrapper() {
 	        var length = arguments.length,
-	            index = length,
 	            args = Array(length),
-	            fn = (this && this !== root && this instanceof wrapper) ? Ctor : func,
-	            placeholder = lodash.placeholder || wrapper.placeholder;
+	            index = length,
+	            placeholder = getPlaceholder(wrapper);
 	
 	        while (index--) {
 	          args[index] = arguments[index];
@@ -5201,9 +5298,13 @@
 	          : replaceHolders(args, placeholder);
 	
 	        length -= holders.length;
-	        return length < arity
-	          ? createRecurryWrapper(func, bitmask, createHybridWrapper, placeholder, undefined, args, holders, undefined, undefined, arity - length)
-	          : apply(fn, this, args);
+	        if (length < arity) {
+	          return createRecurryWrapper(
+	            func, bitmask, createHybridWrapper, wrapper.placeholder, undefined,
+	            args, holders, undefined, undefined, arity - length);
+	        }
+	        var fn = (this && this !== root && this instanceof wrapper) ? Ctor : func;
+	        return apply(fn, this, args);
 	      }
 	      return wrapper;
 	    }
@@ -5217,7 +5318,7 @@
 	     */
 	    function createFlow(fromRight) {
 	      return rest(function(funcs) {
-	        funcs = baseFlatten(funcs);
+	        funcs = baseFlatten(funcs, 1);
 	
 	        var length = funcs.length,
 	            index = length,
@@ -5242,7 +5343,10 @@
 	          var funcName = getFuncName(func),
 	              data = funcName == 'wrapper' ? getData(func) : undefined;
 	
-	          if (data && isLaziable(data[0]) && data[1] == (ARY_FLAG | CURRY_FLAG | PARTIAL_FLAG | REARG_FLAG) && !data[4].length && data[9] == 1) {
+	          if (data && isLaziable(data[0]) &&
+	                data[1] == (ARY_FLAG | CURRY_FLAG | PARTIAL_FLAG | REARG_FLAG) &&
+	                !data[4].length && data[9] == 1
+	              ) {
 	            wrapper = wrapper[getFuncName(data[0])].apply(wrapper, data[3]);
 	          } else {
 	            wrapper = (func.length == 1 && isLaziable(func)) ? wrapper[funcName]() : wrapper.thru(func);
@@ -5252,7 +5356,8 @@
 	          var args = arguments,
 	              value = args[0];
 	
-	          if (wrapper && args.length == 1 && isArray(value) && value.length >= LARGE_ARRAY_SIZE) {
+	          if (wrapper && args.length == 1 &&
+	              isArray(value) && value.length >= LARGE_ARRAY_SIZE) {
 	            return wrapper.plant(value).value();
 	          }
 	          var index = 0,
@@ -5287,8 +5392,7 @@
 	      var isAry = bitmask & ARY_FLAG,
 	          isBind = bitmask & BIND_FLAG,
 	          isBindKey = bitmask & BIND_KEY_FLAG,
-	          isCurry = bitmask & CURRY_FLAG,
-	          isCurryRight = bitmask & CURRY_RIGHT_FLAG,
+	          isCurried = bitmask & (CURRY_FLAG | CURRY_RIGHT_FLAG),
 	          isFlip = bitmask & FLIP_FLAG,
 	          Ctor = isBindKey ? undefined : createCtorWrapper(func);
 	
@@ -5300,30 +5404,34 @@
 	        while (index--) {
 	          args[index] = arguments[index];
 	        }
+	        if (isCurried) {
+	          var placeholder = getPlaceholder(wrapper),
+	              holdersCount = countHolders(args, placeholder);
+	        }
 	        if (partials) {
-	          args = composeArgs(args, partials, holders);
+	          args = composeArgs(args, partials, holders, isCurried);
 	        }
 	        if (partialsRight) {
-	          args = composeArgsRight(args, partialsRight, holdersRight);
+	          args = composeArgsRight(args, partialsRight, holdersRight, isCurried);
 	        }
-	        if (isCurry || isCurryRight) {
-	          var placeholder = lodash.placeholder || wrapper.placeholder,
-	              argsHolders = replaceHolders(args, placeholder);
-	
-	          length -= argsHolders.length;
-	          if (length < arity) {
-	            return createRecurryWrapper(func, bitmask, createHybridWrapper, placeholder, thisArg, args, argsHolders, argPos, ary, arity - length);
-	          }
+	        length -= holdersCount;
+	        if (isCurried && length < arity) {
+	          var newHolders = replaceHolders(args, placeholder);
+	          return createRecurryWrapper(
+	            func, bitmask, createHybridWrapper, wrapper.placeholder, thisArg,
+	            args, newHolders, argPos, ary, arity - length
+	          );
 	        }
 	        var thisBinding = isBind ? thisArg : this,
 	            fn = isBindKey ? thisBinding[func] : func;
 	
+	        length = args.length;
 	        if (argPos) {
 	          args = reorder(args, argPos);
-	        } else if (isFlip && args.length > 1) {
+	        } else if (isFlip && length > 1) {
 	          args.reverse();
 	        }
-	        if (isAry && ary < args.length) {
+	        if (isAry && ary < length) {
 	          args.length = ary;
 	        }
 	        if (this && this !== root && this instanceof wrapper) {
@@ -5357,7 +5465,7 @@
 	     */
 	    function createOver(arrayFunc) {
 	      return rest(function(iteratees) {
-	        iteratees = arrayMap(baseFlatten(iteratees), getIteratee());
+	        iteratees = arrayMap(baseFlatten(iteratees, 1), getIteratee());
 	        return rest(function(args) {
 	          var thisArg = this;
 	          return arrayFunc(iteratees, function(iteratee) {
@@ -5461,7 +5569,7 @@
 	     * @param {Function} func The function to wrap.
 	     * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper` for more details.
 	     * @param {Function} wrapFunc The function to create the `func` wrapper.
-	     * @param {*} placeholder The placeholder to replace.
+	     * @param {*} placeholder The placeholder value.
 	     * @param {*} [thisArg] The `this` binding of `func`.
 	     * @param {Array} [partials] The arguments to prepend to those provided to the new function.
 	     * @param {Array} [holders] The `partials` placeholder indexes.
@@ -5473,7 +5581,7 @@
 	    function createRecurryWrapper(func, bitmask, wrapFunc, placeholder, thisArg, partials, holders, argPos, ary, arity) {
 	      var isCurry = bitmask & CURRY_FLAG,
 	          newArgPos = argPos ? copyArray(argPos) : undefined,
-	          newsHolders = isCurry ? holders : undefined,
+	          newHolders = isCurry ? holders : undefined,
 	          newHoldersRight = isCurry ? undefined : holders,
 	          newPartials = isCurry ? partials : undefined,
 	          newPartialsRight = isCurry ? undefined : partials;
@@ -5484,9 +5592,12 @@
 	      if (!(bitmask & CURRY_BOUND_FLAG)) {
 	        bitmask &= ~(BIND_FLAG | BIND_KEY_FLAG);
 	      }
-	      var newData = [func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight, newHoldersRight, newArgPos, ary, arity],
-	          result = wrapFunc.apply(undefined, newData);
+	      var newData = [
+	        func, bitmask, thisArg, newPartials, newHolders, newPartialsRight,
+	        newHoldersRight, newArgPos, ary, arity
+	      ];
 	
+	      var result = wrapFunc.apply(undefined, newData);
 	      if (isLaziable(func)) {
 	        setData(result, newData);
 	      }
@@ -5575,8 +5686,12 @@
 	
 	        partials = holders = undefined;
 	      }
-	      var data = isBindKey ? undefined : getData(func),
-	          newData = [func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity];
+	      var data = isBindKey ? undefined : getData(func);
+	
+	      var newData = [
+	        func, bitmask, thisArg, partials, holders, partialsRight, holdersRight,
+	        argPos, ary, arity
+	      ];
 	
 	      if (data) {
 	        mergeData(newData, data);
@@ -5900,6 +6015,18 @@
 	    }
 	
 	    /**
+	     * Gets the argument placeholder value for `func`.
+	     *
+	     * @private
+	     * @param {Function} func The function to inspect.
+	     * @returns {*} Returns the placeholder value.
+	     */
+	    function getPlaceholder(func) {
+	      var object = hasOwnProperty.call(lodash, 'placeholder') ? lodash : func;
+	      return object.placeholder;
+	    }
+	
+	    /**
 	     * Creates an array of the own symbol properties of `object`.
 	     *
 	     * @private
@@ -5921,19 +6048,20 @@
 	      return objectToString.call(value);
 	    }
 	
-	    // Fallback for IE 11 providing `toStringTag` values for maps and sets.
-	    if ((Map && getTag(new Map) != mapTag) || (Set && getTag(new Set) != setTag)) {
+	    // Fallback for IE 11 providing `toStringTag` values for maps, sets, and weakmaps.
+	    if ((Map && getTag(new Map) != mapTag) ||
+	        (Set && getTag(new Set) != setTag) ||
+	        (WeakMap && getTag(new WeakMap) != weakMapTag)) {
 	      getTag = function(value) {
 	        var result = objectToString.call(value),
 	            Ctor = result == objectTag ? value.constructor : null,
 	            ctorString = typeof Ctor == 'function' ? funcToString.call(Ctor) : '';
 	
 	        if (ctorString) {
-	          if (ctorString == mapCtorString) {
-	            return mapTag;
-	          }
-	          if (ctorString == setCtorString) {
-	            return setTag;
+	          switch (ctorString) {
+	            case mapCtorString: return mapTag;
+	            case setCtorString: return setTag;
+	            case weakMapCtorString: return weakMapTag;
 	          }
 	        }
 	        return result;
@@ -5983,7 +6111,7 @@
 	      }
 	      var result = hasFunc(object, path);
 	      if (!result && !isKey(path)) {
-	        path = baseToPath(path);
+	        path = baseCastPath(path);
 	        object = parent(object, path);
 	        if (object != null) {
 	          path = last(path);
@@ -6024,11 +6152,9 @@
 	     * @returns {Object} Returns the initialized clone.
 	     */
 	    function initCloneObject(object) {
-	      if (isPrototype(object)) {
-	        return {};
-	      }
-	      var Ctor = object.constructor;
-	      return baseCreate(isFunction(Ctor) ? Ctor.prototype : undefined);
+	      return (isFunction(object.constructor) && !isPrototype(object))
+	        ? baseCreate(getPrototypeOf(object))
+	        : {};
 	    }
 	
 	    /**
@@ -6047,7 +6173,7 @@
 	      var Ctor = object.constructor;
 	      switch (tag) {
 	        case arrayBufferTag:
-	          return cloneBuffer(object);
+	          return cloneArrayBuffer(object);
 	
 	        case boolTag:
 	        case dateTag:
@@ -6094,7 +6220,7 @@
 	    }
 	
 	    /**
-	     * Checks if the provided arguments are from an iteratee call.
+	     * Checks if the given arguments are from an iteratee call.
 	     *
 	     * @private
 	     * @param {*} value The potential iteratee value argument.
@@ -6142,7 +6268,7 @@
 	    function isKeyable(value) {
 	      var type = typeof value;
 	      return type == 'number' || type == 'boolean' ||
-	        (type == 'string' && value !== '__proto__') || value == null;
+	        (type == 'string' && value != '__proto__') || value == null;
 	    }
 	
 	    /**
@@ -6175,7 +6301,7 @@
 	     */
 	    function isPrototype(value) {
 	      var Ctor = value && value.constructor,
-	          proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+	          proto = (isFunction(Ctor) && Ctor.prototype) || objectProto;
 	
 	      return value === proto;
 	    }
@@ -6214,9 +6340,9 @@
 	          isCommon = newBitmask < (BIND_FLAG | BIND_KEY_FLAG | ARY_FLAG);
 	
 	      var isCombo =
-	        (srcBitmask == ARY_FLAG && (bitmask == CURRY_FLAG)) ||
-	        (srcBitmask == ARY_FLAG && (bitmask == REARG_FLAG) && (data[7].length <= source[8])) ||
-	        (srcBitmask == (ARY_FLAG | REARG_FLAG) && (source[7].length <= source[8]) && (bitmask == CURRY_FLAG));
+	        ((srcBitmask == ARY_FLAG) && (bitmask == CURRY_FLAG)) ||
+	        ((srcBitmask == ARY_FLAG) && (bitmask == REARG_FLAG) && (data[7].length <= source[8])) ||
+	        ((srcBitmask == (ARY_FLAG | REARG_FLAG)) && (source[7].length <= source[8]) && (bitmask == CURRY_FLAG));
 	
 	      // Exit early if metadata can't be merged.
 	      if (!(isCommon || isCombo)) {
@@ -6226,7 +6352,7 @@
 	      if (srcBitmask & BIND_FLAG) {
 	        data[2] = source[2];
 	        // Set when currying a bound function.
-	        newBitmask |= (bitmask & BIND_FLAG) ? 0 : CURRY_BOUND_FLAG;
+	        newBitmask |= bitmask & BIND_FLAG ? 0 : CURRY_BOUND_FLAG;
 	      }
 	      // Compose partial arguments.
 	      var value = source[3];
@@ -6365,28 +6491,6 @@
 	    }
 	
 	    /**
-	     * Converts `value` to an array-like object if it's not one.
-	     *
-	     * @private
-	     * @param {*} value The value to process.
-	     * @returns {Array} Returns the array-like object.
-	     */
-	    function toArrayLikeObject(value) {
-	      return isArrayLikeObject(value) ? value : [];
-	    }
-	
-	    /**
-	     * Converts `value` to a function if it's not one.
-	     *
-	     * @private
-	     * @param {*} value The value to process.
-	     * @returns {Function} Returns the function.
-	     */
-	    function toFunction(value) {
-	      return typeof value == 'function' ? value : identity;
-	    }
-	
-	    /**
 	     * Creates a clone of `wrapper`.
 	     *
 	     * @private
@@ -6496,13 +6600,13 @@
 	      if (!isArray(array)) {
 	        array = array == null ? [] : [Object(array)];
 	      }
-	      values = baseFlatten(values);
+	      values = baseFlatten(values, 1);
 	      return arrayConcat(array, values);
 	    });
 	
 	    /**
 	     * Creates an array of unique `array` values not included in the other
-	     * provided arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+	     * given arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
 	     * for equality comparisons.
 	     *
 	     * @static
@@ -6518,7 +6622,7 @@
 	     */
 	    var difference = rest(function(array, values) {
 	      return isArrayLikeObject(array)
-	        ? baseDifference(array, baseFlatten(values, false, true))
+	        ? baseDifference(array, baseFlatten(values, 1, true))
 	        : [];
 	    });
 	
@@ -6549,7 +6653,7 @@
 	        iteratee = undefined;
 	      }
 	      return isArrayLikeObject(array)
-	        ? baseDifference(array, baseFlatten(values, false, true), getIteratee(iteratee))
+	        ? baseDifference(array, baseFlatten(values, 1, true), getIteratee(iteratee))
 	        : [];
 	    });
 	
@@ -6578,7 +6682,7 @@
 	        comparator = undefined;
 	      }
 	      return isArrayLikeObject(array)
-	        ? baseDifference(array, baseFlatten(values, false, true), undefined, comparator)
+	        ? baseDifference(array, baseFlatten(values, 1, true), undefined, comparator)
 	        : [];
 	    });
 	
@@ -6848,7 +6952,7 @@
 	    }
 	
 	    /**
-	     * Flattens `array` a single level.
+	     * Flattens `array` a single level deep.
 	     *
 	     * @static
 	     * @memberOf _
@@ -6857,30 +6961,58 @@
 	     * @returns {Array} Returns the new flattened array.
 	     * @example
 	     *
-	     * _.flatten([1, [2, 3, [4]]]);
-	     * // => [1, 2, 3, [4]]
+	     * _.flatten([1, [2, [3, [4]], 5]]);
+	     * // => [1, 2, [3, [4]], 5]
 	     */
 	    function flatten(array) {
 	      var length = array ? array.length : 0;
-	      return length ? baseFlatten(array) : [];
+	      return length ? baseFlatten(array, 1) : [];
 	    }
 	
 	    /**
-	     * This method is like `_.flatten` except that it recursively flattens `array`.
+	     * Recursively flattens `array`.
 	     *
 	     * @static
 	     * @memberOf _
 	     * @category Array
-	     * @param {Array} array The array to recursively flatten.
+	     * @param {Array} array The array to flatten.
 	     * @returns {Array} Returns the new flattened array.
 	     * @example
 	     *
-	     * _.flattenDeep([1, [2, 3, [4]]]);
-	     * // => [1, 2, 3, 4]
+	     * _.flattenDeep([1, [2, [3, [4]], 5]]);
+	     * // => [1, 2, 3, 4, 5]
 	     */
 	    function flattenDeep(array) {
 	      var length = array ? array.length : 0;
-	      return length ? baseFlatten(array, true) : [];
+	      return length ? baseFlatten(array, INFINITY) : [];
+	    }
+	
+	    /**
+	     * Recursively flatten `array` up to `depth` times.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Array
+	     * @param {Array} array The array to flatten.
+	     * @param {number} [depth=1] The maximum recursion depth.
+	     * @returns {Array} Returns the new flattened array.
+	     * @example
+	     *
+	     * var array = [1, [2, [3, [4]], 5]];
+	     *
+	     * _.flattenDepth(array, 1);
+	     * // => [1, 2, [3, [4]], 5]
+	     *
+	     * _.flattenDepth(array, 2);
+	     * // => [1, 2, 3, [4], 5]
+	     */
+	    function flattenDepth(array, depth) {
+	      var length = array ? array.length : 0;
+	      if (!length) {
+	        return [];
+	      }
+	      depth = depth === undefined ? 1 : toInteger(depth);
+	      return baseFlatten(array, depth);
 	    }
 	
 	    /**
@@ -6982,8 +7114,8 @@
 	    }
 	
 	    /**
-	     * Creates an array of unique values that are included in all of the provided
-	     * arrays using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+	     * Creates an array of unique values that are included in all given arrays
+	     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
 	     * for equality comparisons.
 	     *
 	     * @static
@@ -6997,7 +7129,7 @@
 	     * // => [2]
 	     */
 	    var intersection = rest(function(arrays) {
-	      var mapped = arrayMap(arrays, toArrayLikeObject);
+	      var mapped = arrayMap(arrays, baseCastArrayLikeObject);
 	      return (mapped.length && mapped[0] === arrays[0])
 	        ? baseIntersection(mapped)
 	        : [];
@@ -7025,7 +7157,7 @@
 	     */
 	    var intersectionBy = rest(function(arrays) {
 	      var iteratee = last(arrays),
-	          mapped = arrayMap(arrays, toArrayLikeObject);
+	          mapped = arrayMap(arrays, baseCastArrayLikeObject);
 	
 	      if (iteratee === last(mapped)) {
 	        iteratee = undefined;
@@ -7058,7 +7190,7 @@
 	     */
 	    var intersectionWith = rest(function(arrays) {
 	      var comparator = last(arrays),
-	          mapped = arrayMap(arrays, toArrayLikeObject);
+	          mapped = arrayMap(arrays, baseCastArrayLikeObject);
 	
 	      if (comparator === last(mapped)) {
 	        comparator = undefined;
@@ -7148,11 +7280,12 @@
 	    }
 	
 	    /**
-	     * Removes all provided values from `array` using
+	     * Removes all given values from `array` using
 	     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
 	     * for equality comparisons.
 	     *
-	     * **Note:** Unlike `_.without`, this method mutates `array`.
+	     * **Note:** Unlike `_.without`, this method mutates `array`. Use `_.remove`
+	     * to remove elements from an array by predicate.
 	     *
 	     * @static
 	     * @memberOf _
@@ -7248,7 +7381,7 @@
 	     * // => [10, 20]
 	     */
 	    var pullAt = rest(function(array, indexes) {
-	      indexes = arrayMap(baseFlatten(indexes), String);
+	      indexes = arrayMap(baseFlatten(indexes, 1), String);
 	
 	      var result = baseAt(array, indexes);
 	      basePullAt(array, indexes.sort(compareAscending));
@@ -7257,10 +7390,11 @@
 	
 	    /**
 	     * Removes all elements from `array` that `predicate` returns truthy for
-	     * and returns an array of the removed elements. The predicate is invoked with
-	     * three arguments: (value, index, array).
+	     * and returns an array of the removed elements. The predicate is invoked
+	     * with three arguments: (value, index, array).
 	     *
-	     * **Note:** Unlike `_.filter`, this method mutates `array`.
+	     * **Note:** Unlike `_.filter`, this method mutates `array`. Use `_.pull`
+	     * to pull elements from an array by value.
 	     *
 	     * @static
 	     * @memberOf _
@@ -7705,8 +7839,8 @@
 	    }
 	
 	    /**
-	     * Creates an array of unique values, in order, from all of the provided arrays
-	     * using [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
+	     * Creates an array of unique values, in order, from all given arrays using
+	     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
 	     * for equality comparisons.
 	     *
 	     * @static
@@ -7720,7 +7854,7 @@
 	     * // => [2, 1, 4]
 	     */
 	    var union = rest(function(arrays) {
-	      return baseUniq(baseFlatten(arrays, false, true));
+	      return baseUniq(baseFlatten(arrays, 1, true));
 	    });
 	
 	    /**
@@ -7748,7 +7882,7 @@
 	      if (isArrayLikeObject(iteratee)) {
 	        iteratee = undefined;
 	      }
-	      return baseUniq(baseFlatten(arrays, false, true), getIteratee(iteratee));
+	      return baseUniq(baseFlatten(arrays, 1, true), getIteratee(iteratee));
 	    });
 	
 	    /**
@@ -7775,7 +7909,7 @@
 	      if (isArrayLikeObject(comparator)) {
 	        comparator = undefined;
 	      }
-	      return baseUniq(baseFlatten(arrays, false, true), undefined, comparator);
+	      return baseUniq(baseFlatten(arrays, 1, true), undefined, comparator);
 	    });
 	
 	    /**
@@ -7917,7 +8051,7 @@
 	    }
 	
 	    /**
-	     * Creates an array excluding all provided values using
+	     * Creates an array excluding all given values using
 	     * [`SameValueZero`](http://ecma-international.org/ecma-262/6.0/#sec-samevaluezero)
 	     * for equality comparisons.
 	     *
@@ -7940,7 +8074,7 @@
 	
 	    /**
 	     * Creates an array of unique values that is the [symmetric difference](https://en.wikipedia.org/wiki/Symmetric_difference)
-	     * of the provided arrays.
+	     * of the given arrays.
 	     *
 	     * @static
 	     * @memberOf _
@@ -8199,17 +8333,22 @@
 	     * // => ['a', 'c']
 	     */
 	    var wrapperAt = rest(function(paths) {
-	      paths = baseFlatten(paths);
+	      paths = baseFlatten(paths, 1);
 	      var length = paths.length,
 	          start = length ? paths[0] : 0,
 	          value = this.__wrapped__,
 	          interceptor = function(object) { return baseAt(object, paths); };
 	
-	      if (length > 1 || this.__actions__.length || !(value instanceof LazyWrapper) || !isIndex(start)) {
+	      if (length > 1 || this.__actions__.length ||
+	          !(value instanceof LazyWrapper) || !isIndex(start)) {
 	        return this.thru(interceptor);
 	      }
 	      value = value.slice(start, +start + (length ? 1 : 0));
-	      value.__actions__.push({ 'func': thru, 'args': [interceptor], 'thisArg': undefined });
+	      value.__actions__.push({
+	        'func': thru,
+	        'args': [interceptor],
+	        'thisArg': undefined
+	      });
 	      return new LodashWrapper(value, this.__chain__).thru(function(array) {
 	        if (length && !array.length) {
 	          array.push(undefined);
@@ -8420,7 +8559,11 @@
 	          wrapped = new LazyWrapper(this);
 	        }
 	        wrapped = wrapped.reverse();
-	        wrapped.__actions__.push({ 'func': thru, 'args': [reverse], 'thisArg': undefined });
+	        wrapped.__actions__.push({
+	          'func': thru,
+	          'args': [reverse],
+	          'thisArg': undefined
+	        });
 	        return new LodashWrapper(wrapped, this.__chain__);
 	      }
 	      return this.thru(reverse);
@@ -8639,7 +8782,7 @@
 	     * // => [1, 1, 2, 2]
 	     */
 	    function flatMap(collection, iteratee) {
-	      return baseFlatten(map(collection, iteratee));
+	      return baseFlatten(map(collection, iteratee), 1);
 	    }
 	
 	    /**
@@ -8673,7 +8816,7 @@
 	    function forEach(collection, iteratee) {
 	      return (typeof iteratee == 'function' && isArray(collection))
 	        ? arrayEach(collection, iteratee)
-	        : baseEach(collection, toFunction(iteratee));
+	        : baseEach(collection, baseCastFunction(iteratee));
 	    }
 	
 	    /**
@@ -8697,7 +8840,7 @@
 	    function forEachRight(collection, iteratee) {
 	      return (typeof iteratee == 'function' && isArray(collection))
 	        ? arrayEachRight(collection, iteratee)
-	        : baseEachRight(collection, toFunction(iteratee));
+	        : baseEachRight(collection, baseCastFunction(iteratee));
 	    }
 	
 	    /**
@@ -8966,7 +9109,7 @@
 	     * Reduces `collection` to a value which is the accumulated result of running
 	     * each element in `collection` through `iteratee`, where each successive
 	     * invocation is supplied the return value of the previous. If `accumulator`
-	     * is not provided the first element of `collection` is used as the initial
+	     * is not given the first element of `collection` is used as the initial
 	     * value. The iteratee is invoked with four arguments:
 	     * (accumulator, value, index|key, collection).
 	     *
@@ -9261,7 +9404,7 @@
 	      } else if (length > 2 && isIterateeCall(iteratees[0], iteratees[1], iteratees[2])) {
 	        iteratees.length = 1;
 	      }
-	      return baseOrderBy(collection, baseFlatten(iteratees), []);
+	      return baseOrderBy(collection, baseFlatten(iteratees, 1), []);
 	    });
 	
 	    /*------------------------------------------------------------------------*/
@@ -9272,7 +9415,7 @@
 	     *
 	     * @static
 	     * @memberOf _
-	     * @type Function
+	     * @type {Function}
 	     * @category Date
 	     * @returns {number} Returns the timestamp.
 	     * @example
@@ -9414,9 +9557,7 @@
 	    var bind = rest(function(func, thisArg, partials) {
 	      var bitmask = BIND_FLAG;
 	      if (partials.length) {
-	        var placeholder = lodash.placeholder || bind.placeholder,
-	            holders = replaceHolders(partials, placeholder);
-	
+	        var holders = replaceHolders(partials, getPlaceholder(bind));
 	        bitmask |= PARTIAL_FLAG;
 	      }
 	      return createWrapper(func, bitmask, thisArg, partials, holders);
@@ -9469,9 +9610,7 @@
 	    var bindKey = rest(function(object, key, partials) {
 	      var bitmask = BIND_FLAG | BIND_KEY_FLAG;
 	      if (partials.length) {
-	        var placeholder = lodash.placeholder || bindKey.placeholder,
-	            holders = replaceHolders(partials, placeholder);
-	
+	        var holders = replaceHolders(partials, getPlaceholder(bindKey));
 	        bitmask |= PARTIAL_FLAG;
 	      }
 	      return createWrapper(key, bitmask, object, partials, holders);
@@ -9520,7 +9659,7 @@
 	    function curry(func, arity, guard) {
 	      arity = guard ? undefined : arity;
 	      var result = createWrapper(func, CURRY_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
-	      result.placeholder = lodash.placeholder || curry.placeholder;
+	      result.placeholder = curry.placeholder;
 	      return result;
 	    }
 	
@@ -9564,7 +9703,7 @@
 	    function curryRight(func, arity, guard) {
 	      arity = guard ? undefined : arity;
 	      var result = createWrapper(func, CURRY_RIGHT_FLAG, undefined, undefined, undefined, undefined, undefined, arity);
-	      result.placeholder = lodash.placeholder || curryRight.placeholder;
+	      result.placeholder = curryRight.placeholder;
 	      return result;
 	    }
 	
@@ -9695,11 +9834,13 @@
 	        if (maxWait === false) {
 	          var leadingCall = leading && !timeoutId;
 	        } else {
-	          if (!maxTimeoutId && !leading) {
+	          if (!lastCalled && !maxTimeoutId && !leading) {
 	            lastCalled = stamp;
 	          }
-	          var remaining = maxWait - (stamp - lastCalled),
-	              isCalled = remaining <= 0 || remaining > maxWait;
+	          var remaining = maxWait - (stamp - lastCalled);
+	
+	          var isCalled = (remaining <= 0 || remaining > maxWait) &&
+	            (leading || maxTimeoutId);
 	
 	          if (isCalled) {
 	            if (maxTimeoutId) {
@@ -9939,7 +10080,7 @@
 	     * // => [100, 10]
 	     */
 	    var overArgs = rest(function(func, transforms) {
-	      transforms = arrayMap(baseFlatten(transforms), getIteratee());
+	      transforms = arrayMap(baseFlatten(transforms, 1), getIteratee());
 	
 	      var funcsLength = transforms.length;
 	      return rest(function(args) {
@@ -9986,9 +10127,7 @@
 	     * // => 'hi fred'
 	     */
 	    var partial = rest(function(func, partials) {
-	      var placeholder = lodash.placeholder || partial.placeholder,
-	          holders = replaceHolders(partials, placeholder);
-	
+	      var holders = replaceHolders(partials, getPlaceholder(partial));
 	      return createWrapper(func, PARTIAL_FLAG, undefined, partials, holders);
 	    });
 	
@@ -10024,9 +10163,7 @@
 	     * // => 'hello fred'
 	     */
 	    var partialRight = rest(function(func, partials) {
-	      var placeholder = lodash.placeholder || partialRight.placeholder,
-	          holders = replaceHolders(partials, placeholder);
-	
+	      var holders = replaceHolders(partials, getPlaceholder(partialRight));
 	      return createWrapper(func, PARTIAL_RIGHT_FLAG, undefined, partials, holders);
 	    });
 	
@@ -10053,7 +10190,7 @@
 	     * // => ['a', 'b', 'c']
 	     */
 	    var rearg = rest(function(func, indexes) {
-	      return createWrapper(func, REARG_FLAG, undefined, undefined, undefined, baseFlatten(indexes));
+	      return createWrapper(func, REARG_FLAG, undefined, undefined, undefined, baseFlatten(indexes, 1));
 	    });
 	
 	    /**
@@ -10205,7 +10342,11 @@
 	        leading = 'leading' in options ? !!options.leading : leading;
 	        trailing = 'trailing' in options ? !!options.trailing : trailing;
 	      }
-	      return debounce(func, wait, { 'leading': leading, 'maxWait': wait, 'trailing': trailing });
+	      return debounce(func, wait, {
+	        'leading': leading,
+	        'maxWait': wait,
+	        'trailing': trailing
+	      });
 	    }
 	
 	    /**
@@ -10236,7 +10377,7 @@
 	     * @memberOf _
 	     * @category Function
 	     * @param {*} value The value to wrap.
-	     * @param {Function} wrapper The wrapper function.
+	     * @param {Function} [wrapper=identity] The wrapper function.
 	     * @returns {Function} Returns the new function.
 	     * @example
 	     *
@@ -10253,6 +10394,46 @@
 	    }
 	
 	    /*------------------------------------------------------------------------*/
+	
+	    /**
+	     * Casts `value` as an array if it's not one.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to inspect.
+	     * @returns {Array} Returns the cast array.
+	     * @example
+	     *
+	     * _.castArray(1);
+	     * // => [1]
+	     *
+	     * _.castArray({ 'a': 1 });
+	     * // => [{ 'a': 1 }]
+	     *
+	     * _.castArray('abc');
+	     * // => ['abc']
+	     *
+	     * _.castArray(null);
+	     * // => [null]
+	     *
+	     * _.castArray(undefined);
+	     * // => [undefined]
+	     *
+	     * _.castArray();
+	     * // => []
+	     *
+	     * var array = [1, 2, 3];
+	     * console.log(_.castArray(array) === array);
+	     * // => true
+	     */
+	    function castArray() {
+	      if (!arguments.length) {
+	        return [];
+	      }
+	      var value = arguments[0];
+	      return isArray(value) ? value : [value];
+	    }
 	
 	    /**
 	     * Creates a shallow clone of `value`.
@@ -10474,7 +10655,7 @@
 	     *
 	     * @static
 	     * @memberOf _
-	     * @type Function
+	     * @type {Function}
 	     * @category Lang
 	     * @param {*} value The value to check.
 	     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
@@ -10495,13 +10676,32 @@
 	    var isArray = Array.isArray;
 	
 	    /**
+	     * Checks if `value` is classified as an `ArrayBuffer` object.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to check.
+	     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	     * @example
+	     *
+	     * _.isArrayBuffer(new ArrayBuffer(2));
+	     * // => true
+	     *
+	     * _.isArrayBuffer(new Array(2));
+	     * // => false
+	     */
+	    function isArrayBuffer(value) {
+	      return isObjectLike(value) && objectToString.call(value) == arrayBufferTag;
+	    }
+	
+	    /**
 	     * Checks if `value` is array-like. A value is considered array-like if it's
 	     * not a function and has a `value.length` that's an integer greater than or
 	     * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
 	     *
 	     * @static
 	     * @memberOf _
-	     * @type Function
 	     * @category Lang
 	     * @param {*} value The value to check.
 	     * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
@@ -10530,7 +10730,6 @@
 	     *
 	     * @static
 	     * @memberOf _
-	     * @type Function
 	     * @category Lang
 	     * @param {*} value The value to check.
 	     * @returns {boolean} Returns `true` if `value` is an array-like object, else `false`.
@@ -10572,6 +10771,26 @@
 	      return value === true || value === false ||
 	        (isObjectLike(value) && objectToString.call(value) == boolTag);
 	    }
+	
+	    /**
+	     * Checks if `value` is a buffer.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to check.
+	     * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
+	     * @example
+	     *
+	     * _.isBuffer(new Buffer(2));
+	     * // => true
+	     *
+	     * _.isBuffer(new Uint8Array(2));
+	     * // => false
+	     */
+	    var isBuffer = !Buffer ? constant(false) : function(value) {
+	      return value instanceof Buffer;
+	    };
 	
 	    /**
 	     * Checks if `value` is classified as a `Date` object.
@@ -10642,7 +10861,8 @@
 	     */
 	    function isEmpty(value) {
 	      if (isArrayLike(value) &&
-	          (isArray(value) || isString(value) || isFunction(value.splice) || isArguments(value))) {
+	          (isArray(value) || isString(value) ||
+	            isFunction(value.splice) || isArguments(value))) {
 	        return !value.length;
 	      }
 	      for (var key in value) {
@@ -10685,10 +10905,10 @@
 	    }
 	
 	    /**
-	     * This method is like `_.isEqual` except that it accepts `customizer` which is
-	     * invoked to compare values. If `customizer` returns `undefined` comparisons are
-	     * handled by the method instead. The `customizer` is invoked with up to six arguments:
-	     * (objValue, othValue [, index|key, object, other, stack]).
+	     * This method is like `_.isEqual` except that it accepts `customizer` which
+	     * is invoked to compare values. If `customizer` returns `undefined` comparisons
+	     * are handled by the method instead. The `customizer` is invoked with up to
+	     * six arguments: (objValue, othValue [, index|key, object, other, stack]).
 	     *
 	     * @static
 	     * @memberOf _
@@ -10739,8 +10959,11 @@
 	     * // => false
 	     */
 	    function isError(value) {
-	      return isObjectLike(value) &&
-	        typeof value.message == 'string' && objectToString.call(value) == errorTag;
+	      if (!isObjectLike(value)) {
+	        return false;
+	      }
+	      return (objectToString.call(value) == errorTag) ||
+	        (typeof value.message == 'string' && typeof value.name == 'string');
 	    }
 	
 	    /**
@@ -10848,7 +11071,8 @@
 	     * // => false
 	     */
 	    function isLength(value) {
-	      return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	      return typeof value == 'number' &&
+	        value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
 	    }
 	
 	    /**
@@ -10907,8 +11131,29 @@
 	    }
 	
 	    /**
-	     * Performs a deep comparison between `object` and `source` to determine if
-	     * `object` contains equivalent property values.
+	     * Checks if `value` is classified as a `Map` object.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to check.
+	     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	     * @example
+	     *
+	     * _.isMap(new Map);
+	     * // => true
+	     *
+	     * _.isMap(new WeakMap);
+	     * // => false
+	     */
+	    function isMap(value) {
+	      return isObjectLike(value) && getTag(value) == mapTag;
+	    }
+	
+	    /**
+	     * Performs a partial deep comparison between `object` and `source` to
+	     * determine if `object` contains equivalent property values. This method is
+	     * equivalent to a `_.matches` function when `source` is partially applied.
 	     *
 	     * **Note:** This method supports comparing the same values as `_.isEqual`.
 	     *
@@ -11127,13 +11372,11 @@
 	     * // => true
 	     */
 	    function isPlainObject(value) {
-	      if (!isObjectLike(value) || objectToString.call(value) != objectTag || isHostObject(value)) {
+	      if (!isObjectLike(value) ||
+	          objectToString.call(value) != objectTag || isHostObject(value)) {
 	        return false;
 	      }
-	      var proto = objectProto;
-	      if (typeof value.constructor == 'function') {
-	        proto = getPrototypeOf(value);
-	      }
+	      var proto = getPrototypeOf(value);
 	      if (proto === null) {
 	        return true;
 	      }
@@ -11189,6 +11432,26 @@
 	     */
 	    function isSafeInteger(value) {
 	      return isInteger(value) && value >= -MAX_SAFE_INTEGER && value <= MAX_SAFE_INTEGER;
+	    }
+	
+	    /**
+	     * Checks if `value` is classified as a `Set` object.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to check.
+	     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	     * @example
+	     *
+	     * _.isSet(new Set);
+	     * // => true
+	     *
+	     * _.isSet(new WeakSet);
+	     * // => false
+	     */
+	    function isSet(value) {
+	      return isObjectLike(value) && getTag(value) == setTag;
 	    }
 	
 	    /**
@@ -11250,7 +11513,8 @@
 	     * // => false
 	     */
 	    function isTypedArray(value) {
-	      return isObjectLike(value) && isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
+	      return isObjectLike(value) &&
+	        isLength(value.length) && !!typedArrayTags[objectToString.call(value)];
 	    }
 	
 	    /**
@@ -11271,6 +11535,46 @@
 	     */
 	    function isUndefined(value) {
 	      return value === undefined;
+	    }
+	
+	    /**
+	     * Checks if `value` is classified as a `WeakMap` object.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to check.
+	     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	     * @example
+	     *
+	     * _.isWeakMap(new WeakMap);
+	     * // => true
+	     *
+	     * _.isWeakMap(new Map);
+	     * // => false
+	     */
+	    function isWeakMap(value) {
+	      return isObjectLike(value) && getTag(value) == weakMapTag;
+	    }
+	
+	    /**
+	     * Checks if `value` is classified as a `WeakSet` object.
+	     *
+	     * @static
+	     * @memberOf _
+	     * @category Lang
+	     * @param {*} value The value to check.
+	     * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+	     * @example
+	     *
+	     * _.isWeakSet(new WeakSet);
+	     * // => true
+	     *
+	     * _.isWeakSet(new Set);
+	     * // => false
+	     */
+	    function isWeakSet(value) {
+	      return isObjectLike(value) && objectToString.call(value) == weakSetTag;
 	    }
 	
 	    /**
@@ -11702,12 +12006,12 @@
 	     * // => ['a', 'c']
 	     */
 	    var at = rest(function(object, paths) {
-	      return baseAt(object, baseFlatten(paths));
+	      return baseAt(object, baseFlatten(paths, 1));
 	    });
 	
 	    /**
 	     * Creates an object that inherits from the `prototype` object. If a `properties`
-	     * object is provided its own enumerable properties are assigned to the created object.
+	     * object is given its own enumerable properties are assigned to the created object.
 	     *
 	     * @static
 	     * @memberOf _
@@ -11890,7 +12194,9 @@
 	     * // => logs 'a', 'b', then 'c' (iteration order is not guaranteed)
 	     */
 	    function forIn(object, iteratee) {
-	      return object == null ? object : baseFor(object, toFunction(iteratee), keysIn);
+	      return object == null
+	        ? object
+	        : baseFor(object, baseCastFunction(iteratee), keysIn);
 	    }
 	
 	    /**
@@ -11918,7 +12224,9 @@
 	     * // => logs 'c', 'b', then 'a' assuming `_.forIn` logs 'a', 'b', then 'c'
 	     */
 	    function forInRight(object, iteratee) {
-	      return object == null ? object : baseForRight(object, toFunction(iteratee), keysIn);
+	      return object == null
+	        ? object
+	        : baseForRight(object, baseCastFunction(iteratee), keysIn);
 	    }
 	
 	    /**
@@ -11948,7 +12256,7 @@
 	     * // => logs 'a' then 'b' (iteration order is not guaranteed)
 	     */
 	    function forOwn(object, iteratee) {
-	      return object && baseForOwn(object, toFunction(iteratee));
+	      return object && baseForOwn(object, baseCastFunction(iteratee));
 	    }
 	
 	    /**
@@ -11976,7 +12284,7 @@
 	     * // => logs 'b' then 'a' assuming `_.forOwn` logs 'a' then 'b'
 	     */
 	    function forOwnRight(object, iteratee) {
-	      return object && baseForOwnRight(object, toFunction(iteratee));
+	      return object && baseForOwnRight(object, baseCastFunction(iteratee));
 	    }
 	
 	    /**
@@ -12282,7 +12590,8 @@
 	    /**
 	     * The opposite of `_.mapValues`; this method creates an object with the
 	     * same values as `object` and keys generated by running each own enumerable
-	     * property of `object` through `iteratee`.
+	     * property of `object` through `iteratee`. The iteratee is invoked with
+	     * three arguments: (value, key, object).
 	     *
 	     * @static
 	     * @memberOf _
@@ -12310,7 +12619,7 @@
 	    /**
 	     * Creates an object with the same keys as `object` and values generated by
 	     * running each own enumerable property of `object` through `iteratee`. The
-	     * iteratee function is invoked with three arguments: (value, key, object).
+	     * iteratee is invoked with three arguments: (value, key, object).
 	     *
 	     * @static
 	     * @memberOf _
@@ -12343,12 +12652,12 @@
 	    }
 	
 	    /**
-	     * Recursively merges own and inherited enumerable properties of source
-	     * objects into the destination object, skipping source properties that resolve
-	     * to `undefined`. Array and plain object properties are merged recursively.
-	     * Other objects and value types are overridden by assignment. Source objects
-	     * are applied from left to right. Subsequent sources overwrite property
-	     * assignments of previous sources.
+	     * Recursively merges own and inherited enumerable properties of source objects
+	     * into the destination object. Source properties that resolve to `undefined`
+	     * are skipped if a destination value exists. Array and plain object properties
+	     * are merged recursively. Other objects and value types are overridden by
+	     * assignment. Source objects are applied from left to right. Subsequent
+	     * sources overwrite property assignments of previous sources.
 	     *
 	     * **Note:** This method mutates `object`.
 	     *
@@ -12425,7 +12734,7 @@
 	     * @category Object
 	     * @param {Object} object The source object.
 	     * @param {...(string|string[])} [props] The property names to omit, specified
-	     *  individually or in arrays..
+	     *  individually or in arrays.
 	     * @returns {Object} Returns the new object.
 	     * @example
 	     *
@@ -12438,14 +12747,15 @@
 	      if (object == null) {
 	        return {};
 	      }
-	      props = arrayMap(baseFlatten(props), String);
+	      props = arrayMap(baseFlatten(props, 1), String);
 	      return basePick(object, baseDifference(keysIn(object), props));
 	    });
 	
 	    /**
-	     * The opposite of `_.pickBy`; this method creates an object composed of the
-	     * own and inherited enumerable properties of `object` that `predicate`
-	     * doesn't return truthy for.
+	     * The opposite of `_.pickBy`; this method creates an object composed of
+	     * the own and inherited enumerable properties of `object` that `predicate`
+	     * doesn't return truthy for. The predicate is invoked with two arguments:
+	     * (value, key).
 	     *
 	     * @static
 	     * @memberOf _
@@ -12461,7 +12771,7 @@
 	     * // => { 'b': '2' }
 	     */
 	    function omitBy(object, predicate) {
-	      predicate = getIteratee(predicate, 2);
+	      predicate = getIteratee(predicate);
 	      return basePickBy(object, function(value, key) {
 	        return !predicate(value, key);
 	      });
@@ -12485,7 +12795,7 @@
 	     * // => { 'a': 1, 'c': 3 }
 	     */
 	    var pick = rest(function(object, props) {
-	      return object == null ? {} : basePick(object, baseFlatten(props));
+	      return object == null ? {} : basePick(object, baseFlatten(props, 1));
 	    });
 	
 	    /**
@@ -12506,7 +12816,7 @@
 	     * // => { 'a': 1, 'c': 3 }
 	     */
 	    function pickBy(object, predicate) {
-	      return object == null ? {} : basePickBy(object, getIteratee(predicate, 2));
+	      return object == null ? {} : basePickBy(object, getIteratee(predicate));
 	    }
 	
 	    /**
@@ -12539,7 +12849,7 @@
 	     */
 	    function result(object, path, defaultValue) {
 	      if (!isKey(path, object)) {
-	        path = baseToPath(path);
+	        path = baseCastPath(path);
 	        var result = get(object, path);
 	        object = parent(object, path);
 	      } else {
@@ -12609,7 +12919,8 @@
 	    }
 	
 	    /**
-	     * Creates an array of own enumerable key-value pairs for `object`.
+	     * Creates an array of own enumerable key-value pairs for `object` which
+	     * can be consumed by `_.fromPairs`.
 	     *
 	     * @static
 	     * @memberOf _
@@ -12633,7 +12944,8 @@
 	    }
 	
 	    /**
-	     * Creates an array of own and inherited enumerable key-value pairs for `object`.
+	     * Creates an array of own and inherited enumerable key-value pairs for
+	     * `object` which can be consumed by `_.fromPairs`.
 	     *
 	     * @static
 	     * @memberOf _
@@ -12694,7 +13006,7 @@
 	          if (isArr) {
 	            accumulator = isArray(object) ? new Ctor : [];
 	          } else {
-	            accumulator = baseCreate(isFunction(Ctor) ? Ctor.prototype : undefined);
+	            accumulator = isFunction(Ctor) ? baseCreate(getPrototypeOf(object)) : {};
 	          }
 	        } else {
 	          accumulator = {};
@@ -12788,7 +13100,7 @@
 	     * // => [1, 2, 3] (iteration order is not guaranteed)
 	     */
 	    function valuesIn(object) {
-	      return object == null ? baseValues(object, keysIn(object)) : [];
+	      return object == null ? [] : baseValues(object, keysIn(object));
 	    }
 	
 	    /*------------------------------------------------------------------------*/
@@ -13286,7 +13598,7 @@
 	     * @memberOf _
 	     * @category String
 	     * @param {string} string The string to convert.
-	     * @param {number} [radix] The radix to interpret `value` by.
+	     * @param {number} [radix=10] The radix to interpret `value` by.
 	     * @param- {Object} [guard] Enables use as an iteratee for functions like `_.map`.
 	     * @returns {number} Returns the converted integer.
 	     * @example
@@ -13473,7 +13785,7 @@
 	     * in "interpolate" delimiters, HTML-escape interpolated data properties in
 	     * "escape" delimiters, and execute JavaScript in "evaluate" delimiters. Data
 	     * properties may be accessed as free variables in the template. If a setting
-	     * object is provided it takes precedence over `_.templateSettings` values.
+	     * object is given it takes precedence over `_.templateSettings` values.
 	     *
 	     * **Note:** In the development build `_.template` utilizes
 	     * [sourceURLs](http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl)
@@ -13658,7 +13970,8 @@
 	        'return __p\n}';
 	
 	      var result = attempt(function() {
-	        return Function(importsKeys, sourceURL + 'return ' + source).apply(undefined, importsValues);
+	        return Function(importsKeys, sourceURL + 'return ' + source)
+	          .apply(undefined, importsValues);
 	      });
 	
 	      // Provide the compiled function's source by its `toString` method or
@@ -13752,7 +14065,9 @@
 	      var strSymbols = stringToArray(string),
 	          chrSymbols = stringToArray(chars);
 	
-	      return strSymbols.slice(charsStartIndex(strSymbols, chrSymbols), charsEndIndex(strSymbols, chrSymbols) + 1).join('');
+	      return strSymbols
+	        .slice(charsStartIndex(strSymbols, chrSymbols), charsEndIndex(strSymbols, chrSymbols) + 1)
+	        .join('');
 	    }
 	
 	    /**
@@ -13786,7 +14101,9 @@
 	        return string;
 	      }
 	      var strSymbols = stringToArray(string);
-	      return strSymbols.slice(0, charsEndIndex(strSymbols, stringToArray(chars)) + 1).join('');
+	      return strSymbols
+	        .slice(0, charsEndIndex(strSymbols, stringToArray(chars)) + 1)
+	        .join('');
 	    }
 	
 	    /**
@@ -13820,7 +14137,9 @@
 	        return string;
 	      }
 	      var strSymbols = stringToArray(string);
-	      return strSymbols.slice(charsStartIndex(strSymbols, stringToArray(chars))).join('');
+	      return strSymbols
+	        .slice(charsStartIndex(strSymbols, stringToArray(chars)))
+	        .join('');
 	    }
 	
 	    /**
@@ -13832,7 +14151,7 @@
 	     * @memberOf _
 	     * @category String
 	     * @param {string} [string=''] The string to truncate.
-	     * @param {Object} [options] The options object.
+	     * @param {Object} [options=({})] The options object.
 	     * @param {number} [options.length=30] The maximum string length.
 	     * @param {string} [options.omission='...'] The string to indicate text is omitted.
 	     * @param {RegExp|string} [options.separator] The separator pattern to truncate to.
@@ -14017,7 +14336,7 @@
 	      try {
 	        return apply(func, undefined, args);
 	      } catch (e) {
-	        return isObject(e) ? e : new Error(e);
+	        return isError(e) ? e : new Error(e);
 	      }
 	    });
 	
@@ -14048,7 +14367,7 @@
 	     * // => logs 'clicked docs' when clicked
 	     */
 	    var bindAll = rest(function(object, methodNames) {
-	      arrayEach(baseFlatten(methodNames), function(key) {
+	      arrayEach(baseFlatten(methodNames, 1), function(key) {
 	        object[key] = bind(object[key], object);
 	      });
 	      return object;
@@ -14151,9 +14470,9 @@
 	    }
 	
 	    /**
-	     * Creates a function that returns the result of invoking the provided
-	     * functions with the `this` binding of the created function, where each
-	     * successive invocation is supplied the return value of the previous.
+	     * Creates a function that returns the result of invoking the given functions
+	     * with the `this` binding of the created function, where each successive
+	     * invocation is supplied the return value of the previous.
 	     *
 	     * @static
 	     * @memberOf _
@@ -14174,7 +14493,7 @@
 	
 	    /**
 	     * This method is like `_.flow` except that it creates a function that
-	     * invokes the provided functions from right to left.
+	     * invokes the given functions from right to left.
 	     *
 	     * @static
 	     * @memberOf _
@@ -14194,7 +14513,7 @@
 	    var flowRight = createFlow(true);
 	
 	    /**
-	     * This method returns the first argument provided to it.
+	     * This method returns the first argument given to it.
 	     *
 	     * @static
 	     * @memberOf _
@@ -14216,7 +14535,8 @@
 	     * Creates a function that invokes `func` with the arguments of the created
 	     * function. If `func` is a property name the created callback returns the
 	     * property value for a given element. If `func` is an object the created
-	     * callback returns `true` for elements that contain the equivalent object properties, otherwise it returns `false`.
+	     * callback returns `true` for elements that contain the equivalent object
+	     * properties, otherwise it returns `false`.
 	     *
 	     * @static
 	     * @memberOf _
@@ -14246,9 +14566,10 @@
 	    }
 	
 	    /**
-	     * Creates a function that performs a deep partial comparison between a given
+	     * Creates a function that performs a partial deep comparison between a given
 	     * object and `source`, returning `true` if the given object has equivalent
-	     * property values, else `false`.
+	     * property values, else `false`. The created function is equivalent to
+	     * `_.isMatch` with a `source` partially applied.
 	     *
 	     * **Note:** This method supports comparing the same values as `_.isEqual`.
 	     *
@@ -14272,7 +14593,7 @@
 	    }
 	
 	    /**
-	     * Creates a function that performs a deep partial comparison between the
+	     * Creates a function that performs a partial deep comparison between the
 	     * value at `path` of a given object to `srcValue`, returning `true` if the
 	     * object value is equivalent, else `false`.
 	     *
@@ -14681,8 +15002,8 @@
 	    var rangeRight = createRange(true);
 	
 	    /**
-	     * Invokes the iteratee function `n` times, returning an array of the results
-	     * of each invocation. The iteratee is invoked with one argument; (index).
+	     * Invokes the iteratee `n` times, returning an array of the results of
+	     * each invocation. The iteratee is invoked with one argument; (index).
 	     *
 	     * @static
 	     * @memberOf _
@@ -14706,7 +15027,7 @@
 	      var index = MAX_ARRAY_LENGTH,
 	          length = nativeMin(n, MAX_ARRAY_LENGTH);
 	
-	      iteratee = toFunction(iteratee);
+	      iteratee = baseCastFunction(iteratee);
 	      n -= MAX_ARRAY_LENGTH;
 	
 	      var result = baseTimes(length, iteratee);
@@ -14746,12 +15067,12 @@
 	    }
 	
 	    /**
-	     * Generates a unique ID. If `prefix` is provided the ID is appended to it.
+	     * Generates a unique ID. If `prefix` is given the ID is appended to it.
 	     *
 	     * @static
 	     * @memberOf _
 	     * @category Util
-	     * @param {string} [prefix] The value to prefix the ID with.
+	     * @param {string} [prefix=''] The value to prefix the ID with.
 	     * @returns {string} Returns the unique ID.
 	     * @example
 	     *
@@ -14784,6 +15105,9 @@
 	     */
 	    function add(augend, addend) {
 	      var result;
+	      if (augend === undefined && addend === undefined) {
+	        return 0;
+	      }
 	      if (augend !== undefined) {
 	        result = augend;
 	      }
@@ -14994,6 +15318,9 @@
 	     */
 	    function subtract(minuend, subtrahend) {
 	      var result;
+	      if (minuend === undefined && subtrahend === undefined) {
+	        return 0;
+	      }
 	      if (minuend !== undefined) {
 	        result = minuend;
 	      }
@@ -15096,6 +15423,7 @@
 	    lodash.bind = bind;
 	    lodash.bindAll = bindAll;
 	    lodash.bindKey = bindKey;
+	    lodash.castArray = castArray;
 	    lodash.chain = chain;
 	    lodash.chunk = chunk;
 	    lodash.compact = compact;
@@ -15124,6 +15452,7 @@
 	    lodash.flatMap = flatMap;
 	    lodash.flatten = flatten;
 	    lodash.flattenDeep = flattenDeep;
+	    lodash.flattenDepth = flattenDepth;
 	    lodash.flip = flip;
 	    lodash.flow = flow;
 	    lodash.flowRight = flowRight;
@@ -15280,9 +15609,11 @@
 	    lodash.invoke = invoke;
 	    lodash.isArguments = isArguments;
 	    lodash.isArray = isArray;
+	    lodash.isArrayBuffer = isArrayBuffer;
 	    lodash.isArrayLike = isArrayLike;
 	    lodash.isArrayLikeObject = isArrayLikeObject;
 	    lodash.isBoolean = isBoolean;
+	    lodash.isBuffer = isBuffer;
 	    lodash.isDate = isDate;
 	    lodash.isElement = isElement;
 	    lodash.isEmpty = isEmpty;
@@ -15293,6 +15624,7 @@
 	    lodash.isFunction = isFunction;
 	    lodash.isInteger = isInteger;
 	    lodash.isLength = isLength;
+	    lodash.isMap = isMap;
 	    lodash.isMatch = isMatch;
 	    lodash.isMatchWith = isMatchWith;
 	    lodash.isNaN = isNaN;
@@ -15305,10 +15637,13 @@
 	    lodash.isPlainObject = isPlainObject;
 	    lodash.isRegExp = isRegExp;
 	    lodash.isSafeInteger = isSafeInteger;
+	    lodash.isSet = isSet;
 	    lodash.isString = isString;
 	    lodash.isSymbol = isSymbol;
 	    lodash.isTypedArray = isTypedArray;
 	    lodash.isUndefined = isUndefined;
+	    lodash.isWeakMap = isWeakMap;
+	    lodash.isWeakSet = isWeakSet;
 	    lodash.join = join;
 	    lodash.kebabCase = kebabCase;
 	    lodash.last = last;
@@ -15392,7 +15727,7 @@
 	     *
 	     * @static
 	     * @memberOf _
-	     * @type string
+	     * @type {string}
 	     */
 	    lodash.VERSION = VERSION;
 	
@@ -15414,7 +15749,10 @@
 	        if (filtered) {
 	          result.__takeCount__ = nativeMin(n, result.__takeCount__);
 	        } else {
-	          result.__views__.push({ 'size': nativeMin(n, MAX_ARRAY_LENGTH), 'type': methodName + (result.__dir__ < 0 ? 'Right' : '') });
+	          result.__views__.push({
+	            'size': nativeMin(n, MAX_ARRAY_LENGTH),
+	            'type': methodName + (result.__dir__ < 0 ? 'Right' : '')
+	          });
 	        }
 	        return result;
 	      };
@@ -15431,7 +15769,10 @@
 	
 	      LazyWrapper.prototype[methodName] = function(iteratee) {
 	        var result = this.clone();
-	        result.__iteratees__.push({ 'iteratee': getIteratee(iteratee, 3), 'type': type });
+	        result.__iteratees__.push({
+	          'iteratee': getIteratee(iteratee, 3),
+	          'type': type
+	        });
 	        result.__filtered__ = result.__filtered__ || isFilter;
 	        return result;
 	      };
@@ -15583,7 +15924,10 @@
 	      }
 	    });
 	
-	    realNames[createHybridWrapper(undefined, BIND_KEY_FLAG).name] = [{ 'name': 'wrapper', 'func': undefined }];
+	    realNames[createHybridWrapper(undefined, BIND_KEY_FLAG).name] = [{
+	      'name': 'wrapper',
+	      'func': undefined
+	    }];
 	
 	    // Add functions to the lazy wrapper.
 	    LazyWrapper.prototype.clone = lazyClone;
@@ -15759,6 +16103,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	/* eslint no-unused-vars: 0 */
+	
 	
 	const styles = {
 		height: 0,
@@ -35397,19 +35742,20 @@
 	
 	exports.default = function (props) {
 		let buildQueueButtons = [];
+		let buildQueue = props.buildQueue;
 	
-		_lodash2.default.each(props.buildQueue, (queuedItem, index) => {
-			buildQueueButtons.push(_react2.default.createElement(
+		for (let x = 0; x < buildQueue.length; x++) {
+			buildQueueButtons[buildQueueButtons.length] = _react2.default.createElement(
 				'button',
 				{
-					key: queuedItem.label + index,
+					key: buildQueue[x].label + x,
 					className: 'icon-button',
 					style: buttonStyles,
-					onClick: _lodash2.default.bind(dequeueBuildItem, null, index)
+					onClick: _lodash2.default.bind(dequeueBuildItem, null, x)
 				},
-				queuedItem.label
-			));
-		});
+				buildQueue[x].label
+			);
+		}
 	
 		return _react2.default.createElement(
 			'div',
@@ -35443,6 +35789,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	/* eslint no-unused-vars: 0 */
+	
 	
 	const ecsManager = _instanceManager2.default.get('ecs-manager');
 	
@@ -35478,8 +35825,8 @@
 /* 185 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseForOwn = __webpack_require__(186),
-	    toFunction = __webpack_require__(205);
+	var baseCastFunction = __webpack_require__(186),
+	    baseForOwn = __webpack_require__(188);
 	
 	/**
 	 * Iterates over own enumerable properties of an object invoking `iteratee`
@@ -35508,7 +35855,7 @@
 	 * // => logs 'a' then 'b' (iteration order is not guaranteed)
 	 */
 	function forOwn(object, iteratee) {
-	  return object && baseForOwn(object, toFunction(iteratee));
+	  return object && baseForOwn(object, baseCastFunction(iteratee));
 	}
 	
 	module.exports = forOwn;
@@ -35518,8 +35865,54 @@
 /* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseFor = __webpack_require__(187),
-	    keys = __webpack_require__(189);
+	var identity = __webpack_require__(187);
+	
+	/**
+	 * Casts `value` to `identity` if it's not a function.
+	 *
+	 * @private
+	 * @param {*} value The value to inspect.
+	 * @returns {Array} Returns the array-like object.
+	 */
+	function baseCastFunction(value) {
+	  return typeof value == 'function' ? value : identity;
+	}
+	
+	module.exports = baseCastFunction;
+
+
+/***/ },
+/* 187 */
+/***/ function(module, exports) {
+
+	/**
+	 * This method returns the first argument given to it.
+	 *
+	 * @static
+	 * @memberOf _
+	 * @category Util
+	 * @param {*} value Any value.
+	 * @returns {*} Returns `value`.
+	 * @example
+	 *
+	 * var object = { 'user': 'fred' };
+	 *
+	 * _.identity(object) === object;
+	 * // => true
+	 */
+	function identity(value) {
+	  return value;
+	}
+	
+	module.exports = identity;
+
+
+/***/ },
+/* 188 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var baseFor = __webpack_require__(189),
+	    keys = __webpack_require__(191);
 	
 	/**
 	 * The base implementation of `_.forOwn` without support for iteratee shorthands.
@@ -35537,10 +35930,10 @@
 
 
 /***/ },
-/* 187 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createBaseFor = __webpack_require__(188);
+	var createBaseFor = __webpack_require__(190);
 	
 	/**
 	 * The base implementation of `baseForIn` and `baseForOwn` which iterates
@@ -35560,7 +35953,7 @@
 
 
 /***/ },
-/* 188 */
+/* 190 */
 /***/ function(module, exports) {
 
 	/**
@@ -35591,15 +35984,15 @@
 
 
 /***/ },
-/* 189 */
+/* 191 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseHas = __webpack_require__(190),
-	    baseKeys = __webpack_require__(191),
-	    indexKeys = __webpack_require__(192),
-	    isArrayLike = __webpack_require__(196),
-	    isIndex = __webpack_require__(203),
-	    isPrototype = __webpack_require__(204);
+	var baseHas = __webpack_require__(192),
+	    baseKeys = __webpack_require__(193),
+	    indexKeys = __webpack_require__(194),
+	    isArrayLike = __webpack_require__(198),
+	    isIndex = __webpack_require__(205),
+	    isPrototype = __webpack_require__(206);
 	
 	/**
 	 * Creates an array of the own enumerable property names of `object`.
@@ -35652,7 +36045,7 @@
 
 
 /***/ },
-/* 190 */
+/* 192 */
 /***/ function(module, exports) {
 
 	/** Used for built-in method references. */
@@ -35684,7 +36077,7 @@
 
 
 /***/ },
-/* 191 */
+/* 193 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -35695,7 +36088,6 @@
 	 * property of prototypes or treat sparse arrays as dense.
 	 *
 	 * @private
-	 * @type Function
 	 * @param {Object} object The object to query.
 	 * @returns {Array} Returns the array of property names.
 	 */
@@ -35707,14 +36099,14 @@
 
 
 /***/ },
-/* 192 */
+/* 194 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseTimes = __webpack_require__(193),
-	    isArguments = __webpack_require__(194),
-	    isArray = __webpack_require__(201),
-	    isLength = __webpack_require__(199),
-	    isString = __webpack_require__(202);
+	var baseTimes = __webpack_require__(195),
+	    isArguments = __webpack_require__(196),
+	    isArray = __webpack_require__(203),
+	    isLength = __webpack_require__(201),
+	    isString = __webpack_require__(204);
 	
 	/**
 	 * Creates an array of index keys for `object` values of arrays,
@@ -35737,7 +36129,7 @@
 
 
 /***/ },
-/* 193 */
+/* 195 */
 /***/ function(module, exports) {
 
 	/**
@@ -35763,10 +36155,10 @@
 
 
 /***/ },
-/* 194 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLikeObject = __webpack_require__(195);
+	var isArrayLikeObject = __webpack_require__(197);
 	
 	/** `Object#toString` result references. */
 	var argsTag = '[object Arguments]';
@@ -35812,11 +36204,11 @@
 
 
 /***/ },
-/* 195 */
+/* 197 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLike = __webpack_require__(196),
-	    isObjectLike = __webpack_require__(200);
+	var isArrayLike = __webpack_require__(198),
+	    isObjectLike = __webpack_require__(202);
 	
 	/**
 	 * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -35824,7 +36216,6 @@
 	 *
 	 * @static
 	 * @memberOf _
-	 * @type Function
 	 * @category Lang
 	 * @param {*} value The value to check.
 	 * @returns {boolean} Returns `true` if `value` is an array-like object, else `false`.
@@ -35850,12 +36241,12 @@
 
 
 /***/ },
-/* 196 */
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getLength = __webpack_require__(197),
+	var getLength = __webpack_require__(199),
 	    isFunction = __webpack_require__(7),
-	    isLength = __webpack_require__(199);
+	    isLength = __webpack_require__(201);
 	
 	/**
 	 * Checks if `value` is array-like. A value is considered array-like if it's
@@ -35864,7 +36255,6 @@
 	 *
 	 * @static
 	 * @memberOf _
-	 * @type Function
 	 * @category Lang
 	 * @param {*} value The value to check.
 	 * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
@@ -35891,10 +36281,10 @@
 
 
 /***/ },
-/* 197 */
+/* 199 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseProperty = __webpack_require__(198);
+	var baseProperty = __webpack_require__(200);
 	
 	/**
 	 * Gets the "length" property value of `object`.
@@ -35912,7 +36302,7 @@
 
 
 /***/ },
-/* 198 */
+/* 200 */
 /***/ function(module, exports) {
 
 	/**
@@ -35932,7 +36322,7 @@
 
 
 /***/ },
-/* 199 */
+/* 201 */
 /***/ function(module, exports) {
 
 	/** Used as references for various `Number` constants. */
@@ -35963,14 +36353,15 @@
 	 * // => false
 	 */
 	function isLength(value) {
-	  return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+	  return typeof value == 'number' &&
+	    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
 	}
 	
 	module.exports = isLength;
 
 
 /***/ },
-/* 200 */
+/* 202 */
 /***/ function(module, exports) {
 
 	/**
@@ -36004,7 +36395,7 @@
 
 
 /***/ },
-/* 201 */
+/* 203 */
 /***/ function(module, exports) {
 
 	/**
@@ -36012,7 +36403,7 @@
 	 *
 	 * @static
 	 * @memberOf _
-	 * @type Function
+	 * @type {Function}
 	 * @category Lang
 	 * @param {*} value The value to check.
 	 * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
@@ -36036,11 +36427,11 @@
 
 
 /***/ },
-/* 202 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArray = __webpack_require__(201),
-	    isObjectLike = __webpack_require__(200);
+	var isArray = __webpack_require__(203),
+	    isObjectLike = __webpack_require__(202);
 	
 	/** `Object#toString` result references. */
 	var stringTag = '[object String]';
@@ -36079,7 +36470,7 @@
 
 
 /***/ },
-/* 203 */
+/* 205 */
 /***/ function(module, exports) {
 
 	/** Used as references for various `Number` constants. */
@@ -36106,9 +36497,11 @@
 
 
 /***/ },
-/* 204 */
-/***/ function(module, exports) {
+/* 206 */
+/***/ function(module, exports, __webpack_require__) {
 
+	var isFunction = __webpack_require__(7);
+	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
 	
@@ -36121,58 +36514,12 @@
 	 */
 	function isPrototype(value) {
 	  var Ctor = value && value.constructor,
-	      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+	      proto = (isFunction(Ctor) && Ctor.prototype) || objectProto;
 	
 	  return value === proto;
 	}
 	
 	module.exports = isPrototype;
-
-
-/***/ },
-/* 205 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var identity = __webpack_require__(206);
-	
-	/**
-	 * Converts `value` to a function if it's not one.
-	 *
-	 * @private
-	 * @param {*} value The value to process.
-	 * @returns {Function} Returns the function.
-	 */
-	function toFunction(value) {
-	  return typeof value == 'function' ? value : identity;
-	}
-	
-	module.exports = toFunction;
-
-
-/***/ },
-/* 206 */
-/***/ function(module, exports) {
-
-	/**
-	 * This method returns the first argument provided to it.
-	 *
-	 * @static
-	 * @memberOf _
-	 * @category Util
-	 * @param {*} value Any value.
-	 * @returns {*} Returns `value`.
-	 * @example
-	 *
-	 * var object = { 'user': 'fred' };
-	 *
-	 * _.identity(object) === object;
-	 * // => true
-	 */
-	function identity(value) {
-	  return value;
-	}
-	
-	module.exports = identity;
 
 
 /***/ },
@@ -36186,18 +36533,18 @@
 	exports.default = function (props) {
 		let result = [];
 	
-		(0, _forOwn2.default)(props.productionOptions, (blueprint, key) => {
-			result.push(_react2.default.createElement(
+		for (let blueprint in props.productionOptions) {
+			result[result.length] = _react2.default.createElement(
 				'button',
 				{
-					key: key,
+					key: blueprint,
 					className: 'icon-button',
 					style: buttonStyles,
-					onClick: _lodash2.default.bind(handleSelectBlueprint, null, key, blueprint.label)
+					onClick: _lodash2.default.bind(handleSelectBlueprint, null, blueprint, props.productionOptions[blueprint].label)
 				},
-				blueprint.label
-			));
-		});
+				props.productionOptions[blueprint].label
+			);
+		}
 	
 		return _react2.default.createElement(
 			'div',
@@ -36231,6 +36578,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	/* eslint no-unused-vars: 0 */
+	
 	
 	const ecsManager = _instanceManager2.default.get('ecs-manager');
 	
@@ -36284,11 +36632,120 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
+	var _phaser = __webpack_require__(10);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	let ecsManager = _instanceManager2.default.get('ecs-manager');
 	
-	ecsManager.registerSystem('universe-creation', __webpack_require__(210).default).registerSystem('camera', __webpack_require__(223).default).registerSystem('breaking', __webpack_require__(224).default).registerSystem('colonize', __webpack_require__(225).default).registerSystem('entity-spawn-dequeue', __webpack_require__(226).default).registerSystem('group-coordination', __webpack_require__(227).default).registerSystem('movement', __webpack_require__(228).default).registerSystem('order-processing', __webpack_require__(230).default).registerSystem('selection', __webpack_require__(231).default).registerSystem('waypoint-dequeue', __webpack_require__(272).default).registerSystem('render-production-options', __webpack_require__(273).default).registerSystem('render-build-queue', __webpack_require__(274).default).registerSystem('radar-detection', __webpack_require__(275).default).registerSystem('weapon-detonation', __webpack_require__(276).default);
+	ecsManager.registerComponent('colonizable').registerComponent('colonizer').registerComponent('selectable').registerComponent('selected').registerComponent('sprite', __webpack_require__(210).default).registerComponent('breaks', {
+		state: {
+			remainingCooldown: 0,
+			cooldown: 0,
+			power: 0,
+			sound: null
+		}
+	}).registerComponent('detonation-fuse', {
+		state: {
+			damage: 0,
+			target: null
+		}
+	}).registerComponent('dockable', {
+		state: {
+			size: 0
+		}
+	}).registerComponent('entity-spawn-queue', {
+		factory(params = {}) {
+			return {
+				queue: params.queue || []
+			};
+		}
+	}).registerComponent('entity-spawner', {
+		factory(params = {}) {
+			return {
+				availableBlueprints: params.availableBlueprints || {}
+			};
+		}
+	}).registerComponent('environment', {
+		state: {
+			habitability: 0,
+			type: ''
+		}
+	}).registerComponent('group-movement', {
+		state: {
+			centralPoint: {
+				x: 0,
+				y: 0
+			},
+			queue: false
+		}
+	}).registerComponent('gun', {
+		state: {
+			remainingCooldown: 0,
+			cooldown: 0,
+			power: 0,
+			sound: null
+		}
+	}).registerComponent('health', {
+		state: {
+			current: 0,
+			max: 0
+		}
+	}).registerComponent('immovable', {
+		factory() {
+			this.physics.immovable = true;
+	
+			return true;
+		},
+		onRemove() {
+			if (this.physics) {
+				this.physics.immovable = false;
+			}
+		}
+	}).registerComponent('movable', {
+		state: {
+			acceleration: 150,
+			currentSpeed: 0,
+			topSpeed: 100
+		}
+	}).registerComponent('order', {
+		state: {
+			x: 0,
+			y: 0
+		}
+	}).registerComponent('physics', {
+		factory(params = {}) {
+			let sprite = this.sprite;
+	
+			_instanceManager2.default.get('game').physics.enable(sprite, _phaser.Physics.ARCADE);
+	
+			// NOTE Is the body reference safe or does it get reassigned later?
+			return sprite.body;
+		}
+	}).registerComponent('population', {
+		state: {
+			count: 0,
+			fertility: 0,
+			longevity: 0
+		}
+	}).registerComponent('radar', {
+		range: 0
+	}).registerComponent('team', {
+		state: {
+			name: 'neutral'
+		}
+	}).registerComponent('waypoint-queue', {
+		factory(params = { queue: [] }) {
+			params.queue = params.queue || [];
+	
+			return params;
+		}
+	}).registerComponent('waypoint', {
+		state: {
+			x: 0,
+			y: 0
+		}
+	});
 
 /***/ },
 /* 210 */
@@ -36298,9 +36755,67 @@
 	
 	exports.__esModule = true;
 	
-	var _lodash = __webpack_require__(22);
+	var _instanceManager = __webpack_require__(9);
 	
-	var _lodash2 = _interopRequireDefault(_lodash);
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _phaser = __webpack_require__(10);
+	
+	var _phaser2 = _interopRequireDefault(_phaser);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	const game = _instanceManager2.default.get('game');
+	const defaultParams = {
+		x: 0,
+		y: 0,
+		graphic: ''
+	};
+	
+	exports.default = {
+		factory(params) {
+			let sprite;
+	
+			params = params || defaultParams;
+	
+			sprite = new _phaser2.default.Sprite(game, params.x, params.y, params.graphic);
+			sprite.anchor.setTo(0.5, 0.5);
+			sprite.smoothed = false;
+	
+			_instanceManager2.default.get('world-entities').add(sprite);
+	
+			return sprite;
+		},
+		onRemove(sprite) {
+			sprite.destroy();
+		}
+	};
+
+/***/ },
+/* 211 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	let ecsManager = _instanceManager2.default.get('ecs-manager');
+	
+	ecsManager.registerSystem('universe-creation', __webpack_require__(212).default).registerSystem('camera', __webpack_require__(217).default).registerSystem('breaking', __webpack_require__(218).default).registerSystem('colonize', __webpack_require__(219).default).registerSystem('entity-spawn-dequeue', __webpack_require__(220).default).registerSystem('group-coordination', __webpack_require__(221).default).registerSystem('movement', __webpack_require__(222).default).registerSystem('order-processing', __webpack_require__(224).default).registerSystem('selection', __webpack_require__(225).default).registerSystem('waypoint-dequeue', __webpack_require__(268).default).registerSystem('render-production-options', __webpack_require__(269).default).registerSystem('render-build-queue', __webpack_require__(270).default).registerSystem('radar-detection', __webpack_require__(271).default).registerSystem('weapon-detonation', __webpack_require__(272).default);
+
+/***/ },
+/* 212 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _lodash = __webpack_require__(22);
 	
 	var _config = __webpack_require__(13);
 	
@@ -36310,17 +36825,15 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	__webpack_require__(211);
-	
-	var _colonyShip = __webpack_require__(212);
+	var _colonyShip = __webpack_require__(213);
 	
 	var _colonyShip2 = _interopRequireDefault(_colonyShip);
 	
-	var _fighter = __webpack_require__(217);
+	var _fighter = __webpack_require__(214);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
-	var _planet = __webpack_require__(221);
+	var _planet = __webpack_require__(216);
 	
 	var _planet2 = _interopRequireDefault(_planet);
 	
@@ -36350,8 +36863,8 @@
 	
 			for (let i = 0; i < _config2.default.universeSize; i++) {
 				let newPlanet = (0, _planet2.default)({
-					x: _lodash2.default.random(100, _config2.default.stage.width - 100),
-					y: _lodash2.default.random(100, _config2.default.stage.height - 100)
+					x: (0, _lodash.random)(100, _config2.default.stage.width - 100),
+					y: (0, _lodash.random)(100, _config2.default.stage.height - 100)
 				});
 	
 				planets.push(newPlanet);
@@ -36374,32 +36887,22 @@
 					name: 'player'
 				},
 				'entity-spawn-queue': {
-					queue: [{
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0
-					}, {
-						label: 'fighter',
-						blueprint: 'fighter',
-						elapsedBuildTime: 0
-					}, {
-						label: 'Colony Ship',
-						blueprint: 'colony-ship',
-						elapsedBuildTime: 0
-					}]
+					queue: (() => {
+						let fighters = [];
+						for (let x = 0; x < 10; x++) {
+							fighters.push({
+								label: 'fighter',
+								blueprint: 'fighter',
+								elapsedBuildTime: 0
+							});
+						}
+						return fighters;
+					})()
 				},
 				'entity-spawner': {
 					availableBlueprints: {
 						fighter: {
-							baseBuildTime: 400,
+							baseBuildTime: 4000,
 							cost: 0,
 							label: 'Fighter',
 							prefab: (0, _fighter2.default)('green')
@@ -36512,27 +37015,7 @@
 	exports.default = UniverseCreationSystem;
 
 /***/ },
-/* 211 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('entity-spawn-queue', {
-		factory(params = {}) {
-			return {
-				queue: params.queue || []
-			};
-		}
-	});
-
-/***/ },
-/* 212 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36583,125 +37066,10 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(213);
-
-	__webpack_require__(211);
-
-	__webpack_require__(214);
-
-	__webpack_require__(215);
-
-	__webpack_require__(216);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/***/ },
-/* 213 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('entity-spawner', {
-		factory(params = {}) {
-			return {
-				availableBlueprints: params.availableBlueprints || {}
-			};
-		}
-	});
 
 /***/ },
 /* 214 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	var _phaser = __webpack_require__(10);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('physics', {
-		factory(params = {}) {
-			let sprite = this.sprite;
-	
-			_instanceManager2.default.get('game').physics.enable(sprite, _phaser.Physics.ARCADE);
-	
-			// NOTE Is the body reference safe or does it get reassigned later?
-			return sprite.body;
-		}
-	});
-
-/***/ },
-/* 215 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	var _phaser = __webpack_require__(10);
-	
-	var _phaser2 = _interopRequireDefault(_phaser);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	const game = _instanceManager2.default.get('game');
-	const defaultParams = {
-		x: 0,
-		y: 0,
-		graphic: ''
-	};
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('sprite', {
-		factory(params) {
-			let sprite;
-	
-			params = params || defaultParams;
-	
-			sprite = new _phaser2.default.Sprite(game, params.x, params.y, params.graphic);
-			sprite.anchor.setTo(0.5, 0.5);
-			sprite.smoothed = false;
-	
-			_instanceManager2.default.get('world-entities').add(sprite);
-	
-			return sprite;
-		},
-		onRemove(sprite) {
-			sprite.destroy();
-		}
-	});
-
-/***/ },
-/* 216 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('team', {
-		state: {
-			name: 'neutral'
-		}
-	});
-
-/***/ },
-/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36750,60 +37118,14 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(218);
-
-	__webpack_require__(215);
-
-	__webpack_require__(216);
-
-	__webpack_require__(219);
-
-	var _beam = __webpack_require__(220);
+	var _beam = __webpack_require__(215);
 
 	var _beam2 = _interopRequireDefault(_beam);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 218 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('radar', {
-		range: 0
-	});
-
-/***/ },
-/* 219 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _lodash = __webpack_require__(22);
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('waypoint-queue', {
-		factory(params) {
-			return (0, _lodash.defaults)(params, {
-				queue: []
-			});
-		}
-	});
-
-/***/ },
-/* 220 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36846,12 +37168,10 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(215);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 221 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36890,43 +37210,10 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	__webpack_require__(215);
-
-	__webpack_require__(214);
-
-	__webpack_require__(222);
-
-	__webpack_require__(216);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 222 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	_instanceManager2.default.get('ecs-manager').registerComponent('immovable', {
-		factory() {
-			this.physics.immovable = true;
-	
-			return true;
-		},
-		onRemove() {
-			if (this.physics) {
-				this.physics.immovable = false;
-			}
-		}
-	});
-
-/***/ },
-/* 223 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37054,7 +37341,7 @@
 	exports.default = CameraSystem;
 
 /***/ },
-/* 224 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37108,7 +37395,7 @@
 	exports.default = BreakingSystem;
 
 /***/ },
-/* 225 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37119,11 +37406,11 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _colonyShip = __webpack_require__(212);
+	var _colonyShip = __webpack_require__(213);
 	
 	var _colonyShip2 = _interopRequireDefault(_colonyShip);
 	
-	var _fighter = __webpack_require__(217);
+	var _fighter = __webpack_require__(214);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
@@ -37191,7 +37478,7 @@
 	exports.default = ColonizeSystem;
 
 /***/ },
-/* 226 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37234,20 +37521,15 @@
 	
 			if (activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 				let newEntity;
-				let spawnerSprite = entity.sprite;
-				let waypoint = entity.waypoint;
 	
 				entitySpawnQueue.shift();
 	
 				newEntity = spawnerBlueprint.prefab({
-					x: spawnerSprite.x,
-					y: spawnerSprite.y
+					x: entity.sprite.x,
+					y: entity.sprite.y
 				});
 				newEntity.team.name = entity.team.name;
-				newEntity['waypoint-queue'].queue.push({
-					x: waypoint.x,
-					y: waypoint.y
-				});
+				newEntity['waypoint-queue'].queue.push(entity.waypoint);
 			}
 		}
 	};
@@ -37255,7 +37537,7 @@
 	exports.default = EntitySpawnDequeueSystem;
 
 /***/ },
-/* 227 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37332,20 +37614,20 @@
 			formationCenterOffsetX = slotWidth * (rowCount - 1) / 2;
 			formationCenterOffsetY = slotWidth * (colCount - 1) / 2;
 	
-			(0, _lodash.each)(entities, (entity, i) => {
-				let waypointQueue = entity['waypoint-queue'];
+			for (let x = 0; x < entities.length; x++) {
+				let waypointQueue = entities[x]['waypoint-queue'];
 	
-				formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (i % rowCount) - formationCenterOffsetX;
-				formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * (i / rowCount | 0) - formationCenterOffsetY;
+				formationPositionX = groupMovementComponent.centralPoint.x + slotWidth * (x % rowCount) - formationCenterOffsetX;
+				formationPositionY = groupMovementComponent.centralPoint.y + slotWidth * (x / rowCount | 0) - formationCenterOffsetY;
 	
 				if (groupMovementComponent.queue && waypointQueue) {
-					waypointQueue.queue.push({
+					waypointQueue.queue[waypointQueue.queue.length]({
 						x: formationPositionX,
 						y: formationPositionY,
 						hyperspace: groupMovementComponent.hyperspace
 					});
 				} else {
-					GroupCoordinationSystem.ecsManager.addComponent(entity.id, 'waypoint', {
+					GroupCoordinationSystem.ecsManager.addComponent(entities[x].id, 'waypoint', {
 						x: formationPositionX,
 						y: formationPositionY
 					});
@@ -37355,8 +37637,8 @@
 					}
 				}
 	
-				GroupCoordinationSystem.ecsManager.removeComponent(entity.id, 'group-movement');
-			});
+				GroupCoordinationSystem.ecsManager.removeComponent(entities[x].id, 'group-movement');
+			}
 	
 			if (!GroupCoordinationSystem.moveOrderSound.isPlaying) {
 				GroupCoordinationSystem.moveOrderSound.play();
@@ -37367,7 +37649,7 @@
 	exports.default = GroupCoordinationSystem;
 
 /***/ },
-/* 228 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37378,7 +37660,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _utils = __webpack_require__(229);
+	var _utils = __webpack_require__(223);
 	
 	var _utils2 = _interopRequireDefault(_utils);
 	
@@ -37409,7 +37691,10 @@
 			let waypoint = entity.waypoint;
 	
 			breakingDistance = _utils2.default.breakingDistance(movable.currentSpeed, movable.acceleration);
-			distance = _utils2.default.distanceBetween(sprite, waypoint);
+			distance = _utils2.default.distanceBetween({
+				x: sprite.x,
+				y: sprite.y
+			}, waypoint);
 	
 			if (distance <= breakingDistance) {
 				movable.currentSpeed -= movable.acceleration * MovementSystem.game.time.physicsElapsed;
@@ -37430,7 +37715,10 @@
 			}
 	
 			// TODO Cache angle
-			angle = _utils2.default.angleBetween(sprite.position, waypoint);
+			angle = _utils2.default.angleBetween({
+				x: sprite.position.x,
+				y: sprite.position.y
+			}, waypoint);
 	
 			sprite.rotation = angle; // TODO Animate angle change
 			sprite.position.x += Math.cos(angle) * movable.currentSpeed * MovementSystem.game.time.physicsElapsed;
@@ -37445,7 +37733,7 @@
 	// Determine how to best store references to libraries and global instances
 
 /***/ },
-/* 229 */
+/* 223 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -37461,16 +37749,16 @@
 			return currentSpeed * currentSpeed / (2 * acceleration);
 		},
 	
-		distanceBetween(objA, objB) {
-			let dx = objA.x - objB.x;
-			let dy = objA.y - objB.y;
+		distanceBetween(posA, posB) {
+			let dx = posA.x - posB.x;
+			let dy = posA.y - posB.y;
 	
 			return Math.sqrt(dx * dx + dy * dy);
 		}
 	};
 
 /***/ },
-/* 230 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37591,18 +37879,18 @@
 	exports.default = OrdersProcessingSystem;
 
 /***/ },
-/* 231 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _bind = __webpack_require__(232);
+	var _bind = __webpack_require__(226);
 	
 	var _bind2 = _interopRequireDefault(_bind);
 	
-	var _each = __webpack_require__(267);
+	var _each = __webpack_require__(263);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -37678,11 +37966,12 @@
 	exports.default = SelectionSystem;
 
 /***/ },
-/* 232 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createWrapper = __webpack_require__(233),
-	    replaceHolders = __webpack_require__(264),
+	var createWrapper = __webpack_require__(227),
+	    getPlaceholder = __webpack_require__(258),
+	    replaceHolders = __webpack_require__(260),
 	    rest = __webpack_require__(3);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -37727,29 +38016,30 @@
 	var bind = rest(function(func, thisArg, partials) {
 	  var bitmask = BIND_FLAG;
 	  if (partials.length) {
-	    var placeholder = bind.placeholder,
-	        holders = replaceHolders(partials, placeholder);
-	
+	    var holders = replaceHolders(partials, getPlaceholder(bind));
 	    bitmask |= PARTIAL_FLAG;
 	  }
 	  return createWrapper(func, bitmask, thisArg, partials, holders);
 	});
 	
+	// Assign default placeholders.
+	bind.placeholder = {};
+	
 	module.exports = bind;
 
 
 /***/ },
-/* 233 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(234),
-	    createBaseWrapper = __webpack_require__(242),
-	    createCurryWrapper = __webpack_require__(245),
-	    createHybridWrapper = __webpack_require__(246),
-	    createPartialWrapper = __webpack_require__(265),
-	    getData = __webpack_require__(254),
-	    mergeData = __webpack_require__(266),
-	    setData = __webpack_require__(261),
+	var baseSetData = __webpack_require__(228),
+	    createBaseWrapper = __webpack_require__(236),
+	    createCurryWrapper = __webpack_require__(239),
+	    createHybridWrapper = __webpack_require__(240),
+	    createPartialWrapper = __webpack_require__(261),
+	    getData = __webpack_require__(249),
+	    mergeData = __webpack_require__(262),
+	    setData = __webpack_require__(256),
 	    toInteger = __webpack_require__(5);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -37811,8 +38101,12 @@
 	
 	    partials = holders = undefined;
 	  }
-	  var data = isBindKey ? undefined : getData(func),
-	      newData = [func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity];
+	  var data = isBindKey ? undefined : getData(func);
+	
+	  var newData = [
+	    func, bitmask, thisArg, partials, holders, partialsRight, holdersRight,
+	    argPos, ary, arity
+	  ];
 	
 	  if (data) {
 	    mergeData(newData, data);
@@ -37846,11 +38140,11 @@
 
 
 /***/ },
-/* 234 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var identity = __webpack_require__(206),
-	    metaMap = __webpack_require__(235);
+	var identity = __webpack_require__(187),
+	    metaMap = __webpack_require__(229);
 	
 	/**
 	 * The base implementation of `setData` without support for hot loop detection.
@@ -37869,10 +38163,10 @@
 
 
 /***/ },
-/* 235 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WeakMap = __webpack_require__(236);
+	var WeakMap = __webpack_require__(230);
 	
 	/** Used to store function metadata. */
 	var metaMap = WeakMap && new WeakMap;
@@ -37881,11 +38175,11 @@
 
 
 /***/ },
-/* 236 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getNative = __webpack_require__(237),
-	    root = __webpack_require__(240);
+	var getNative = __webpack_require__(231),
+	    root = __webpack_require__(234);
 	
 	/* Built-in method references that are verified to be native. */
 	var WeakMap = getNative(root, 'WeakMap');
@@ -37894,10 +38188,10 @@
 
 
 /***/ },
-/* 237 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isNative = __webpack_require__(238);
+	var isNative = __webpack_require__(232);
 	
 	/**
 	 * Gets the native function at `key` of `object`.
@@ -37916,12 +38210,12 @@
 
 
 /***/ },
-/* 238 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isFunction = __webpack_require__(7),
-	    isHostObject = __webpack_require__(239),
-	    isObjectLike = __webpack_require__(200);
+	    isHostObject = __webpack_require__(233),
+	    isObjectLike = __webpack_require__(202);
 	
 	/** Used to match `RegExp` [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns). */
 	var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
@@ -37975,7 +38269,7 @@
 
 
 /***/ },
-/* 239 */
+/* 233 */
 /***/ function(module, exports) {
 
 	/**
@@ -38001,10 +38295,10 @@
 
 
 /***/ },
-/* 240 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(module, global) {var checkGlobal = __webpack_require__(241);
+	/* WEBPACK VAR INJECTION */(function(module, global) {var checkGlobal = __webpack_require__(235);
 	
 	/** Used to determine if values are of the language type `Object`. */
 	var objectTypes = {
@@ -38013,10 +38307,14 @@
 	};
 	
 	/** Detect free variable `exports`. */
-	var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType) ? exports : null;
+	var freeExports = (objectTypes[typeof exports] && exports && !exports.nodeType)
+	  ? exports
+	  : undefined;
 	
 	/** Detect free variable `module`. */
-	var freeModule = (objectTypes[typeof module] && module && !module.nodeType) ? module : null;
+	var freeModule = (objectTypes[typeof module] && module && !module.nodeType)
+	  ? module
+	  : undefined;
 	
 	/** Detect free variable `global` from Node.js. */
 	var freeGlobal = checkGlobal(freeExports && freeModule && typeof global == 'object' && global);
@@ -38036,14 +38334,16 @@
 	 * The `this` value is used if it's the global object to avoid Greasemonkey's
 	 * restricted `window` object, otherwise the `window` object is used.
 	 */
-	var root = freeGlobal || ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) || freeSelf || thisGlobal || Function('return this')();
+	var root = freeGlobal ||
+	  ((freeWindow !== (thisGlobal && thisGlobal.window)) && freeWindow) ||
+	    freeSelf || thisGlobal || Function('return this')();
 	
 	module.exports = root;
 	
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(23)(module), (function() { return this; }())))
 
 /***/ },
-/* 241 */
+/* 235 */
 /***/ function(module, exports) {
 
 	/**
@@ -38061,11 +38361,11 @@
 
 
 /***/ },
-/* 242 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createCtorWrapper = __webpack_require__(243),
-	    root = __webpack_require__(240);
+	var createCtorWrapper = __webpack_require__(237),
+	    root = __webpack_require__(234);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -38095,10 +38395,10 @@
 
 
 /***/ },
-/* 243 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(244),
+	var baseCreate = __webpack_require__(238),
 	    isObject = __webpack_require__(8);
 	
 	/**
@@ -38138,10 +38438,13 @@
 
 
 /***/ },
-/* 244 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(8);
+	
+	/** Built-in value references. */
+	var objectCreate = Object.create;
 	
 	/**
 	 * The base implementation of `_.create` without support for assigning
@@ -38151,31 +38454,24 @@
 	 * @param {Object} prototype The object to inherit from.
 	 * @returns {Object} Returns the new object.
 	 */
-	var baseCreate = (function() {
-	  function object() {}
-	  return function(prototype) {
-	    if (isObject(prototype)) {
-	      object.prototype = prototype;
-	      var result = new object;
-	      object.prototype = undefined;
-	    }
-	    return result || {};
-	  };
-	}());
+	function baseCreate(proto) {
+	  return isObject(proto) ? objectCreate(proto) : {};
+	}
 	
 	module.exports = baseCreate;
 
 
 /***/ },
-/* 245 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(243),
-	    createHybridWrapper = __webpack_require__(246),
-	    createRecurryWrapper = __webpack_require__(249),
-	    replaceHolders = __webpack_require__(264),
-	    root = __webpack_require__(240);
+	    createCtorWrapper = __webpack_require__(237),
+	    createHybridWrapper = __webpack_require__(240),
+	    createRecurryWrapper = __webpack_require__(244),
+	    getPlaceholder = __webpack_require__(258),
+	    replaceHolders = __webpack_require__(260),
+	    root = __webpack_require__(234);
 	
 	/**
 	 * Creates a function that wraps `func` to enable currying.
@@ -38191,10 +38487,9 @@
 	
 	  function wrapper() {
 	    var length = arguments.length,
-	        index = length,
 	        args = Array(length),
-	        fn = (this && this !== root && this instanceof wrapper) ? Ctor : func,
-	        placeholder = wrapper.placeholder;
+	        index = length,
+	        placeholder = getPlaceholder(wrapper);
 	
 	    while (index--) {
 	      args[index] = arguments[index];
@@ -38204,9 +38499,13 @@
 	      : replaceHolders(args, placeholder);
 	
 	    length -= holders.length;
-	    return length < arity
-	      ? createRecurryWrapper(func, bitmask, createHybridWrapper, placeholder, undefined, args, holders, undefined, undefined, arity - length)
-	      : apply(fn, this, args);
+	    if (length < arity) {
+	      return createRecurryWrapper(
+	        func, bitmask, createHybridWrapper, wrapper.placeholder, undefined,
+	        args, holders, undefined, undefined, arity - length);
+	    }
+	    var fn = (this && this !== root && this instanceof wrapper) ? Ctor : func;
+	    return apply(fn, this, args);
 	  }
 	  return wrapper;
 	}
@@ -38215,16 +38514,18 @@
 
 
 /***/ },
-/* 246 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(247),
-	    composeArgsRight = __webpack_require__(248),
-	    createCtorWrapper = __webpack_require__(243),
-	    createRecurryWrapper = __webpack_require__(249),
-	    reorder = __webpack_require__(263),
-	    replaceHolders = __webpack_require__(264),
-	    root = __webpack_require__(240);
+	var composeArgs = __webpack_require__(241),
+	    composeArgsRight = __webpack_require__(242),
+	    countHolders = __webpack_require__(243),
+	    createCtorWrapper = __webpack_require__(237),
+	    createRecurryWrapper = __webpack_require__(244),
+	    getPlaceholder = __webpack_require__(258),
+	    reorder = __webpack_require__(259),
+	    replaceHolders = __webpack_require__(260),
+	    root = __webpack_require__(234);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38255,8 +38556,7 @@
 	  var isAry = bitmask & ARY_FLAG,
 	      isBind = bitmask & BIND_FLAG,
 	      isBindKey = bitmask & BIND_KEY_FLAG,
-	      isCurry = bitmask & CURRY_FLAG,
-	      isCurryRight = bitmask & CURRY_RIGHT_FLAG,
+	      isCurried = bitmask & (CURRY_FLAG | CURRY_RIGHT_FLAG),
 	      isFlip = bitmask & FLIP_FLAG,
 	      Ctor = isBindKey ? undefined : createCtorWrapper(func);
 	
@@ -38268,30 +38568,34 @@
 	    while (index--) {
 	      args[index] = arguments[index];
 	    }
+	    if (isCurried) {
+	      var placeholder = getPlaceholder(wrapper),
+	          holdersCount = countHolders(args, placeholder);
+	    }
 	    if (partials) {
-	      args = composeArgs(args, partials, holders);
+	      args = composeArgs(args, partials, holders, isCurried);
 	    }
 	    if (partialsRight) {
-	      args = composeArgsRight(args, partialsRight, holdersRight);
+	      args = composeArgsRight(args, partialsRight, holdersRight, isCurried);
 	    }
-	    if (isCurry || isCurryRight) {
-	      var placeholder = wrapper.placeholder,
-	          argsHolders = replaceHolders(args, placeholder);
-	
-	      length -= argsHolders.length;
-	      if (length < arity) {
-	        return createRecurryWrapper(func, bitmask, createHybridWrapper, placeholder, thisArg, args, argsHolders, argPos, ary, arity - length);
-	      }
+	    length -= holdersCount;
+	    if (isCurried && length < arity) {
+	      var newHolders = replaceHolders(args, placeholder);
+	      return createRecurryWrapper(
+	        func, bitmask, createHybridWrapper, wrapper.placeholder, thisArg,
+	        args, newHolders, argPos, ary, arity - length
+	      );
 	    }
 	    var thisBinding = isBind ? thisArg : this,
 	        fn = isBindKey ? thisBinding[func] : func;
 	
+	    length = args.length;
 	    if (argPos) {
 	      args = reorder(args, argPos);
-	    } else if (isFlip && args.length > 1) {
+	    } else if (isFlip && length > 1) {
 	      args.reverse();
 	    }
-	    if (isAry && ary < args.length) {
+	    if (isAry && ary < length) {
 	      args.length = ary;
 	    }
 	    if (this && this !== root && this instanceof wrapper) {
@@ -38306,7 +38610,7 @@
 
 
 /***/ },
-/* 247 */
+/* 241 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38320,23 +38624,28 @@
 	 * @param {Array|Object} args The provided arguments.
 	 * @param {Array} partials The arguments to prepend to those provided.
 	 * @param {Array} holders The `partials` placeholder indexes.
+	 * @params {boolean} [isCurried] Specify composing for a curried function.
 	 * @returns {Array} Returns the new array of composed arguments.
 	 */
-	function composeArgs(args, partials, holders) {
-	  var holdersLength = holders.length,
-	      argsIndex = -1,
-	      argsLength = nativeMax(args.length - holdersLength, 0),
+	function composeArgs(args, partials, holders, isCurried) {
+	  var argsIndex = -1,
+	      argsLength = args.length,
+	      holdersLength = holders.length,
 	      leftIndex = -1,
 	      leftLength = partials.length,
-	      result = Array(leftLength + argsLength);
+	      rangeLength = nativeMax(argsLength - holdersLength, 0),
+	      result = Array(leftLength + rangeLength),
+	      isUncurried = !isCurried;
 	
 	  while (++leftIndex < leftLength) {
 	    result[leftIndex] = partials[leftIndex];
 	  }
 	  while (++argsIndex < holdersLength) {
-	    result[holders[argsIndex]] = args[argsIndex];
+	    if (isUncurried || argsIndex < argsLength) {
+	      result[holders[argsIndex]] = args[argsIndex];
+	    }
 	  }
-	  while (argsLength--) {
+	  while (rangeLength--) {
 	    result[leftIndex++] = args[argsIndex++];
 	  }
 	  return result;
@@ -38346,7 +38655,7 @@
 
 
 /***/ },
-/* 248 */
+/* 242 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38360,18 +38669,21 @@
 	 * @param {Array|Object} args The provided arguments.
 	 * @param {Array} partials The arguments to append to those provided.
 	 * @param {Array} holders The `partials` placeholder indexes.
+	 * @params {boolean} [isCurried] Specify composing for a curried function.
 	 * @returns {Array} Returns the new array of composed arguments.
 	 */
-	function composeArgsRight(args, partials, holders) {
-	  var holdersIndex = -1,
+	function composeArgsRight(args, partials, holders, isCurried) {
+	  var argsIndex = -1,
+	      argsLength = args.length,
+	      holdersIndex = -1,
 	      holdersLength = holders.length,
-	      argsIndex = -1,
-	      argsLength = nativeMax(args.length - holdersLength, 0),
 	      rightIndex = -1,
 	      rightLength = partials.length,
-	      result = Array(argsLength + rightLength);
+	      rangeLength = nativeMax(argsLength - holdersLength, 0),
+	      result = Array(rangeLength + rightLength),
+	      isUncurried = !isCurried;
 	
-	  while (++argsIndex < argsLength) {
+	  while (++argsIndex < rangeLength) {
 	    result[argsIndex] = args[argsIndex];
 	  }
 	  var offset = argsIndex;
@@ -38379,7 +38691,9 @@
 	    result[offset + rightIndex] = partials[rightIndex];
 	  }
 	  while (++holdersIndex < holdersLength) {
-	    result[offset + holders[holdersIndex]] = args[argsIndex++];
+	    if (isUncurried || argsIndex < argsLength) {
+	      result[offset + holders[holdersIndex]] = args[argsIndex++];
+	    }
 	  }
 	  return result;
 	}
@@ -38388,12 +38702,39 @@
 
 
 /***/ },
-/* 249 */
+/* 243 */
+/***/ function(module, exports) {
+
+	/**
+	 * Gets the number of `placeholder` occurrences in `array`.
+	 *
+	 * @private
+	 * @param {Array} array The array to inspect.
+	 * @param {*} placeholder The placeholder to search for.
+	 * @returns {number} Returns the placeholder count.
+	 */
+	function countHolders(array, placeholder) {
+	  var length = array.length,
+	      result = 0;
+	
+	  while (length--) {
+	    if (array[length] === placeholder) {
+	      result++;
+	    }
+	  }
+	  return result;
+	}
+	
+	module.exports = countHolders;
+
+
+/***/ },
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(250),
-	    isLaziable = __webpack_require__(251),
-	    setData = __webpack_require__(261);
+	var copyArray = __webpack_require__(245),
+	    isLaziable = __webpack_require__(246),
+	    setData = __webpack_require__(256);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38410,7 +38751,7 @@
 	 * @param {Function} func The function to wrap.
 	 * @param {number} bitmask The bitmask of wrapper flags. See `createWrapper` for more details.
 	 * @param {Function} wrapFunc The function to create the `func` wrapper.
-	 * @param {*} placeholder The placeholder to replace.
+	 * @param {*} placeholder The placeholder value.
 	 * @param {*} [thisArg] The `this` binding of `func`.
 	 * @param {Array} [partials] The arguments to prepend to those provided to the new function.
 	 * @param {Array} [holders] The `partials` placeholder indexes.
@@ -38422,7 +38763,7 @@
 	function createRecurryWrapper(func, bitmask, wrapFunc, placeholder, thisArg, partials, holders, argPos, ary, arity) {
 	  var isCurry = bitmask & CURRY_FLAG,
 	      newArgPos = argPos ? copyArray(argPos) : undefined,
-	      newsHolders = isCurry ? holders : undefined,
+	      newHolders = isCurry ? holders : undefined,
 	      newHoldersRight = isCurry ? undefined : holders,
 	      newPartials = isCurry ? partials : undefined,
 	      newPartialsRight = isCurry ? undefined : partials;
@@ -38433,9 +38774,12 @@
 	  if (!(bitmask & CURRY_BOUND_FLAG)) {
 	    bitmask &= ~(BIND_FLAG | BIND_KEY_FLAG);
 	  }
-	  var newData = [func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight, newHoldersRight, newArgPos, ary, arity],
-	      result = wrapFunc.apply(undefined, newData);
+	  var newData = [
+	    func, bitmask, thisArg, newPartials, newHolders, newPartialsRight,
+	    newHoldersRight, newArgPos, ary, arity
+	  ];
 	
+	  var result = wrapFunc.apply(undefined, newData);
 	  if (isLaziable(func)) {
 	    setData(result, newData);
 	  }
@@ -38447,7 +38791,7 @@
 
 
 /***/ },
-/* 250 */
+/* 245 */
 /***/ function(module, exports) {
 
 	/**
@@ -38473,13 +38817,13 @@
 
 
 /***/ },
-/* 251 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(252),
-	    getData = __webpack_require__(254),
-	    getFuncName = __webpack_require__(256),
-	    lodash = __webpack_require__(258);
+	var LazyWrapper = __webpack_require__(247),
+	    getData = __webpack_require__(249),
+	    getFuncName = __webpack_require__(251),
+	    lodash = __webpack_require__(253);
 	
 	/**
 	 * Checks if `func` has a lazy counterpart.
@@ -38506,11 +38850,11 @@
 
 
 /***/ },
-/* 252 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(244),
-	    baseLodash = __webpack_require__(253);
+	var baseCreate = __webpack_require__(238),
+	    baseLodash = __webpack_require__(248);
 	
 	/** Used as references for the maximum length and index of an array. */
 	var MAX_ARRAY_LENGTH = 4294967295;
@@ -38519,6 +38863,7 @@
 	 * Creates a lazy wrapper object which wraps `value` to enable lazy evaluation.
 	 *
 	 * @private
+	 * @constructor
 	 * @param {*} value The value to wrap.
 	 */
 	function LazyWrapper(value) {
@@ -38538,7 +38883,7 @@
 
 
 /***/ },
-/* 253 */
+/* 248 */
 /***/ function(module, exports) {
 
 	/**
@@ -38554,11 +38899,11 @@
 
 
 /***/ },
-/* 254 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var metaMap = __webpack_require__(235),
-	    noop = __webpack_require__(255);
+	var metaMap = __webpack_require__(229),
+	    noop = __webpack_require__(250);
 	
 	/**
 	 * Gets metadata for `func`.
@@ -38575,7 +38920,7 @@
 
 
 /***/ },
-/* 255 */
+/* 250 */
 /***/ function(module, exports) {
 
 	/**
@@ -38600,10 +38945,10 @@
 
 
 /***/ },
-/* 256 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var realNames = __webpack_require__(257);
+	var realNames = __webpack_require__(252);
 	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
@@ -38637,7 +38982,7 @@
 
 
 /***/ },
-/* 257 */
+/* 252 */
 /***/ function(module, exports) {
 
 	/** Used to lookup unminified function names. */
@@ -38647,15 +38992,15 @@
 
 
 /***/ },
-/* 258 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(252),
-	    LodashWrapper = __webpack_require__(259),
-	    baseLodash = __webpack_require__(253),
-	    isArray = __webpack_require__(201),
-	    isObjectLike = __webpack_require__(200),
-	    wrapperClone = __webpack_require__(260);
+	var LazyWrapper = __webpack_require__(247),
+	    LodashWrapper = __webpack_require__(254),
+	    baseLodash = __webpack_require__(248),
+	    isArray = __webpack_require__(203),
+	    isObjectLike = __webpack_require__(202),
+	    wrapperClone = __webpack_require__(255);
 	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
@@ -38702,51 +39047,52 @@
 	 * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, and `toArray`
 	 *
 	 * The chainable wrapper methods are:
-	 * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`,
-	 * `at`, `before`, `bind`, `bindAll`, `bindKey`, `chain`, `chunk`, `commit`,
-	 * `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`, `curry`,
-	 * `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
+	 * `after`, `ary`, `assign`, `assignIn`, `assignInWith`, `assignWith`, `at`,
+	 * `before`, `bind`, `bindAll`, `bindKey`, `castArray`, `chain`, `chunk`,
+	 * `commit`, `compact`, `concat`, `conforms`, `constant`, `countBy`, `create`,
+	 * `curry`, `debounce`, `defaults`, `defaultsDeep`, `defer`, `delay`, `difference`,
 	 * `differenceBy`, `differenceWith`, `drop`, `dropRight`, `dropRightWhile`,
-	 * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flip`, `flow`,
-	 * `flowRight`, `fromPairs`, `functions`, `functionsIn`, `groupBy`, `initial`,
-	 * `intersection`, `intersectionBy`, `intersectionWith`, `invert`, `invertBy`,
-	 * `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`, `map`, `mapKeys`,
-	 * `mapValues`, `matches`, `matchesProperty`, `memoize`, `merge`, `mergeWith`,
-	 * `method`, `methodOf`, `mixin`, `negate`, `nthArg`, `omit`, `omitBy`, `once`,
-	 * `orderBy`, `over`, `overArgs`, `overEvery`, `overSome`, `partial`,
-	 * `partialRight`, `partition`, `pick`, `pickBy`, `plant`, `property`,
-	 * `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`, `range`,
-	 * `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`, `sampleSize`,
-	 * `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`, `splice`, `spread`,
-	 * `tail`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`,
-	 * `thru`, `toArray`, `toPairs`, `toPairsIn`, `toPath`, `toPlainObject`,
-	 * `transform`, `unary`, `union`, `unionBy`, `unionWith`, `uniq`, `uniqBy`,
-	 * `uniqWith`, `unset`, `unshift`, `unzip`, `unzipWith`, `values`, `valuesIn`,
-	 * `without`, `wrap`, `xor`, `xorBy`, `xorWith`, `zip`, `zipObject`,
-	 * `zipObjectDeep`, and `zipWith`
+	 * `dropWhile`, `fill`, `filter`, `flatten`, `flattenDeep`, `flattenDepth`,
+	 * `flip`, `flow`, `flowRight`, `fromPairs`, `functions`, `functionsIn`,
+	 * `groupBy`, `initial`, `intersection`, `intersectionBy`, `intersectionWith`,
+	 * `invert`, `invertBy`, `invokeMap`, `iteratee`, `keyBy`, `keys`, `keysIn`,
+	 * `map`, `mapKeys`, `mapValues`, `matches`, `matchesProperty`, `memoize`,
+	 * `merge`, `mergeWith`, `method`, `methodOf`, `mixin`, `negate`, `nthArg`,
+	 * `omit`, `omitBy`, `once`, `orderBy`, `over`, `overArgs`, `overEvery`,
+	 * `overSome`, `partial`, `partialRight`, `partition`, `pick`, `pickBy`, `plant`,
+	 * `property`, `propertyOf`, `pull`, `pullAll`, `pullAllBy`, `pullAt`, `push`,
+	 * `range`, `rangeRight`, `rearg`, `reject`, `remove`, `rest`, `reverse`,
+	 * `sampleSize`, `set`, `setWith`, `shuffle`, `slice`, `sort`, `sortBy`,
+	 * `splice`, `spread`, `tail`, `take`, `takeRight`, `takeRightWhile`,
+	 * `takeWhile`, `tap`, `throttle`, `thru`, `toArray`, `toPairs`, `toPairsIn`,
+	 * `toPath`, `toPlainObject`, `transform`, `unary`, `union`, `unionBy`,
+	 * `unionWith`, `uniq`, `uniqBy`, `uniqWith`, `unset`, `unshift`, `unzip`,
+	 * `unzipWith`, `values`, `valuesIn`, `without`, `wrap`, `xor`, `xorBy`,
+	 * `xorWith`, `zip`, `zipObject`, `zipObjectDeep`, and `zipWith`
 	 *
 	 * The wrapper methods that are **not** chainable by default are:
 	 * `add`, `attempt`, `camelCase`, `capitalize`, `ceil`, `clamp`, `clone`,
 	 * `cloneDeep`, `cloneDeepWith`, `cloneWith`, `deburr`, `endsWith`, `eq`,
-	 * `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`,
-	 * `findLast`, `findLastIndex`, `findLastKey`, `floor`, `forEach`, `forEachRight`,
-	 * `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`,
-	 * `hasIn`, `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`,
-	 * `isArguments`, `isArray`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
-	 * `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`, `isError`,
-	 * `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMatch`, `isMatchWith`,
-	 * `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`, `isObject`, `isObjectLike`,
-	 * `isPlainObject`, `isRegExp`, `isSafeInteger`, `isString`, `isUndefined`,
-	 * `isTypedArray`, `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`,
-	 * `lowerFirst`, `lt`, `lte`, `max`, `maxBy`, `mean`, `min`, `minBy`,
-	 * `noConflict`, `noop`, `now`, `pad`, `padEnd`, `padStart`, `parseInt`,
-	 * `pop`, `random`, `reduce`, `reduceRight`, `repeat`, `result`, `round`,
-	 * `runInContext`, `sample`, `shift`, `size`, `snakeCase`, `some`, `sortedIndex`,
-	 * `sortedIndexBy`, `sortedLastIndex`, `sortedLastIndexBy`, `startCase`,
-	 * `startsWith`, `subtract`, `sum`, `sumBy`, `template`, `times`, `toLower`,
-	 * `toInteger`, `toLength`, `toNumber`, `toSafeInteger`, `toString`, `toUpper`,
-	 * `trim`, `trimEnd`, `trimStart`, `truncate`, `unescape`, `uniqueId`,
-	 * `upperCase`, `upperFirst`, `value`, and `words`
+	 * `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`, `findLast`,
+	 * `findLastIndex`, `findLastKey`, `floor`, `forEach`, `forEachRight`, `forIn`,
+	 * `forInRight`, `forOwn`, `forOwnRight`, `get`, `gt`, `gte`, `has`, `hasIn`,
+	 * `head`, `identity`, `includes`, `indexOf`, `inRange`, `invoke`, `isArguments`,
+	 * `isArray`, `isArrayBuffer`, `isArrayLike`, `isArrayLikeObject`, `isBoolean`,
+	 * `isBuffer`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isEqualWith`,
+	 * `isError`, `isFinite`, `isFunction`, `isInteger`, `isLength`, `isMap`,
+	 * `isMatch`, `isMatchWith`, `isNaN`, `isNative`, `isNil`, `isNull`, `isNumber`,
+	 * `isObject`, `isObjectLike`, `isPlainObject`, `isRegExp`, `isSafeInteger`,
+	 * `isSet`, `isString`, `isUndefined`, `isTypedArray`, `isWeakMap`, `isWeakSet`,
+	 * `join`, `kebabCase`, `last`, `lastIndexOf`, `lowerCase`, `lowerFirst`,
+	 * `lt`, `lte`, `max`, `maxBy`, `mean`, `min`, `minBy`, `noConflict`, `noop`,
+	 * `now`, `pad`, `padEnd`, `padStart`, `parseInt`, `pop`, `random`, `reduce`,
+	 * `reduceRight`, `repeat`, `result`, `round`, `runInContext`, `sample`,
+	 * `shift`, `size`, `snakeCase`, `some`, `sortedIndex`, `sortedIndexBy`,
+	 * `sortedLastIndex`, `sortedLastIndexBy`, `startCase`, `startsWith`, `subtract`,
+	 * `sum`, `sumBy`, `template`, `times`, `toLower`, `toInteger`, `toLength`,
+	 * `toNumber`, `toSafeInteger`, `toString`, `toUpper`, `trim`, `trimEnd`,
+	 * `trimStart`, `truncate`, `unescape`, `uniqueId`, `upperCase`, `upperFirst`,
+	 * `value`, and `words`
 	 *
 	 * @name _
 	 * @constructor
@@ -38793,11 +39139,11 @@
 
 
 /***/ },
-/* 259 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(244),
-	    baseLodash = __webpack_require__(253);
+	var baseCreate = __webpack_require__(238),
+	    baseLodash = __webpack_require__(248);
 	
 	/**
 	 * The base constructor for creating `lodash` wrapper objects.
@@ -38821,12 +39167,12 @@
 
 
 /***/ },
-/* 260 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(252),
-	    LodashWrapper = __webpack_require__(259),
-	    copyArray = __webpack_require__(250);
+	var LazyWrapper = __webpack_require__(247),
+	    LodashWrapper = __webpack_require__(254),
+	    copyArray = __webpack_require__(245);
 	
 	/**
 	 * Creates a clone of `wrapper`.
@@ -38850,11 +39196,11 @@
 
 
 /***/ },
-/* 261 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(234),
-	    now = __webpack_require__(262);
+	var baseSetData = __webpack_require__(228),
+	    now = __webpack_require__(257);
 	
 	/** Used to detect hot functions by number of calls within a span of milliseconds. */
 	var HOT_COUNT = 150,
@@ -38897,7 +39243,7 @@
 
 
 /***/ },
-/* 262 */
+/* 257 */
 /***/ function(module, exports) {
 
 	/**
@@ -38906,7 +39252,7 @@
 	 *
 	 * @static
 	 * @memberOf _
-	 * @type Function
+	 * @type {Function}
 	 * @category Date
 	 * @returns {number} Returns the timestamp.
 	 * @example
@@ -38922,11 +39268,30 @@
 
 
 /***/ },
-/* 263 */
+/* 258 */
+/***/ function(module, exports) {
+
+	/**
+	 * Gets the argument placeholder value for `func`.
+	 *
+	 * @private
+	 * @param {Function} func The function to inspect.
+	 * @returns {*} Returns the placeholder value.
+	 */
+	function getPlaceholder(func) {
+	  var object = func;
+	  return object.placeholder;
+	}
+	
+	module.exports = getPlaceholder;
+
+
+/***/ },
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(250),
-	    isIndex = __webpack_require__(203);
+	var copyArray = __webpack_require__(245),
+	    isIndex = __webpack_require__(205);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
 	var nativeMin = Math.min;
@@ -38957,7 +39322,7 @@
 
 
 /***/ },
-/* 264 */
+/* 260 */
 /***/ function(module, exports) {
 
 	/** Used as the internal argument placeholder. */
@@ -38979,7 +39344,8 @@
 	      result = [];
 	
 	  while (++index < length) {
-	    if (array[index] === placeholder) {
+	    var value = array[index];
+	    if (value === placeholder || value === PLACEHOLDER) {
 	      array[index] = PLACEHOLDER;
 	      result[++resIndex] = index;
 	    }
@@ -38991,12 +39357,12 @@
 
 
 /***/ },
-/* 265 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(243),
-	    root = __webpack_require__(240);
+	    createCtorWrapper = __webpack_require__(237),
+	    root = __webpack_require__(234);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -39040,13 +39406,13 @@
 
 
 /***/ },
-/* 266 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(247),
-	    composeArgsRight = __webpack_require__(248),
-	    copyArray = __webpack_require__(250),
-	    replaceHolders = __webpack_require__(264);
+	var composeArgs = __webpack_require__(241),
+	    composeArgsRight = __webpack_require__(242),
+	    copyArray = __webpack_require__(245),
+	    replaceHolders = __webpack_require__(260);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -39084,9 +39450,9 @@
 	      isCommon = newBitmask < (BIND_FLAG | BIND_KEY_FLAG | ARY_FLAG);
 	
 	  var isCombo =
-	    (srcBitmask == ARY_FLAG && (bitmask == CURRY_FLAG)) ||
-	    (srcBitmask == ARY_FLAG && (bitmask == REARG_FLAG) && (data[7].length <= source[8])) ||
-	    (srcBitmask == (ARY_FLAG | REARG_FLAG) && (source[7].length <= source[8]) && (bitmask == CURRY_FLAG));
+	    ((srcBitmask == ARY_FLAG) && (bitmask == CURRY_FLAG)) ||
+	    ((srcBitmask == ARY_FLAG) && (bitmask == REARG_FLAG) && (data[7].length <= source[8])) ||
+	    ((srcBitmask == (ARY_FLAG | REARG_FLAG)) && (source[7].length <= source[8]) && (bitmask == CURRY_FLAG));
 	
 	  // Exit early if metadata can't be merged.
 	  if (!(isCommon || isCombo)) {
@@ -39096,7 +39462,7 @@
 	  if (srcBitmask & BIND_FLAG) {
 	    data[2] = source[2];
 	    // Set when currying a bound function.
-	    newBitmask |= (bitmask & BIND_FLAG) ? 0 : CURRY_BOUND_FLAG;
+	    newBitmask |= bitmask & BIND_FLAG ? 0 : CURRY_BOUND_FLAG;
 	  }
 	  // Compose partial arguments.
 	  var value = source[3];
@@ -39136,20 +39502,20 @@
 
 
 /***/ },
-/* 267 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(268);
+	module.exports = __webpack_require__(264);
 
 
 /***/ },
-/* 268 */
+/* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(269),
-	    baseEach = __webpack_require__(270),
-	    isArray = __webpack_require__(201),
-	    toFunction = __webpack_require__(205);
+	var arrayEach = __webpack_require__(265),
+	    baseCastFunction = __webpack_require__(186),
+	    baseEach = __webpack_require__(266),
+	    isArray = __webpack_require__(203);
 	
 	/**
 	 * Iterates over elements of `collection` invoking `iteratee` for each element.
@@ -39182,14 +39548,14 @@
 	function forEach(collection, iteratee) {
 	  return (typeof iteratee == 'function' && isArray(collection))
 	    ? arrayEach(collection, iteratee)
-	    : baseEach(collection, toFunction(iteratee));
+	    : baseEach(collection, baseCastFunction(iteratee));
 	}
 	
 	module.exports = forEach;
 
 
 /***/ },
-/* 269 */
+/* 265 */
 /***/ function(module, exports) {
 
 	/**
@@ -39217,11 +39583,11 @@
 
 
 /***/ },
-/* 270 */
+/* 266 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseForOwn = __webpack_require__(186),
-	    createBaseEach = __webpack_require__(271);
+	var baseForOwn = __webpack_require__(188),
+	    createBaseEach = __webpack_require__(267);
 	
 	/**
 	 * The base implementation of `_.forEach` without support for iteratee shorthands.
@@ -39237,10 +39603,10 @@
 
 
 /***/ },
-/* 271 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isArrayLike = __webpack_require__(196);
+	var isArrayLike = __webpack_require__(198);
 	
 	/**
 	 * Creates a `baseEach` or `baseEachRight` function.
@@ -39275,7 +39641,7 @@
 
 
 /***/ },
-/* 272 */
+/* 268 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39317,7 +39683,7 @@
 	exports.default = WaypointDequeueSystem;
 
 /***/ },
-/* 273 */
+/* 269 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39343,25 +39709,31 @@
 		init() {
 			RenderProductionOptionsSystem.game = _instanceManager2.default.get('game');
 			RenderProductionOptionsSystem.ui = _instanceManager2.default.get('ui');
+	
+			RenderProductionOptionsSystem.run = (0, _lodash.throttle)(RenderProductionOptionsSystem.run, 150);
 		},
 	
-		run: (0, _lodash.throttle)(function (entities) {
-			let selectedEntities = (0, _lodash.filter)(entities, function (entity) {
-				return entity.selected;
-			});
+		run(entities) {
+			let selectedEntities = [];
+	
+			for (let x = 0; x < entities.length; x++) {
+				if (entities[x].selected) {
+					selectedEntities[selectedEntities.length] = entities[x];
+				}
+			}
 	
 			if (selectedEntities.length) {
 				RenderProductionOptionsSystem.ui.setProductionOptions(selectedEntities[0]['entity-spawner'].availableBlueprints);
 			} else {
 				RenderProductionOptionsSystem.ui.setProductionOptions(null);
 			}
-		}, 100)
+		}
 	};
 	
 	exports.default = RenderProductionOptionsSystem;
 
 /***/ },
-/* 274 */
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39387,25 +39759,31 @@
 		init() {
 			RenderBuildingQueueSystem.game = _instanceManager2.default.get('game');
 			RenderBuildingQueueSystem.ui = _instanceManager2.default.get('ui');
+	
+			RenderBuildingQueueSystem.run = (0, _lodash.throttle)(RenderBuildingQueueSystem.run, 150);
 		},
 	
-		run: (0, _lodash.throttle)(function (entities) {
-			let selectedEntities = (0, _lodash.filter)(entities, function (entity) {
-				return entity.selected;
-			});
+		run(entities) {
+			let selectedEntities = [];
+	
+			for (let x = 0; x < entities.length; x++) {
+				if (entities[x].selected) {
+					selectedEntities[selectedEntities.length] = entities[x];
+				}
+			}
 	
 			if (selectedEntities.length === 1) {
 				RenderBuildingQueueSystem.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
 			} else {
 				RenderBuildingQueueSystem.ui.setBuildQueue(null);
 			}
-		}, 100)
+		}
 	};
 	
 	exports.default = RenderBuildingQueueSystem;
 
 /***/ },
-/* 275 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39437,22 +39815,30 @@
 	
 		// TODO Optimize with quadtree
 		runOne(entity) {
-			let gun = entity.gun;
-			let sprite = entity.sprite;
-			let radar = entity.radar;
-			let currentTarget;
-			let currentTargetDistance;
+			entity.gun.remainingCooldown = Math.max(entity.gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS, 0);
 	
-			gun.remainingCooldown = Math.max(gun.remainingCooldown - RadarDetectionSystemSystem.game.time.physicsElapsedMS, 0);
-	
-			if (gun.remainingCooldown) {
+			if (entity.gun.remainingCooldown) {
 				return;
 			}
 	
+			RadarDetectionSystemSystem.foo({
+				breaks: entity.breaks,
+				gun: entity.gun,
+				id: entity.id,
+				movable: entity.movable,
+				radar: entity.radar,
+				sprite: entity.sprite,
+				team: entity.team
+			});
+		},
+	
+		foo({ sprite, radar, movable, breaks, gun, team, id }) {
+			let currentTarget;
+			let currentTargetDistance;
 			let potentialTargets = RadarDetectionSystemSystem.ecsManager.getEntities(['team', 'sprite', 'health']);
 	
 			for (let x = 0; x < potentialTargets.length; x++) {
-				if (potentialTargets[x].team.name !== entity.team.name) {
+				if (potentialTargets[x].team.name !== team.name) {
 					let targetDistance = RadarDetectionSystemSystem.calculateTargetDistance(sprite.position, potentialTargets[x].sprite.position);
 	
 					if (targetDistance <= radar.range) {
@@ -39465,13 +39851,13 @@
 			}
 	
 			if (currentTarget) {
-				if (entity.movable && entity.movable.currentSpeed === 0) {
+				if (movable && movable.currentSpeed === 0) {
 					RadarDetectionSystemSystem.fire(sprite, gun, currentTarget);
-				} else if (!entity.breaks) {
-					RadarDetectionSystemSystem.ecsManager.addComponent(entity.id, 'breaks');
+				} else if (!breaks) {
+					RadarDetectionSystemSystem.ecsManager.addComponent(id, 'breaks');
 				}
-			} else if (entity.breaks) {
-				RadarDetectionSystemSystem.ecsManager.removeComponent(entity.id, 'breaks');
+			} else if (breaks) {
+				RadarDetectionSystemSystem.ecsManager.removeComponent(id, 'breaks');
 			}
 		},
 	
@@ -39500,7 +39886,7 @@
 	exports.default = RadarDetectionSystemSystem;
 
 /***/ },
-/* 276 */
+/* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39550,7 +39936,7 @@
 	exports.default = WeaponDetonationSystem;
 
 /***/ },
-/* 277 */
+/* 273 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39563,7 +39949,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(278);
+	var _mouseControls = __webpack_require__(274);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -39632,14 +40018,14 @@
 	});
 
 /***/ },
-/* 278 */
+/* 274 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _each = __webpack_require__(267);
+	var _each = __webpack_require__(263);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -39659,7 +40045,6 @@
 	exports.default = {
 		checkForDoubleClick: false,
 		controls: null,
-		endPoint: new _phaser2.default.Point(),
 		game: _instanceManager2.default.get('game'),
 		graphic: null,
 		mousePointer: null,

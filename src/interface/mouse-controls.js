@@ -8,7 +8,6 @@ const ecsManager = instanceManager.get('ecs-manager');
 export default {
 	checkForDoubleClick: false,
 	controls: null,
-	endPoint: new Phaser.Point(),
 	game: instanceManager.get('game'),
 	graphic: null,
 	mousePointer: null,

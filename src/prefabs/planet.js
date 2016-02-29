@@ -1,11 +1,6 @@
 import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
-import 'components/sprite';
-import 'components/physics';
-import 'components/immovable';
-import 'components/team';
-
 export default
 function(position) {
 	let ecsManager = instanceManager.get('ecs-manager');

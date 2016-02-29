@@ -33,20 +33,15 @@ let EntitySpawnDequeueSystem = {
 
 		if(activeConstruction.elapsedBuildTime >= spawnerBlueprint.baseBuildTime) {
 			let newEntity;
-			let spawnerSprite = entity.sprite;
-			let waypoint = entity.waypoint;
 
 			entitySpawnQueue.shift();
 
 			newEntity = spawnerBlueprint.prefab({
-				x: spawnerSprite.x,
-				y: spawnerSprite.y,
+				x: entity.sprite.x,
+				y: entity.sprite.y,
 			});
 			newEntity.team.name = entity.team.name;
-			newEntity['waypoint-queue'].queue.push({
-				x: waypoint.x,
-				y: waypoint.y,
-			});
+			newEntity['waypoint-queue'].queue.push(entity.waypoint);
 		}
 	},
 };

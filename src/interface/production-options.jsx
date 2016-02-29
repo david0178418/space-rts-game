@@ -41,18 +41,18 @@ export default
 function(props) {
 	let result = [];
 
-	forOwn(props.productionOptions, (blueprint, key) => {
-		result.push(
+	for(let blueprint in props.productionOptions) {
+		result[result.length] = (
 			<button
-				key={key}
+				key={blueprint}
 				className="icon-button"
 				style={buttonStyles}
-				onClick={_.bind(handleSelectBlueprint, null, key, blueprint.label)}
+				onClick={_.bind(handleSelectBlueprint, null, blueprint, props.productionOptions[blueprint].label)}
 			>
-				{blueprint.label}
+				{props.productionOptions[blueprint].label}
 			</button>
 		);
-	});
+	}
 
 	return (
 		<div style={styles}>

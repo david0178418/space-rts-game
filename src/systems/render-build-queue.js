@@ -1,4 +1,4 @@
-import {filter, throttle} from 'lodash';
+import {throttle} from 'lodash';
 import instanceManager from 'instance-manager';
 
 let RenderBuildingQueueSystem = {
@@ -14,19 +14,25 @@ let RenderBuildingQueueSystem = {
 	init() {
 		RenderBuildingQueueSystem.game = instanceManager.get('game');
 		RenderBuildingQueueSystem.ui = instanceManager.get('ui');
+
+		RenderBuildingQueueSystem.run = throttle(RenderBuildingQueueSystem.run, 150);
 	},
 
-	run: throttle(function(entities) {
-		let selectedEntities = filter(entities, function(entity) {
-			return entity.selected;
-		});
+	run(entities) {
+		let selectedEntities = [];
+
+		for(let x = 0; x < entities.length; x++) {
+			if(entities[x].selected) {
+				selectedEntities[selectedEntities.length] = entities[x];
+			}
+		}
 
 		if(selectedEntities.length === 1) {
 			RenderBuildingQueueSystem.ui.setBuildQueue(selectedEntities[0]['entity-spawn-queue'].queue);
 		} else {
 			RenderBuildingQueueSystem.ui.setBuildQueue(null);
 		}
-	}, 100),
+	},
 };
 
 export default RenderBuildingQueueSystem;

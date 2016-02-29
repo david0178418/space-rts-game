@@ -1,11 +1,6 @@
 import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
-import 'components/radar';
-import 'components/sprite';
-import 'components/team';
-import 'components/waypoint-queue';
-
 import Beam from './beam';
 
 export default
