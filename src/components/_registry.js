@@ -8,13 +8,27 @@ ecsManager
 	.registerComponent('colonizer')
 	.registerComponent('selectable')
 	.registerComponent('selected')
+	.registerComponent('shield', require('./shield').default)
 	.registerComponent('sprite', require('./sprite').default)
+	.registerComponent('animation', {
+		factory: function(state = {}) {
+			this.sprite.animations.add(state.name, state.frames || null);
+
+			return state;
+		},
+	})
 	.registerComponent('breaks', {
 		state: {
 			remainingCooldown: 0,
 			cooldown: 0,
 			power: 0,
 			sound: null,
+		},
+	})
+	.registerComponent('colonize', {
+		state: {
+			sprite: null,
+			target: null,
 		},
 	})
 	.registerComponent('detonation-fuse', {

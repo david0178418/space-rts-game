@@ -7,7 +7,7 @@ function(position) {
 	let planet = ecsManager.createEntity();
 
 	ecsManager.addComponents(planet.id, {
-		sprite: extend({graphic: 'planet'}, position),
+		sprite: extend({graphic: `planet${(Math.random() * 10 + 1) | 0}`}, position),
 		physics: {},
 		immovable: {},
 		selectable: {},
@@ -24,6 +24,9 @@ function(position) {
 	});
 
 	instanceManager.get('planets-quadtree').insert(planet.sprite);
+
+	planet.sprite.scale.x = 3;
+	planet.sprite.scale.y = 3;
 
 	return planet;
 }

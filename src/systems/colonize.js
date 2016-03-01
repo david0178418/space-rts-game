@@ -33,7 +33,7 @@ let ColonizeSystem = {
 
 		// TODO Figure out how to handle colonization and blueprints
 		ColonizeSystem.ecsManager.removeComponent(colonizeTarget.id, 'colonizable');
-		ColonizeSystem.ecsManager.addComponent(colonizeTarget.id, {
+		ColonizeSystem.ecsManager.addComponents(colonizeTarget.id, {
 			team: {
 				name: teamName,
 			},

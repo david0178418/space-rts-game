@@ -11,6 +11,10 @@ function({position, target, damage}) {
 
 	ecsManager.addComponents(beam.id, {
 		sprite: extend({graphic: 'beam'}, position),
+		'animation': {
+			name: 'fire',
+			frames: [1],
+		},
 		'detonation-fuse': {
 			damage,
 			target,
@@ -26,8 +30,7 @@ function({position, target, damage}) {
 		},
 	});
 
-	beam.sprite.scale.x = .1;
-	beam.sprite.scale.y = .1;
+	beam.sprite.animations.play('fire', [1], true);
 
 	return beam;
 }

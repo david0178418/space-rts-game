@@ -6,16 +6,11 @@ import Phaser from 'phaser';
 const game = instanceManager.get('game');
 const ecsManager = instanceManager.get('ecs-manager');
 
+const PLANE_COUNT = 10;
+
 game.state.add('play', {
 	preload(game) {
-		game.load.image('beam', 'assets/images/blue.png');
-
-		game.load.image('green-fighter', 'assets/images/green-fighter.png');
-		game.load.image('red-fighter', 'assets/images/red-fighter.png');
-
 		game.load.image('battleship', 'assets/images/battleship.png');
-		game.load.image('colony-ship', 'assets/images/colony-ship.png');
-		game.load.image('planet', 'assets/images/planet.png');
 		game.load.image('probe', 'assets/images/probe.png');
 
 		game.load.image('selection', 'assets/images/selection.png', 50, 50);
@@ -27,6 +22,17 @@ game.state.add('play', {
 		game.load.audio( 'laser', 'assets/audio/laser1.ogg');
 		game.load.audio( 'move-order', 'assets/audio/move-order.ogg');
 		game.load.audio( 'lasting-hope', 'assets/audio/bgm-lasting-hope.mp3');
+
+		game.load.spritesheet('beam', 'assets/images/spr_bullet_strip.png', 39, 39);
+
+		game.load.image('green-fighter', 'assets/images/ships/blue2.png');
+		game.load.image('red-fighter', 'assets/images/ships/alien1.png');
+		game.load.image('colony-ship', 'assets/images/ships/att5.png');
+		game.load.image('shield', 'assets/images/shield.png');
+
+		for(let x = 1; x <= PLANE_COUNT; x++) {
+			game.load.image(`planet${x}`, `assets/images/planets/p${x}shaded.png`);
+		}
 	},
 
 	create(game) {

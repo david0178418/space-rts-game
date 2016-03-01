@@ -83,8 +83,8 @@ let UniverseCreationSystem = {
 				},
 			},
 			waypoint: {
-				x: playerPlanet.sprite.x + 100,
-				y: playerPlanet.sprite.y + 75,
+				x: playerPlanet.sprite.x + 200,
+				y: playerPlanet.sprite.y + 175,
 			},
 		});
 
@@ -171,8 +171,8 @@ let UniverseCreationSystem = {
 				},
 			},
 			waypoint: {
-				x: playerPlanet.sprite.x + 100,
-				y: playerPlanet.sprite.y + 75,
+				x: playerPlanet.sprite.x + 200,
+				y: playerPlanet.sprite.y + 175,
 			},
 		});
 

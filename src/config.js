@@ -1,6 +1,6 @@
 // commonjs format for use by electron
 module.exports = {
-	universeSize: 15,
+	universeSize: 7,
 	controls: {
 		panUp: 'W',
 		panLeft: 'A',

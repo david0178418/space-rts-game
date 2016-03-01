@@ -9,8 +9,13 @@ function(color) {
 		let ecsManager = instanceManager.get('ecs-manager');
 		let fighter = ecsManager.createEntity();
 
-		return ecsManager.addComponents(fighter.id, {
+		ecsManager.addComponents(fighter.id, {
 			sprite: extend({graphic: `${color}-fighter`}, position),
+			shield: {
+				currentPower: 100,
+				rechargeRate: 10,
+				maxPower: 100,
+			},
 			radar: {
 				range: 500,
 			},
@@ -37,5 +42,10 @@ function(color) {
 				topSpeed: 100,
 			},
 		});
+
+		fighter.sprite.scale.x = 0.4;
+		fighter.sprite.scale.y = 0.4;
+
+		return fighter;
 	};
 }

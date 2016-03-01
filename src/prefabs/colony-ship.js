@@ -6,8 +6,13 @@ function(position) {
 	let ecsManager = instanceManager.get('ecs-manager');
 	let colonyShip = ecsManager.createEntity();
 
-	return ecsManager.addComponents(colonyShip.id, {
+	ecsManager.addComponents(colonyShip.id, {
 		sprite: extend({graphic: 'colony-ship'}, position),
+		shield: {
+			currentPower: 100,
+			rechargeRate: 10,
+			maxPower: 100,
+		},
 		physics: {},
 		selectable: {},
 		team: {},
@@ -38,4 +43,9 @@ function(position) {
 			topSpeed: 25,
 		},
 	});
+
+	colonyShip.sprite.scale.x = 1;
+	colonyShip.sprite.scale.y = 1;
+
+	return colonyShip;
 }
