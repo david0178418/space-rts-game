@@ -12,6 +12,8 @@ ecsManager
 	.registerSystem('movement', require('./movement-system').default)
 	.registerSystem('order-processing', require('./order-processing-system').default)
 	.registerSystem('selection', require('./selection-system').default)
+	.registerSystem('shield-hit', require('./shield-hit-system').default)
+	.registerSystem('shield-regen', require('./shield-regen-system').default)
 	.registerSystem('waypoint-dequeue', require('./waypoint-dequeue-system').default)
 	.registerSystem('render-production-options', require('./render-production-options-system').default)
 	.registerSystem('render-build-queue', require('./render-build-queue-system').default)

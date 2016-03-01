@@ -94,8 +94,12 @@ let RadarDetectionSystemSystem = {
 		gun.remainingCooldown = gun.cooldown;
 
 		gun.prefab({
+			angle: angle,
 			damage: gun.power,
-			position: firingSprite.position,
+			position: {
+				x: firingSprite.position.x,
+				y: firingSprite.position.y,
+			},
 			target,
 		});
 

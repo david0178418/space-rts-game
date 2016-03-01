@@ -21,15 +21,26 @@ let WeaponDetonationSystem = {
 	runOne(entity) {
 		let detonationFuse = entity['detonation-fuse'];
 		let targetHealth = detonationFuse.target.health;
+		let targetShield = detonationFuse.target.shield || null;
 
 		WeaponDetonationSystem.ecsManager.destroyEntity(entity.id);
+
+		if(targetShield) {
+			targetShield.currentPower = targetShield.currentPower - detonationFuse.damage;
+
+			this.ecsManager.addComponent(detonationFuse.target.id, 'shieldHit', {
+				angle: detonationFuse.angle - detonationFuse.target.sprite.rotation - Math.PI,
+				size: detonationFuse.target.sprite.width,
+			});
+			return;
+		}
 
 		// Check if it's dead already
 		if(!targetHealth) {
 			return;
 		}
 
-		targetHealth.current -= detonationFuse.damage;
+		targetHealth.current = targetHealth.current - detonationFuse.damage;
 
 		// TODO some sort of death system
 		if(targetHealth.current <= 0) {

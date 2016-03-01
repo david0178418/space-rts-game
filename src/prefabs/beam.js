@@ -2,7 +2,7 @@ import {extend} from 'lodash';
 import instanceManager from 'instance-manager';
 
 export default
-function({position, target, damage}) {
+function({angle, damage, position, target}) {
 	let beam;
 	let ecsManager = instanceManager.get('ecs-manager');
 	let targetPosition = target.sprite.position;
@@ -16,12 +16,13 @@ function({position, target, damage}) {
 			frames: [1],
 		},
 		'detonation-fuse': {
+			angle,
 			damage,
 			target,
 		},
 		waypoint: {
-			x: targetPosition.x,
-			y: targetPosition.y,
+			x: targetPosition.x - Math.cos(angle) * (target.sprite.width / 2),
+			y: targetPosition.y - Math.sin(angle) * (target.sprite.width / 2),
 		},
 		movable: {
 			acceleration: 0,

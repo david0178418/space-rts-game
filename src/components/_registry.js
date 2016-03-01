@@ -8,7 +8,6 @@ ecsManager
 	.registerComponent('colonizer')
 	.registerComponent('selectable')
 	.registerComponent('selected')
-	.registerComponent('shield', require('./shield').default)
 	.registerComponent('sprite', require('./sprite').default)
 	.registerComponent('animation', {
 		factory: function(state = {}) {
@@ -33,6 +32,7 @@ ecsManager
 	})
 	.registerComponent('detonation-fuse', {
 		state: {
+			angle: 0,
 			damage: 0,
 			target: null,
 		},
@@ -129,6 +129,19 @@ ecsManager
 	})
 	.registerComponent('radar', {
 		range: 0,
+	})
+	.registerComponent('shield', {
+		state: {
+			currentPower: 0,
+			maxPower: 0,
+			rechargeRate: 0,
+		},
+	})
+	.registerComponent('shieldHit', {
+		state: {
+			angle: 0,
+			size: 0,
+		},
 	})
 	.registerComponent('team', {
 		state: {

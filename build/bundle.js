@@ -62,9 +62,9 @@
 	
 	__webpack_require__(209);
 	
-	__webpack_require__(212);
+	__webpack_require__(211);
 	
-	__webpack_require__(274);
+	__webpack_require__(275);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -36638,7 +36638,7 @@
 	
 	let ecsManager = _instanceManager2.default.get('ecs-manager');
 	
-	ecsManager.registerComponent('colonizable').registerComponent('colonizer').registerComponent('selectable').registerComponent('selected').registerComponent('shield', __webpack_require__(210).default).registerComponent('sprite', __webpack_require__(211).default).registerComponent('animation', {
+	ecsManager.registerComponent('colonizable').registerComponent('colonizer').registerComponent('selectable').registerComponent('selected').registerComponent('sprite', __webpack_require__(210).default).registerComponent('animation', {
 		factory: function (state = {}) {
 			this.sprite.animations.add(state.name, state.frames || null);
 	
@@ -36658,6 +36658,7 @@
 		}
 	}).registerComponent('detonation-fuse', {
 		state: {
+			angle: 0,
 			damage: 0,
 			target: null
 		}
@@ -36741,6 +36742,17 @@
 		}
 	}).registerComponent('radar', {
 		range: 0
+	}).registerComponent('shield', {
+		state: {
+			currentPower: 0,
+			maxPower: 0,
+			rechargeRate: 0
+		}
+	}).registerComponent('shieldHit', {
+		state: {
+			angle: 0,
+			size: 0
+		}
 	}).registerComponent('team', {
 		state: {
 			name: 'neutral'
@@ -36760,56 +36772,6 @@
 
 /***/ },
 /* 210 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	exports.__esModule = true;
-	
-	var _instanceManager = __webpack_require__(9);
-	
-	var _instanceManager2 = _interopRequireDefault(_instanceManager);
-	
-	var _phaser = __webpack_require__(10);
-	
-	var _phaser2 = _interopRequireDefault(_phaser);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	const game = _instanceManager2.default.get('game');
-	
-	exports.default = {
-		factory(state = { currentPower: 0, maxPower: 0, rechargeRate: 0 }) {
-			let sprite;
-			let size = Math.max(this.sprite.width, this.sprite.height) * 1.2;
-	
-			sprite = new _phaser2.default.Sprite(game, 0, 0, 'shield');
-			sprite.anchor.setTo(0.5, 0.5);
-			sprite.smoothed = false;
-			sprite.width = size;
-			sprite.height = size;
-			sprite.alpha = 0;
-	
-			this.sprite.addChild(sprite);
-	
-			state._sprite = sprite;
-	
-			return {
-				currentPower: 100,
-				rechargeRate: 10,
-				maxPower: 100,
-				sprite
-			};
-		},
-		onRemove(sprite) {
-			if (sprite._sprite) {
-				sprite._sprite.destroy();
-			}
-		}
-	};
-
-/***/ },
-/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36853,7 +36815,7 @@
 	};
 
 /***/ },
-/* 212 */
+/* 211 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36866,10 +36828,10 @@
 	
 	let ecsManager = _instanceManager2.default.get('ecs-manager');
 	
-	ecsManager.registerSystem('universe-creation', __webpack_require__(213).default).registerSystem('camera', __webpack_require__(218).default).registerSystem('breaking', __webpack_require__(219).default).registerSystem('colonize', __webpack_require__(220).default).registerSystem('entity-spawn-dequeue', __webpack_require__(221).default).registerSystem('group-coordination', __webpack_require__(222).default).registerSystem('movement', __webpack_require__(223).default).registerSystem('order-processing', __webpack_require__(225).default).registerSystem('selection', __webpack_require__(226).default).registerSystem('waypoint-dequeue', __webpack_require__(269).default).registerSystem('render-production-options', __webpack_require__(270).default).registerSystem('render-build-queue', __webpack_require__(271).default).registerSystem('radar-detection', __webpack_require__(272).default).registerSystem('weapon-detonation', __webpack_require__(273).default);
+	ecsManager.registerSystem('universe-creation', __webpack_require__(212).default).registerSystem('camera', __webpack_require__(217).default).registerSystem('breaking', __webpack_require__(218).default).registerSystem('colonize', __webpack_require__(219).default).registerSystem('entity-spawn-dequeue', __webpack_require__(220).default).registerSystem('group-coordination', __webpack_require__(221).default).registerSystem('movement', __webpack_require__(222).default).registerSystem('order-processing', __webpack_require__(224).default).registerSystem('selection', __webpack_require__(225).default).registerSystem('shield-hit', __webpack_require__(268).default).registerSystem('shield-regen', __webpack_require__(269).default).registerSystem('waypoint-dequeue', __webpack_require__(270).default).registerSystem('render-production-options', __webpack_require__(271).default).registerSystem('render-build-queue', __webpack_require__(272).default).registerSystem('radar-detection', __webpack_require__(273).default).registerSystem('weapon-detonation', __webpack_require__(274).default);
 
 /***/ },
-/* 213 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -36886,15 +36848,15 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _colonyShip = __webpack_require__(214);
+	var _colonyShip = __webpack_require__(213);
 	
 	var _colonyShip2 = _interopRequireDefault(_colonyShip);
 	
-	var _fighter = __webpack_require__(215);
+	var _fighter = __webpack_require__(214);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
-	var _planet = __webpack_require__(217);
+	var _planet = __webpack_require__(216);
 	
 	var _planet2 = _interopRequireDefault(_planet);
 	
@@ -37076,7 +37038,7 @@
 	exports.default = UniverseCreationSystem;
 
 /***/ },
-/* 214 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37140,7 +37102,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 215 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37199,21 +37161,21 @@
 
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 
-	var _beam = __webpack_require__(216);
+	var _beam = __webpack_require__(215);
 
 	var _beam2 = _interopRequireDefault(_beam);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 216 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	exports.default = function ({ position, target, damage }) {
+	exports.default = function ({ angle, damage, position, target }) {
 		let beam;
 		let ecsManager = _instanceManager2.default.get('ecs-manager');
 		let targetPosition = target.sprite.position;
@@ -37227,12 +37189,13 @@
 				frames: [1]
 			},
 			'detonation-fuse': {
+				angle,
 				damage,
 				target
 			},
 			waypoint: {
-				x: targetPosition.x,
-				y: targetPosition.y
+				x: targetPosition.x - Math.cos(angle) * (target.sprite.width / 2),
+				y: targetPosition.y - Math.sin(angle) * (target.sprite.width / 2)
 			},
 			movable: {
 				acceleration: 0,
@@ -37255,7 +37218,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 217 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37300,7 +37263,7 @@
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 218 */
+/* 217 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37428,7 +37391,7 @@
 	exports.default = CameraSystem;
 
 /***/ },
-/* 219 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37482,7 +37445,7 @@
 	exports.default = BreakingSystem;
 
 /***/ },
-/* 220 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37493,11 +37456,11 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _colonyShip = __webpack_require__(214);
+	var _colonyShip = __webpack_require__(213);
 	
 	var _colonyShip2 = _interopRequireDefault(_colonyShip);
 	
-	var _fighter = __webpack_require__(215);
+	var _fighter = __webpack_require__(214);
 	
 	var _fighter2 = _interopRequireDefault(_fighter);
 	
@@ -37565,7 +37528,7 @@
 	exports.default = ColonizeSystem;
 
 /***/ },
-/* 221 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37624,7 +37587,7 @@
 	exports.default = EntitySpawnDequeueSystem;
 
 /***/ },
-/* 222 */
+/* 221 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37736,7 +37699,7 @@
 	exports.default = GroupCoordinationSystem;
 
 /***/ },
-/* 223 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37747,7 +37710,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _utils = __webpack_require__(224);
+	var _utils = __webpack_require__(223);
 	
 	var _utils2 = _interopRequireDefault(_utils);
 	
@@ -37820,7 +37783,7 @@
 	// Determine how to best store references to libraries and global instances
 
 /***/ },
-/* 224 */
+/* 223 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -37845,7 +37808,7 @@
 	};
 
 /***/ },
-/* 225 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -37966,18 +37929,18 @@
 	exports.default = OrdersProcessingSystem;
 
 /***/ },
-/* 226 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _bind = __webpack_require__(227);
+	var _bind = __webpack_require__(226);
 	
 	var _bind2 = _interopRequireDefault(_bind);
 	
-	var _each = __webpack_require__(264);
+	var _each = __webpack_require__(263);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
@@ -38053,12 +38016,12 @@
 	exports.default = SelectionSystem;
 
 /***/ },
-/* 227 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createWrapper = __webpack_require__(228),
-	    getPlaceholder = __webpack_require__(259),
-	    replaceHolders = __webpack_require__(261),
+	var createWrapper = __webpack_require__(227),
+	    getPlaceholder = __webpack_require__(258),
+	    replaceHolders = __webpack_require__(260),
 	    rest = __webpack_require__(3);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -38116,17 +38079,17 @@
 
 
 /***/ },
-/* 228 */
+/* 227 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(229),
-	    createBaseWrapper = __webpack_require__(237),
-	    createCurryWrapper = __webpack_require__(240),
-	    createHybridWrapper = __webpack_require__(241),
-	    createPartialWrapper = __webpack_require__(262),
-	    getData = __webpack_require__(250),
-	    mergeData = __webpack_require__(263),
-	    setData = __webpack_require__(257),
+	var baseSetData = __webpack_require__(228),
+	    createBaseWrapper = __webpack_require__(236),
+	    createCurryWrapper = __webpack_require__(239),
+	    createHybridWrapper = __webpack_require__(240),
+	    createPartialWrapper = __webpack_require__(261),
+	    getData = __webpack_require__(249),
+	    mergeData = __webpack_require__(262),
+	    setData = __webpack_require__(256),
 	    toInteger = __webpack_require__(5);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
@@ -38227,11 +38190,11 @@
 
 
 /***/ },
-/* 229 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var identity = __webpack_require__(187),
-	    metaMap = __webpack_require__(230);
+	    metaMap = __webpack_require__(229);
 	
 	/**
 	 * The base implementation of `setData` without support for hot loop detection.
@@ -38250,10 +38213,10 @@
 
 
 /***/ },
-/* 230 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var WeakMap = __webpack_require__(231);
+	var WeakMap = __webpack_require__(230);
 	
 	/** Used to store function metadata. */
 	var metaMap = WeakMap && new WeakMap;
@@ -38262,11 +38225,11 @@
 
 
 /***/ },
-/* 231 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getNative = __webpack_require__(232),
-	    root = __webpack_require__(235);
+	var getNative = __webpack_require__(231),
+	    root = __webpack_require__(234);
 	
 	/* Built-in method references that are verified to be native. */
 	var WeakMap = getNative(root, 'WeakMap');
@@ -38275,10 +38238,10 @@
 
 
 /***/ },
-/* 232 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isNative = __webpack_require__(233);
+	var isNative = __webpack_require__(232);
 	
 	/**
 	 * Gets the native function at `key` of `object`.
@@ -38297,11 +38260,11 @@
 
 
 /***/ },
-/* 233 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isFunction = __webpack_require__(7),
-	    isHostObject = __webpack_require__(234),
+	    isHostObject = __webpack_require__(233),
 	    isObjectLike = __webpack_require__(202);
 	
 	/** Used to match `RegExp` [syntax characters](http://ecma-international.org/ecma-262/6.0/#sec-patterns). */
@@ -38356,7 +38319,7 @@
 
 
 /***/ },
-/* 234 */
+/* 233 */
 /***/ function(module, exports) {
 
 	/**
@@ -38382,10 +38345,10 @@
 
 
 /***/ },
-/* 235 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(module, global) {var checkGlobal = __webpack_require__(236);
+	/* WEBPACK VAR INJECTION */(function(module, global) {var checkGlobal = __webpack_require__(235);
 	
 	/** Used to determine if values are of the language type `Object`. */
 	var objectTypes = {
@@ -38430,7 +38393,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(23)(module), (function() { return this; }())))
 
 /***/ },
-/* 236 */
+/* 235 */
 /***/ function(module, exports) {
 
 	/**
@@ -38448,11 +38411,11 @@
 
 
 /***/ },
-/* 237 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var createCtorWrapper = __webpack_require__(238),
-	    root = __webpack_require__(235);
+	var createCtorWrapper = __webpack_require__(237),
+	    root = __webpack_require__(234);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -38482,10 +38445,10 @@
 
 
 /***/ },
-/* 238 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(239),
+	var baseCreate = __webpack_require__(238),
 	    isObject = __webpack_require__(8);
 	
 	/**
@@ -38525,7 +38488,7 @@
 
 
 /***/ },
-/* 239 */
+/* 238 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(8);
@@ -38549,16 +38512,16 @@
 
 
 /***/ },
-/* 240 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(238),
-	    createHybridWrapper = __webpack_require__(241),
-	    createRecurryWrapper = __webpack_require__(245),
-	    getPlaceholder = __webpack_require__(259),
-	    replaceHolders = __webpack_require__(261),
-	    root = __webpack_require__(235);
+	    createCtorWrapper = __webpack_require__(237),
+	    createHybridWrapper = __webpack_require__(240),
+	    createRecurryWrapper = __webpack_require__(244),
+	    getPlaceholder = __webpack_require__(258),
+	    replaceHolders = __webpack_require__(260),
+	    root = __webpack_require__(234);
 	
 	/**
 	 * Creates a function that wraps `func` to enable currying.
@@ -38601,18 +38564,18 @@
 
 
 /***/ },
-/* 241 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(242),
-	    composeArgsRight = __webpack_require__(243),
-	    countHolders = __webpack_require__(244),
-	    createCtorWrapper = __webpack_require__(238),
-	    createRecurryWrapper = __webpack_require__(245),
-	    getPlaceholder = __webpack_require__(259),
-	    reorder = __webpack_require__(260),
-	    replaceHolders = __webpack_require__(261),
-	    root = __webpack_require__(235);
+	var composeArgs = __webpack_require__(241),
+	    composeArgsRight = __webpack_require__(242),
+	    countHolders = __webpack_require__(243),
+	    createCtorWrapper = __webpack_require__(237),
+	    createRecurryWrapper = __webpack_require__(244),
+	    getPlaceholder = __webpack_require__(258),
+	    reorder = __webpack_require__(259),
+	    replaceHolders = __webpack_require__(260),
+	    root = __webpack_require__(234);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38697,7 +38660,7 @@
 
 
 /***/ },
-/* 242 */
+/* 241 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38742,7 +38705,7 @@
 
 
 /***/ },
-/* 243 */
+/* 242 */
 /***/ function(module, exports) {
 
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38789,7 +38752,7 @@
 
 
 /***/ },
-/* 244 */
+/* 243 */
 /***/ function(module, exports) {
 
 	/**
@@ -38816,12 +38779,12 @@
 
 
 /***/ },
-/* 245 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(246),
-	    isLaziable = __webpack_require__(247),
-	    setData = __webpack_require__(257);
+	var copyArray = __webpack_require__(245),
+	    isLaziable = __webpack_require__(246),
+	    setData = __webpack_require__(256);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -38878,7 +38841,7 @@
 
 
 /***/ },
-/* 246 */
+/* 245 */
 /***/ function(module, exports) {
 
 	/**
@@ -38904,13 +38867,13 @@
 
 
 /***/ },
-/* 247 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(248),
-	    getData = __webpack_require__(250),
-	    getFuncName = __webpack_require__(252),
-	    lodash = __webpack_require__(254);
+	var LazyWrapper = __webpack_require__(247),
+	    getData = __webpack_require__(249),
+	    getFuncName = __webpack_require__(251),
+	    lodash = __webpack_require__(253);
 	
 	/**
 	 * Checks if `func` has a lazy counterpart.
@@ -38937,11 +38900,11 @@
 
 
 /***/ },
-/* 248 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(239),
-	    baseLodash = __webpack_require__(249);
+	var baseCreate = __webpack_require__(238),
+	    baseLodash = __webpack_require__(248);
 	
 	/** Used as references for the maximum length and index of an array. */
 	var MAX_ARRAY_LENGTH = 4294967295;
@@ -38970,7 +38933,7 @@
 
 
 /***/ },
-/* 249 */
+/* 248 */
 /***/ function(module, exports) {
 
 	/**
@@ -38986,11 +38949,11 @@
 
 
 /***/ },
-/* 250 */
+/* 249 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var metaMap = __webpack_require__(230),
-	    noop = __webpack_require__(251);
+	var metaMap = __webpack_require__(229),
+	    noop = __webpack_require__(250);
 	
 	/**
 	 * Gets metadata for `func`.
@@ -39007,7 +38970,7 @@
 
 
 /***/ },
-/* 251 */
+/* 250 */
 /***/ function(module, exports) {
 
 	/**
@@ -39032,10 +38995,10 @@
 
 
 /***/ },
-/* 252 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var realNames = __webpack_require__(253);
+	var realNames = __webpack_require__(252);
 	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
@@ -39069,7 +39032,7 @@
 
 
 /***/ },
-/* 253 */
+/* 252 */
 /***/ function(module, exports) {
 
 	/** Used to lookup unminified function names. */
@@ -39079,15 +39042,15 @@
 
 
 /***/ },
-/* 254 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(248),
-	    LodashWrapper = __webpack_require__(255),
-	    baseLodash = __webpack_require__(249),
+	var LazyWrapper = __webpack_require__(247),
+	    LodashWrapper = __webpack_require__(254),
+	    baseLodash = __webpack_require__(248),
 	    isArray = __webpack_require__(203),
 	    isObjectLike = __webpack_require__(202),
-	    wrapperClone = __webpack_require__(256);
+	    wrapperClone = __webpack_require__(255);
 	
 	/** Used for built-in method references. */
 	var objectProto = Object.prototype;
@@ -39226,11 +39189,11 @@
 
 
 /***/ },
-/* 255 */
+/* 254 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseCreate = __webpack_require__(239),
-	    baseLodash = __webpack_require__(249);
+	var baseCreate = __webpack_require__(238),
+	    baseLodash = __webpack_require__(248);
 	
 	/**
 	 * The base constructor for creating `lodash` wrapper objects.
@@ -39254,12 +39217,12 @@
 
 
 /***/ },
-/* 256 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var LazyWrapper = __webpack_require__(248),
-	    LodashWrapper = __webpack_require__(255),
-	    copyArray = __webpack_require__(246);
+	var LazyWrapper = __webpack_require__(247),
+	    LodashWrapper = __webpack_require__(254),
+	    copyArray = __webpack_require__(245);
 	
 	/**
 	 * Creates a clone of `wrapper`.
@@ -39283,11 +39246,11 @@
 
 
 /***/ },
-/* 257 */
+/* 256 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var baseSetData = __webpack_require__(229),
-	    now = __webpack_require__(258);
+	var baseSetData = __webpack_require__(228),
+	    now = __webpack_require__(257);
 	
 	/** Used to detect hot functions by number of calls within a span of milliseconds. */
 	var HOT_COUNT = 150,
@@ -39330,7 +39293,7 @@
 
 
 /***/ },
-/* 258 */
+/* 257 */
 /***/ function(module, exports) {
 
 	/**
@@ -39355,7 +39318,7 @@
 
 
 /***/ },
-/* 259 */
+/* 258 */
 /***/ function(module, exports) {
 
 	/**
@@ -39374,10 +39337,10 @@
 
 
 /***/ },
-/* 260 */
+/* 259 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var copyArray = __webpack_require__(246),
+	var copyArray = __webpack_require__(245),
 	    isIndex = __webpack_require__(205);
 	
 	/* Built-in method references for those with the same name as other `lodash` methods. */
@@ -39409,7 +39372,7 @@
 
 
 /***/ },
-/* 261 */
+/* 260 */
 /***/ function(module, exports) {
 
 	/** Used as the internal argument placeholder. */
@@ -39444,12 +39407,12 @@
 
 
 /***/ },
-/* 262 */
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var apply = __webpack_require__(4),
-	    createCtorWrapper = __webpack_require__(238),
-	    root = __webpack_require__(235);
+	    createCtorWrapper = __webpack_require__(237),
+	    root = __webpack_require__(234);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1;
@@ -39493,13 +39456,13 @@
 
 
 /***/ },
-/* 263 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var composeArgs = __webpack_require__(242),
-	    composeArgsRight = __webpack_require__(243),
-	    copyArray = __webpack_require__(246),
-	    replaceHolders = __webpack_require__(261);
+	var composeArgs = __webpack_require__(241),
+	    composeArgsRight = __webpack_require__(242),
+	    copyArray = __webpack_require__(245),
+	    replaceHolders = __webpack_require__(260);
 	
 	/** Used to compose bitmasks for wrapper metadata. */
 	var BIND_FLAG = 1,
@@ -39589,19 +39552,19 @@
 
 
 /***/ },
-/* 264 */
+/* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(265);
+	module.exports = __webpack_require__(264);
 
 
 /***/ },
-/* 265 */
+/* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var arrayEach = __webpack_require__(266),
+	var arrayEach = __webpack_require__(265),
 	    baseCastFunction = __webpack_require__(186),
-	    baseEach = __webpack_require__(267),
+	    baseEach = __webpack_require__(266),
 	    isArray = __webpack_require__(203);
 	
 	/**
@@ -39642,7 +39605,7 @@
 
 
 /***/ },
-/* 266 */
+/* 265 */
 /***/ function(module, exports) {
 
 	/**
@@ -39670,11 +39633,11 @@
 
 
 /***/ },
-/* 267 */
+/* 266 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseForOwn = __webpack_require__(188),
-	    createBaseEach = __webpack_require__(268);
+	    createBaseEach = __webpack_require__(267);
 	
 	/**
 	 * The base implementation of `_.forEach` without support for iteratee shorthands.
@@ -39690,7 +39653,7 @@
 
 
 /***/ },
-/* 268 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isArrayLike = __webpack_require__(198);
@@ -39728,7 +39691,112 @@
 
 
 /***/ },
+/* 268 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	var _phaser = __webpack_require__(10);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	let ShieldHitSystem = {
+		components: {
+			with: ['shieldHit']
+		},
+	
+		ecsManager: null,
+		game: null,
+	
+		init() {
+			ShieldHitSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			ShieldHitSystem.game = _instanceManager2.default.get('game');
+		},
+	
+		runOne(entity) {
+			let fadeInTween = null;
+			let shieldHit = entity.shieldHit;
+			let shieldSprite = new _phaser.Sprite(this.game, 0, 0, 'shield');
+	
+			ShieldHitSystem.ecsManager.removeComponent(entity.id, 'shieldHit');
+	
+			shieldSprite.alpha = 0;
+			shieldSprite.rotation = shieldHit.angle;
+			shieldSprite.anchor.setTo(0.5, 0.5);
+			shieldSprite.height = shieldHit.size * 3;
+			shieldSprite.width = shieldHit.size * 3;
+			shieldSprite.smoothed = false;
+	
+			entity.sprite.addChild(shieldSprite);
+	
+			fadeInTween = ShieldHitSystem.game.add.tween(shieldSprite);
+			fadeInTween.to({ alpha: 1 }, 100);
+	
+			fadeInTween.onComplete.add(function () {
+				let fadeOutTween = ShieldHitSystem.game.add.tween(shieldSprite);
+				fadeOutTween.to({ alpha: 0 }, 100);
+	
+				fadeOutTween.onComplete.add(function () {
+					if (!shieldSprite.alpha) {
+						fadeOutTween.stop();
+						shieldSprite.destroy();
+					}
+				});
+				fadeInTween.stop();
+				fadeOutTween.start();
+			});
+			fadeInTween.start();
+		}
+	};
+	
+	exports.default = ShieldHitSystem;
+
+/***/ },
 /* 269 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	exports.__esModule = true;
+	
+	var _instanceManager = __webpack_require__(9);
+	
+	var _instanceManager2 = _interopRequireDefault(_instanceManager);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	let ShieldHitSystem = {
+		components: {
+			with: ['shield']
+		},
+	
+		ecsManager: null,
+		game: null,
+	
+		init() {
+			ShieldHitSystem.ecsManager = _instanceManager2.default.get('ecs-manager');
+			ShieldHitSystem.game = _instanceManager2.default.get('game');
+		},
+	
+		runOne(entity) {
+			let shield = entity.shield;
+	
+			if (shield.currentPower < shield.maxPower) {
+				shield.currentPower = Math.min(shield.maxPower, shield.currentPower + shield.rechargeRate * ShieldHitSystem.game.time.physicsElapsed);
+			}
+		}
+	};
+	
+	exports.default = ShieldHitSystem;
+
+/***/ },
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39770,7 +39838,7 @@
 	exports.default = WaypointDequeueSystem;
 
 /***/ },
-/* 270 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39820,7 +39888,7 @@
 	exports.default = RenderProductionOptionsSystem;
 
 /***/ },
-/* 271 */
+/* 272 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39870,7 +39938,7 @@
 	exports.default = RenderBuildingQueueSystem;
 
 /***/ },
-/* 272 */
+/* 273 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39961,8 +40029,12 @@
 			gun.remainingCooldown = gun.cooldown;
 	
 			gun.prefab({
+				angle: angle,
 				damage: gun.power,
-				position: firingSprite.position,
+				position: {
+					x: firingSprite.position.x,
+					y: firingSprite.position.y
+				},
 				target
 			});
 	
@@ -39973,7 +40045,7 @@
 	exports.default = RadarDetectionSystemSystem;
 
 /***/ },
-/* 273 */
+/* 274 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -40003,15 +40075,26 @@
 		runOne(entity) {
 			let detonationFuse = entity['detonation-fuse'];
 			let targetHealth = detonationFuse.target.health;
+			let targetShield = detonationFuse.target.shield || null;
 	
 			WeaponDetonationSystem.ecsManager.destroyEntity(entity.id);
+	
+			if (targetShield) {
+				targetShield.currentPower = targetShield.currentPower - detonationFuse.damage;
+	
+				this.ecsManager.addComponent(detonationFuse.target.id, 'shieldHit', {
+					angle: detonationFuse.angle - detonationFuse.target.sprite.rotation - Math.PI,
+					size: detonationFuse.target.sprite.width
+				});
+				return;
+			}
 	
 			// Check if it's dead already
 			if (!targetHealth) {
 				return;
 			}
 	
-			targetHealth.current -= detonationFuse.damage;
+			targetHealth.current = targetHealth.current - detonationFuse.damage;
 	
 			// TODO some sort of death system
 			if (targetHealth.current <= 0) {
@@ -40023,7 +40106,7 @@
 	exports.default = WeaponDetonationSystem;
 
 /***/ },
-/* 274 */
+/* 275 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -40036,7 +40119,7 @@
 	
 	var _instanceManager2 = _interopRequireDefault(_instanceManager);
 	
-	var _mouseControls = __webpack_require__(275);
+	var _mouseControls = __webpack_require__(276);
 	
 	var _mouseControls2 = _interopRequireDefault(_mouseControls);
 	
@@ -40111,14 +40194,14 @@
 	});
 
 /***/ },
-/* 275 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	exports.__esModule = true;
 	
-	var _each = __webpack_require__(264);
+	var _each = __webpack_require__(263);
 	
 	var _each2 = _interopRequireDefault(_each);
 	
