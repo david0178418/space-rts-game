@@ -39736,11 +39736,11 @@
 			entity.sprite.addChild(shieldSprite);
 	
 			fadeInTween = ShieldHitSystem.game.add.tween(shieldSprite);
-			fadeInTween.to({ alpha: 1 }, 100);
+			fadeInTween.to({ alpha: .5 }, 75);
 	
 			fadeInTween.onComplete.add(function () {
 				let fadeOutTween = ShieldHitSystem.game.add.tween(shieldSprite);
-				fadeOutTween.to({ alpha: 0 }, 100);
+				fadeOutTween.to({ alpha: 0 }, 75);
 	
 				fadeOutTween.onComplete.add(function () {
 					if (!shieldSprite.alpha) {
