@@ -30,7 +30,7 @@ let WeaponDetonationSystem = {
 
 			this.ecsManager.addComponent(detonationFuse.target.id, 'shieldHit', {
 				angle: detonationFuse.angle - detonationFuse.target.sprite.rotation - Math.PI,
-				size: detonationFuse.target.sprite.width,
+				size: Math.max(detonationFuse.target.sprite.width, detonationFuse.target.sprite.height),
 			});
 			return;
 		}

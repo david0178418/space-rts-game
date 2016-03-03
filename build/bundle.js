@@ -39729,11 +39729,11 @@
 			shieldSprite.alpha = 0;
 			shieldSprite.rotation = shieldHit.angle;
 			shieldSprite.anchor.setTo(0.5, 0.5);
-			shieldSprite.height = shieldHit.size * 3;
-			shieldSprite.width = shieldHit.size * 3;
 			shieldSprite.smoothed = false;
 	
 			entity.sprite.addChild(shieldSprite);
+			shieldSprite.height = entity.sprite.width * 1.2 / entity.sprite.scale.x;
+			shieldSprite.width = entity.sprite.width * 1.2 / entity.sprite.scale.x;
 	
 			fadeInTween = ShieldHitSystem.game.add.tween(shieldSprite);
 			fadeInTween.to({ alpha: .5 }, 75);
@@ -40084,7 +40084,7 @@
 	
 				this.ecsManager.addComponent(detonationFuse.target.id, 'shieldHit', {
 					angle: detonationFuse.angle - detonationFuse.target.sprite.rotation - Math.PI,
-					size: detonationFuse.target.sprite.width
+					size: Math.max(detonationFuse.target.sprite.width, detonationFuse.target.sprite.height)
 				});
 				return;
 			}

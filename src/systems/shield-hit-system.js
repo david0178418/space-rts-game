@@ -26,11 +26,11 @@ let ShieldHitSystem = {
 		shieldSprite.alpha = 0;
 		shieldSprite.rotation = shieldHit.angle;
 		shieldSprite.anchor.setTo(0.5, 0.5);
-		shieldSprite.height = shieldHit.size * 3;
-		shieldSprite.width = shieldHit.size * 3;
 		shieldSprite.smoothed = false;
 
 		entity.sprite.addChild(shieldSprite);
+		shieldSprite.height = (entity.sprite.width * 1.2) / entity.sprite.scale.x;
+		shieldSprite.width = (entity.sprite.width * 1.2) / entity.sprite.scale.x;
 
 		fadeInTween = ShieldHitSystem.game.add.tween(shieldSprite);
 		fadeInTween.to({alpha: .5}, 75);
